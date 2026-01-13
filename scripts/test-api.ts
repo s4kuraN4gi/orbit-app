@@ -37,7 +37,7 @@ async function main() {
   // I will write the script to hit the API. 
   // I will assume the server side (API route) handles the formatting.
   
-  const API_URL = 'http://localhost:3000/api/tasks/bulk-create';
+  const API_URL = 'https://orbit-app-brown.vercel.app/api/tasks/bulk-create';
   
   // Generating a random UUID for testing purposes if you want to verify validation
   // BUT for successful insertion, we need a REAL project_id.
