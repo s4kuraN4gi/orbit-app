@@ -15,9 +15,9 @@ interface TaskCardProps {
 }
 
 const priorityColors = {
-  low: 'bg-slate-100 text-slate-700',
-  medium: 'bg-blue-100 text-blue-700',
-  high: 'bg-red-100 text-red-700',
+  low: 'bg-muted text-muted-foreground',
+  medium: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+  high: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
 };
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
@@ -54,7 +54,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
          isDragging && "opacity-80 border-blue-400 border-2 shadow-xl"
        )}>
         <CardContent className="p-3 flex items-start gap-2">
-           <GripVertical className="h-5 w-5 text-slate-300 flex-shrink-0 mt-0.5" />
+           <GripVertical className="h-5 w-5 text-muted-foreground/40 flex-shrink-0 mt-0.5" />
            <div className="flex-1 space-y-2">
               <p className="text-sm font-medium leading-none">{task.title}</p>
               <div className="flex gap-2 items-center">

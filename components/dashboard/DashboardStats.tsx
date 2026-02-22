@@ -57,7 +57,7 @@ export function DashboardStats({ tasks }: DashboardStatsProps) {
           <CardTitle className="text-sm font-medium">
             {t('todo')}
           </CardTitle>
-          <Circle className="h-4 w-4 text-slate-500" />
+          <Circle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{todoTasks}</div>

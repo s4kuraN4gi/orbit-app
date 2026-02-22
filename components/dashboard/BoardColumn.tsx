@@ -20,9 +20,9 @@ const columnLabels: Record<TaskStatus, string> = {
 };
 
 const columnColors: Record<TaskStatus, string> = {
-    todo: 'bg-slate-50 border-slate-200',
-    in_progress: 'bg-blue-50/50 border-blue-200',
-    done: 'bg-green-50/50 border-green-200'
+    todo: 'bg-muted border-border',
+    in_progress: 'bg-blue-50/50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800',
+    done: 'bg-green-50/50 border-green-200 dark:bg-green-950/30 dark:border-green-800'
 };
 
 export function BoardColumn({ status, tasks, onTaskClick }: BoardColumnProps) {
@@ -35,21 +35,21 @@ export function BoardColumn({ status, tasks, onTaskClick }: BoardColumnProps) {
   });
 
   return (
-    <div className="flex flex-col h-full rounded-lg border bg-slate-50/50">
+    <div className="flex flex-col h-full rounded-lg border bg-muted/50">
         {/* Header */}
-        <div className={cn("p-3 border-b bg-white rounded-t-lg font-semibold text-sm flex items-center justify-between", columnColors[status])}>
+        <div className={cn("p-3 border-b bg-card rounded-t-lg font-semibold text-sm flex items-center justify-between", columnColors[status])}>
             <span>{columnLabels[status]}</span>
-            <span className="text-xs text-muted-foreground bg-white/50 px-2 py-0.5 rounded-full border">
+            <span className="text-xs text-muted-foreground bg-background/50 px-2 py-0.5 rounded-full border">
                 {tasks.length}
             </span>
         </div>
 
         {/* Drop Zone */}
-        <div 
-          ref={setNodeRef} 
+        <div
+          ref={setNodeRef}
           className={cn(
               "flex-1 p-3 overflow-y-auto min-h-[500px] transition-colors",
-              isOver && "bg-slate-100/80"
+              isOver && "bg-muted/80"
           )}
         >
             {tasks.map((task) => (

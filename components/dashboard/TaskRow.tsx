@@ -26,15 +26,15 @@ interface TaskRowProps {
 }
 
 const statusIcons = {
-  todo: <Circle className="h-4 w-4 text-slate-500" />,
+  todo: <Circle className="h-4 w-4 text-muted-foreground" />,
   in_progress: <Disc className="h-4 w-4 text-blue-500" />,
   done: <CheckCircle2 className="h-4 w-4 text-green-500" />,
 };
 
 const priorityColors = {
-  low: 'bg-slate-200 text-slate-700',
-  medium: 'bg-blue-100 text-blue-700',
-  high: 'bg-red-100 text-red-700',
+  low: 'bg-muted text-muted-foreground',
+  medium: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+  high: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
 };
 
 export const TaskRow = forwardRef<HTMLTableRowElement, TaskRowProps>(({ 
@@ -80,9 +80,9 @@ export const TaskRow = forwardRef<HTMLTableRowElement, TaskRowProps>(({
       }}
       style={style}
       className={cn(
-        "hover:bg-slate-50/50 cursor-pointer transition-colors group",
+        "hover:bg-muted/50 cursor-pointer transition-colors group",
         isFocused && "bg-primary/10 ring-2 ring-primary/50 ring-inset",
-        isDragging && "bg-slate-100 dark:bg-slate-800"
+        isDragging && "bg-muted"
       )} 
       onClick={onClick}
       tabIndex={isFocused ? 0 : -1}
@@ -94,7 +94,7 @@ export const TaskRow = forwardRef<HTMLTableRowElement, TaskRowProps>(({
             className="w-8 h-full flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={(e) => e.stopPropagation()}
         >
-            <GripVertical className="h-4 w-4 text-slate-300 hover:text-slate-500" />
+            <GripVertical className="h-4 w-4 text-muted-foreground/40 hover:text-muted-foreground" />
         </div>
       </TableCell>
       <TableCell className="font-medium">
@@ -107,14 +107,14 @@ export const TaskRow = forwardRef<HTMLTableRowElement, TaskRowProps>(({
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 p-0 hover:bg-slate-200"
+              className="h-6 w-6 p-0 hover:bg-muted"
               onClick={handleToggleClick}
               tabIndex={-1}
             >
               {isExpanded ? (
-                <ChevronDown className="h-4 w-4 text-slate-500" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <ChevronRight className="h-4 w-4 text-slate-500" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               )}
             </Button>
           ) : (
@@ -123,13 +123,13 @@ export const TaskRow = forwardRef<HTMLTableRowElement, TaskRowProps>(({
           
           {statusIcons[task.status] || <Circle className="h-4 w-4" />}
           
-          <span className={cn(task.status === 'done' && 'text-slate-400 line-through')}>
+          <span className={cn(task.status === 'done' && 'text-muted-foreground line-through')}>
             {task.title}
           </span>
-          
+
           {/* Show children count when collapsed */}
           {hasChildren && !isExpanded && (
-            <span className="ml-2 text-xs text-muted-foreground bg-slate-100 px-2 py-0.5 rounded-full">
+            <span className="ml-2 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
               {t('subtaskCount', { count: childrenCount })}
             </span>
           )}

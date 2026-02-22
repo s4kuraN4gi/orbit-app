@@ -51,7 +51,7 @@ export function TaskFilters({
   const hasFilters = searchQuery || statusFilter !== 'all' || priorityFilter !== 'all' || timeframe !== 'all';
 
   return (
-    <div className="flex flex-wrap items-center gap-3 p-3 bg-slate-50 rounded-lg border">
+    <div className="flex flex-wrap items-center gap-3 p-3 bg-muted rounded-lg border">
       {/* Search */}
       <div className="relative flex-1 min-w-[200px]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -60,12 +60,12 @@ export function TaskFilters({
           placeholder={t('dashboard.filters.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9 bg-white"
+          className="pl-9 bg-background"
         />
       </div>
 
       {/* Show Completed Toggle */}
-      <div className="flex items-center space-x-2 bg-white px-3 py-2 rounded-md border">
+      <div className="flex items-center space-x-2 bg-background px-3 py-2 rounded-md border">
          <Switch 
             id="show-completed" 
             checked={showCompleted} 
@@ -78,7 +78,7 @@ export function TaskFilters({
 
       {/* Timeframe Filter */}
       <Select value={timeframe} onValueChange={onTimeframeChange} disabled={view === 'gantt'}>
-        <SelectTrigger className="w-[140px] bg-white">
+        <SelectTrigger className="w-[140px] bg-background">
           <SelectValue placeholder={tFilters('timeframe.title')} />
         </SelectTrigger>
         <SelectContent>
@@ -91,7 +91,7 @@ export function TaskFilters({
 
       {/* Status Filter */}
       <Select value={statusFilter} onValueChange={onStatusChange}>
-        <SelectTrigger className="w-[140px] bg-white">
+        <SelectTrigger className="w-[140px] bg-background">
           <SelectValue placeholder={t('task.status.label')} />
         </SelectTrigger>
         <SelectContent>
@@ -104,7 +104,7 @@ export function TaskFilters({
 
       {/* Priority Filter */}
       <Select value={priorityFilter} onValueChange={onPriorityChange}>
-        <SelectTrigger className="w-[140px] bg-white">
+        <SelectTrigger className="w-[140px] bg-background">
           <SelectValue placeholder={t('task.priority.label')} />
         </SelectTrigger>
         <SelectContent>
