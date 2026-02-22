@@ -51,6 +51,7 @@ export default function LoginPage() {
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
       setLoading(false);
     }
   }

@@ -1,10 +1,16 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // Check for Better Auth session cookie
-  const sessionToken = request.cookies.get('better-auth.session_token')?.value;
+  // Better Auth prefixes cookie names with __Secure- on HTTPS
+  const sessionToken =
+    request.cookies.get('better-auth.session_token')?.value ||
+    request.cookies.get('__Secure-better-auth.session_token')?.value;
 
-  if (request.nextUrl.pathname.startsWith('/dashboard') && !sessionToken) {
+  const isProtected =
+    request.nextUrl.pathname.startsWith('/dashboard') ||
+    request.nextUrl.pathname.startsWith('/settings');
+
+  if (isProtected && !sessionToken) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
