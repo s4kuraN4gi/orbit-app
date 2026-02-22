@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tasks, projects } from '@/lib/schema';
-import { eq, like, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { addDays, addWeeks, addMonths, addYears, nextDay, Day } from 'date-fns';
 import { authenticateRequest } from '../../../auth';
 
@@ -23,11 +23,11 @@ export async function PATCH(
     );
   }
 
-  // Find tasks matching the prefix
+  // Find tasks matching the prefix (cast UUID to text for LIKE)
   const matchingTasks = await db
     .select()
     .from(tasks)
-    .where(like(tasks.id, `${idPrefix}%`));
+    .where(sql`${tasks.id}::text LIKE ${idPrefix + '%'}`);
 
   if (matchingTasks.length === 0) {
     return NextResponse.json({ error: 'Task not found' }, { status: 404 });
