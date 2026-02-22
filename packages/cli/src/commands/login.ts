@@ -6,14 +6,11 @@ import { success, error, heading } from '../lib/display.js';
 export async function loginCommand(): Promise<void> {
   console.log(heading('Orbit Login'));
 
-  // Connection info
   let orbitUrl: string;
-  let databaseUrl: string;
 
   if (configExists()) {
     const existing = await loadConfig();
     orbitUrl = existing.orbit_url;
-    databaseUrl = existing.database_url;
     console.log(`  Using saved config: ${orbitUrl}`);
   } else {
     const connResponse = await prompts([
@@ -23,21 +20,14 @@ export async function loginCommand(): Promise<void> {
         message: 'Orbit Web App URL',
         validate: (v: string) => v.startsWith('http') || 'Must start with http:// or https://',
       },
-      {
-        type: 'text',
-        name: 'databaseUrl',
-        message: 'Database URL (postgresql://...)',
-        validate: (v: string) => v.startsWith('postgresql://') || v.startsWith('postgres://') || 'Must be a PostgreSQL connection string',
-      },
     ]);
 
-    if (!connResponse.url || !connResponse.databaseUrl) {
+    if (!connResponse.url) {
       console.log(error('Login cancelled.'));
       process.exit(1);
     }
 
     orbitUrl = connResponse.url;
-    databaseUrl = connResponse.databaseUrl;
   }
 
   // Credentials
@@ -63,43 +53,54 @@ export async function loginCommand(): Promise<void> {
   const spinner = ora('Signing in...').start();
 
   try {
-    // Authenticate via Better Auth REST API
     const res = await fetch(`${orbitUrl}/api/auth/sign-in/email`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Origin': orbitUrl,
+      },
       body: JSON.stringify({
         email: credResponse.email,
         password: credResponse.password,
       }),
     });
 
+    const resText = await res.text();
+    let data: any;
+    try {
+      data = JSON.parse(resText);
+    } catch {
+      spinner.fail('Login failed');
+      console.log(error(`Unexpected response: ${resText.slice(0, 200)}`));
+      process.exit(1);
+    }
+
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
       spinner.fail('Login failed');
-      console.log(error(body.message || `HTTP ${res.status}`));
+      console.log(error(data.message || `HTTP ${res.status}: ${resText.slice(0, 200)}`));
       process.exit(1);
     }
 
-    const data = await res.json();
+    const token = data.token || data.session?.token;
+    const user = data.user;
 
-    if (!data.user || !data.token) {
+    if (!user || !token) {
       spinner.fail('Login failed');
-      console.log(error('Invalid response from server'));
+      console.log(error(`Invalid response structure. Keys: ${Object.keys(data).join(', ')}`));
       process.exit(1);
     }
 
-    // Save config and session
-    await saveConfig({ orbit_url: orbitUrl, database_url: databaseUrl });
+    await saveConfig({ orbit_url: orbitUrl });
     await saveSession({
-      token: data.token,
+      token,
       user: {
-        id: data.user.id,
-        email: data.user.email ?? '',
+        id: user.id,
+        email: user.email ?? '',
       },
     });
 
     spinner.succeed('Logged in');
-    console.log(success(`Welcome, ${data.user.email}!`));
+    console.log(success(`Welcome, ${user.email}!`));
   } catch (err: unknown) {
     spinner.fail('Login failed');
     const message = err instanceof Error ? err.message : String(err);

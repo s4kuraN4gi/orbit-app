@@ -33,7 +33,6 @@ export interface Task {
 /** Stored in ~/.orbit/config.json */
 export interface OrbitConfig {
   orbit_url: string;
-  database_url: string;
 }
 
 /** Stored in ~/.orbit/session.json */
