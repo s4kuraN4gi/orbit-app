@@ -131,7 +131,22 @@
       "environment": "環境",
       "dependencies": "依存パッケージ",
       "packageCount": "{total}パッケージ（dev: {dev}）",
-      "tasks": "タスク状況"
+      "tasks": "タスク状況",
+      "pages": "ページ",
+      "apiRoutes": "APIルート",
+      "dbTables": "DBテーブル",
+      "aiContextTitle": "AIコンテキスト",
+      "aiContextNone": "AIコンテキストファイルが検出されませんでした",
+      "gitLastCommit": "最終コミット",
+      "gitUncommitted": "未コミット",
+      "gitThisWeek": "今週",
+      "codebase": "コードベース",
+      "files": "ファイル",
+      "lines": "行",
+      "largestFiles": "最大ファイル",
+      "scriptsTitle": "スクリプト",
+      "deployTitle": "デプロイ",
+      "envTitle": "環境変数"
     },
     "export": {
       "button": "エクスポート",

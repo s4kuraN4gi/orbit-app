@@ -130,7 +130,22 @@
       "environment": "Environment",
       "dependencies": "Dependencies",
       "packageCount": "{total} packages ({dev} dev)",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "pages": "Pages",
+      "apiRoutes": "API Routes",
+      "dbTables": "DB Tables",
+      "aiContextTitle": "AI Context",
+      "aiContextNone": "No AI context files detected",
+      "gitLastCommit": "Last commit",
+      "gitUncommitted": "uncommitted",
+      "gitThisWeek": "this week",
+      "codebase": "Codebase",
+      "files": "files",
+      "lines": "lines",
+      "largestFiles": "Largest",
+      "scriptsTitle": "Scripts",
+      "deployTitle": "Deployment",
+      "envTitle": "Environment"
     },
     "export": {
       "button": "Export",

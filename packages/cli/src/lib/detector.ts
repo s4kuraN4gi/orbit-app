@@ -1,6 +1,7 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { execSync } from 'node:child_process';
+import { join, relative, basename, dirname } from 'node:path';
 
 export interface ScanResult {
   techStack: string[];
@@ -8,6 +9,33 @@ export interface ScanResult {
   packageManager: string | null;
   dependencies: { category: string; packages: string[] }[];
   depCount: { total: number; dev: number };
+  structure: {
+    pages: string[];
+    apiRoutes: { method: string; path: string }[];
+    dbTables: { name: string; columns: number }[];
+  };
+  aiContext: {
+    files: { name: string; path: string }[];
+  };
+  git: {
+    branch: string;
+    lastCommitDate: string | null;
+    uncommittedChanges: number;
+    totalCommits: number;
+    recentCommits: number;
+  } | null;
+  codeMetrics: {
+    totalFiles: number;
+    totalLines: number;
+    byDirectory: { dir: string; files: number }[];
+    largestFiles: { path: string; lines: number }[];
+  };
+  scripts: Record<string, string>;
+  deployment: {
+    platform: string | null;
+    ci: string | null;
+  };
+  envVars: string[];
 }
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -44,6 +72,226 @@ async function readJson(path: string): Promise<any> {
   }
 }
 
+async function readText(path: string): Promise<string | null> {
+  try {
+    return await readFile(path, 'utf-8');
+  } catch {
+    return null;
+  }
+}
+
+// Recursive glob (simple, avoids external dependency)
+const IGNORE_DIRS = new Set(['node_modules', '.next', 'dist', '.git', '.vercel', 'coverage']);
+
+async function globFiles(dir: string, pattern: RegExp, results: string[] = []): Promise<string[]> {
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        if (IGNORE_DIRS.has(entry.name)) continue;
+        await globFiles(join(dir, entry.name), pattern, results);
+      } else if (pattern.test(entry.name)) {
+        results.push(join(dir, entry.name));
+      }
+    }
+  } catch {
+    // directory doesn't exist or no permission
+  }
+  return results;
+}
+
+function execGit(cmd: string, cwd: string): string | null {
+  try {
+    return execSync(cmd, { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+  } catch {
+    return null;
+  }
+}
+
+// ─── Structure: Pages ───
+async function scanPages(dir: string): Promise<string[]> {
+  const files = await globFiles(join(dir, 'app'), /^page\.tsx?$/);
+  return files.map(f => {
+    let route = relative(join(dir, 'app'), dirname(f));
+    // Remove route groups like (dashboard)
+    route = route.replace(/\([^)]+\)\/?/g, '');
+    return '/' + route.replace(/\\/g, '/');
+  }).map(r => r === '/.' ? '/' : r.replace(/\/$/, '')).sort();
+}
+
+// ─── Structure: API Routes ───
+async function scanApiRoutes(dir: string): Promise<{ method: string; path: string }[]> {
+  const files = await globFiles(join(dir, 'app', 'api'), /^route\.ts$/);
+  const routes: { method: string; path: string }[] = [];
+  const methodPattern = /export\s+(?:async\s+)?function\s+(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)/g;
+
+  for (const file of files) {
+    const content = await readText(file);
+    if (!content) continue;
+    let routePath = '/' + relative(join(dir, 'app'), dirname(file)).replace(/\\/g, '/');
+    routePath = routePath.replace(/\[([^\]]+)\]/g, ':$1');
+
+    let match;
+    while ((match = methodPattern.exec(content)) !== null) {
+      routes.push({ method: match[1], path: routePath });
+    }
+    methodPattern.lastIndex = 0;
+  }
+  return routes.sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method));
+}
+
+// ─── Structure: DB Tables ───
+async function scanDbTables(dir: string): Promise<{ name: string; columns: number }[]> {
+  // Find schema files
+  const candidates = [
+    join(dir, 'lib', 'schema.ts'),
+    join(dir, 'src', 'lib', 'schema.ts'),
+    join(dir, 'db', 'schema.ts'),
+    join(dir, 'src', 'db', 'schema.ts'),
+  ];
+
+  let schemaContent: string | null = null;
+  for (const c of candidates) {
+    schemaContent = await readText(c);
+    if (schemaContent) break;
+  }
+  if (!schemaContent) return [];
+
+  const tables: { name: string; columns: number }[] = [];
+  // Match pgTable('table_name', { ... })
+  const tablePattern = /pgTable\(\s*['"](\w+)['"]\s*,\s*\{([^}]+(?:\{[^}]*\}[^}]*)*)\}/g;
+  let match;
+  while ((match = tablePattern.exec(schemaContent)) !== null) {
+    const tableName = match[1];
+    const body = match[2];
+    // Count column definitions (lines with : followed by column type)
+    const columnCount = (body.match(/\w+\s*:/g) || []).length;
+    tables.push({ name: tableName, columns: columnCount });
+  }
+  return tables;
+}
+
+// ─── AI Context Files ───
+function scanAiContext(dir: string): { files: { name: string; path: string }[] } {
+  const checks: { name: string; path: string }[] = [
+    { name: 'CLAUDE.md', path: 'CLAUDE.md' },
+    { name: 'CLAUDE.md', path: '.claude/CLAUDE.md' },
+    { name: '.cursorrules', path: '.cursorrules' },
+    { name: '.cursor/rules/', path: '.cursor/rules' },
+    { name: '.windsurfrules', path: '.windsurfrules' },
+    { name: 'copilot-instructions.md', path: '.github/copilot-instructions.md' },
+  ];
+
+  const found: { name: string; path: string }[] = [];
+  for (const check of checks) {
+    if (existsSync(join(dir, check.path))) {
+      found.push(check);
+    }
+  }
+  return { files: found };
+}
+
+// ─── Git Activity ───
+function scanGit(dir: string): ScanResult['git'] {
+  if (!existsSync(join(dir, '.git'))) return null;
+
+  const branch = execGit('git branch --show-current', dir) || 'unknown';
+  const lastCommitDate = execGit('git log -1 --format=%ci', dir);
+  const uncommittedRaw = execGit('git status --porcelain', dir);
+  const uncommittedChanges = uncommittedRaw ? uncommittedRaw.split('\n').filter(Boolean).length : 0;
+  const totalCommitsRaw = execGit('git rev-list --count HEAD', dir);
+  const totalCommits = totalCommitsRaw ? parseInt(totalCommitsRaw, 10) : 0;
+  const recentRaw = execGit('git log --since="7 days ago" --oneline', dir);
+  const recentCommits = recentRaw ? recentRaw.split('\n').filter(Boolean).length : 0;
+
+  return { branch, lastCommitDate, uncommittedChanges, totalCommits, recentCommits };
+}
+
+// ─── Code Metrics ───
+async function scanCodeMetrics(dir: string): Promise<ScanResult['codeMetrics']> {
+  const files = await globFiles(dir, /\.(ts|tsx)$/);
+  const fileData: { path: string; lines: number; dir: string }[] = [];
+
+  for (const file of files) {
+    const content = await readText(file);
+    if (!content) continue;
+    const lines = content.split('\n').length;
+    const relPath = relative(dir, file).replace(/\\/g, '/');
+    const topDir = relPath.split('/')[0];
+    fileData.push({ path: relPath, lines, dir: topDir });
+  }
+
+  const totalFiles = fileData.length;
+  const totalLines = fileData.reduce((sum, f) => sum + f.lines, 0);
+
+  // By directory
+  const dirMap = new Map<string, number>();
+  for (const f of fileData) {
+    dirMap.set(f.dir, (dirMap.get(f.dir) || 0) + 1);
+  }
+  const byDirectory = [...dirMap.entries()]
+    .map(([dir, files]) => ({ dir, files }))
+    .sort((a, b) => b.files - a.files);
+
+  // Largest files (top 5)
+  const largestFiles = [...fileData]
+    .sort((a, b) => b.lines - a.lines)
+    .slice(0, 5)
+    .map(f => ({ path: f.path, lines: f.lines }));
+
+  return { totalFiles, totalLines, byDirectory, largestFiles };
+}
+
+// ─── Deployment Detection ───
+function scanDeployment(dir: string): ScanResult['deployment'] {
+  let platform: string | null = null;
+  if (existsSync(join(dir, '.vercel')) || existsSync(join(dir, 'vercel.json'))) platform = 'Vercel';
+  else if (existsSync(join(dir, 'netlify.toml'))) platform = 'Netlify';
+  else if (existsSync(join(dir, 'fly.toml'))) platform = 'Fly.io';
+  else if (existsSync(join(dir, 'Dockerfile')) || existsSync(join(dir, 'docker-compose.yml'))) platform = 'Docker';
+  else if (existsSync(join(dir, 'railway.toml'))) platform = 'Railway';
+
+  let ci: string | null = null;
+  if (existsSync(join(dir, '.github', 'workflows'))) ci = 'GitHub Actions';
+  else if (existsSync(join(dir, '.gitlab-ci.yml'))) ci = 'GitLab CI';
+
+  return { platform, ci };
+}
+
+// ─── Environment Variables (KEYS ONLY, never read .env values) ───
+async function scanEnvVars(dir: string): Promise<string[]> {
+  // Try .env.example first (safe to read)
+  const examplePath = join(dir, '.env.example');
+  if (existsSync(examplePath)) {
+    const content = await readText(examplePath);
+    if (content) {
+      const keys = content.split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('#'))
+        .map(line => line.split('=')[0].trim())
+        .filter(Boolean);
+      return [...new Set(keys)].sort();
+    }
+  }
+
+  // Fallback: grep source for process.env references
+  const sourceFiles = await globFiles(dir, /\.(ts|tsx)$/);
+  const envPattern = /process\.env\.([A-Z_][A-Z0-9_]*)/g;
+  const keys = new Set<string>();
+
+  for (const file of sourceFiles) {
+    const content = await readText(file);
+    if (!content) continue;
+    let match;
+    while ((match = envPattern.exec(content)) !== null) {
+      keys.add(match[1]);
+    }
+    envPattern.lastIndex = 0;
+  }
+  return [...keys].sort();
+}
+
+// ─── Main ───
 export async function scanProject(dir: string): Promise<ScanResult> {
   const pkg = await readJson(join(dir, 'package.json'));
 
@@ -89,7 +337,7 @@ export async function scanProject(dir: string): Promise<ScanResult> {
   // Node version
   const nodeVersion: string | null = pkg?.engines?.node ?? null;
 
-  // Categorize dependencies (prod only, skip devDependencies for display)
+  // Categorize dependencies
   const catMap = new Map<string, string[]>();
   for (const dep of Object.keys(prodDeps)) {
     const cat = categorize(dep);
@@ -97,20 +345,34 @@ export async function scanProject(dir: string): Promise<ScanResult> {
     if (!catMap.has(cat)) catMap.set(cat, []);
     catMap.get(cat)!.push(dep);
   }
-
-  // Sort: named categories first (alphabetical), "Other" last
   const sorted = [...catMap.entries()].sort((a, b) => {
     if (a[0] === 'Other') return 1;
     if (b[0] === 'Other') return -1;
     return a[0].localeCompare(b[0]);
   });
-
   const dependencies = sorted.map(([category, packages]) => ({ category, packages }));
-
   const depCount = {
     total: Object.keys(prodDeps).length + Object.keys(devDeps).length,
     dev: Object.keys(devDeps).length,
   };
 
-  return { techStack, nodeVersion, packageManager, dependencies, depCount };
+  // Run all new scans in parallel
+  const [pages, apiRoutes, dbTables, codeMetrics, envVars] = await Promise.all([
+    scanPages(dir),
+    scanApiRoutes(dir),
+    scanDbTables(dir),
+    scanCodeMetrics(dir),
+    scanEnvVars(dir),
+  ]);
+
+  const structure = { pages, apiRoutes, dbTables };
+  const aiContext = scanAiContext(dir);
+  const git = scanGit(dir);
+  const scripts = pkg?.scripts ?? {};
+  const deployment = scanDeployment(dir);
+
+  return {
+    techStack, nodeVersion, packageManager, dependencies, depCount,
+    structure, aiContext, git, codeMetrics, scripts, deployment, envVars,
+  };
 }
