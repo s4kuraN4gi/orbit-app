@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,13 +12,15 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>, isSignUp: boolean) {
-    e.preventDefault();
+  async function handleAction(isSignUp: boolean) {
+    if (!formRef.current) return;
+
     setError(null);
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(formRef.current);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
@@ -66,7 +68,7 @@ export default function LoginPage() {
               {error}
             </div>
           )}
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form ref={formRef} className="space-y-4" onSubmit={(e) => e.preventDefault()}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" required placeholder="m@example.com" />
@@ -76,25 +78,10 @@ export default function LoginPage() {
               <Input id="password" name="password" type="password" required />
             </div>
             <div className="flex flex-col gap-2 pt-4">
-              <Button
-                type="button"
-                disabled={loading}
-                onClick={(e) => {
-                  const form = (e.target as HTMLElement).closest('form')!;
-                  handleSubmit({ ...new Event('submit'), preventDefault: () => {}, currentTarget: form } as any, false);
-                }}
-              >
+              <Button type="button" disabled={loading} onClick={() => handleAction(false)}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={loading}
-                onClick={(e) => {
-                  const form = (e.target as HTMLElement).closest('form')!;
-                  handleSubmit({ ...new Event('submit'), preventDefault: () => {}, currentTarget: form } as any, true);
-                }}
-              >
+              <Button type="button" variant="outline" disabled={loading} onClick={() => handleAction(true)}>
                 {loading ? 'Signing up...' : 'Sign Up'}
               </Button>
             </div>
