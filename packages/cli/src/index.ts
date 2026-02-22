@@ -8,6 +8,7 @@ import { initCommand } from './commands/init.js';
 import { statusCommand } from './commands/status.js';
 import { addCommand } from './commands/add.js';
 import { doneCommand } from './commands/done.js';
+import { startCommand } from './commands/start.js';
 import { listCommand } from './commands/list.js';
 import { OrbitError } from './lib/errors.js';
 import type { TaskPriority, TaskStatus } from './types.js';
@@ -57,6 +58,13 @@ program
   .option('-d, --description <text>', 'Task description')
   .action((title: string, options: { priority?: TaskPriority; description?: string }) => {
     return addCommand(title, options);
+  });
+
+program
+  .command('start <id-prefix>')
+  .description('Start a task (set to in_progress, match by ID prefix, min 4 chars)')
+  .action((idPrefix: string) => {
+    return startCommand(idPrefix);
   });
 
 program
