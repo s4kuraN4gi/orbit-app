@@ -42,11 +42,11 @@ export function GanttChart({ tasks }: GanttChartProps) {
       // Ensure end > start
       const safeEndDate = endDate > startDate ? endDate : new Date(startDate.getTime() + 60 * 60 * 1000);
 
-      // Map dependencies: Find all where THIS task is the successor (dependent on others)
-      // The library expects "dependencies" = array of PREDECESSOR IDs.
+      // Map dependencies: Find all where THIS task is the predecessor (has successors)
+      // Reversed: arrows point from this task to its successors
       const taskDeps = dependencies
-        .filter(d => d.successor_id === task.id)
-        .map(d => d.predecessor_id);
+        .filter(d => d.predecessor_id === task.id)
+        .map(d => d.successor_id);
 
 
 

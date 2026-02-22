@@ -24,6 +24,7 @@ export function DependencySection({ task, projectId }: DependencySectionProps) {
   const [selectedTask, setSelectedTask] = React.useState<string>('');
   const [direction, setDirection] = React.useState<'predecessor' | 'successor'>('predecessor');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isInitialLoading, setIsInitialLoading] = React.useState(true);
 
   const loadData = React.useCallback(async () => {
     try {
@@ -31,10 +32,13 @@ export function DependencySection({ task, projectId }: DependencySectionProps) {
       setDependencies(deps);
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsInitialLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, task.id]);
 
   React.useEffect(() => {
+    setIsInitialLoading(true);
     loadData();
   }, [loadData]);
 
@@ -144,9 +148,11 @@ export function DependencySection({ task, projectId }: DependencySectionProps) {
                     </Button>
                 </div>
             ))}
-            {myPredecessors.length === 0 && mySuccessors.length === 0 && !isAdding && (
+            {isInitialLoading ? (
+                <div className="text-sm text-muted-foreground pl-6">...</div>
+            ) : myPredecessors.length === 0 && mySuccessors.length === 0 && !isAdding ? (
                 <div className="text-sm text-muted-foreground pl-6">{t('noDependencies')}</div>
-            )}
+            ) : null}
         </div>
 
         {/* Add Form */}

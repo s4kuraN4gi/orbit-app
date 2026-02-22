@@ -143,6 +143,7 @@ export function LabelSelector({ taskId, projectId }: LabelSelectorProps) {
                   value={newLabelName}
                   onChange={(e) => setNewLabelName(e.target.value)}
                   onKeyDown={(e) => {
+                    if (e.nativeEvent.isComposing) return;
                     if (e.key === 'Enter') handleCreateLabel();
                     if (e.key === 'Escape') setIsCreating(false);
                   }}
