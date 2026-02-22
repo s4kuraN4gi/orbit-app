@@ -66,7 +66,8 @@
       "list": "リスト",
       "board": "ボード",
       "gantt": "ガント",
-      "analytics": "分析"
+      "analytics": "分析",
+      "overview": "概要"
     },
     "analytics": {
       "totalTasks": "総タスク数",
@@ -121,6 +122,16 @@
       "todo": "未着手",
       "inProgress": "進行中",
       "done": "完了"
+    },
+    "scan": {
+      "title": "プロジェクト概要",
+      "noData": "スキャンデータがありません",
+      "noDataDesc": "CLIで orbit scan を実行するとプロジェクト情報が表示されます",
+      "techStack": "技術スタック",
+      "environment": "環境",
+      "dependencies": "依存パッケージ",
+      "packageCount": "{total}パッケージ（dev: {dev}）",
+      "tasks": "タスク状況"
     },
     "export": {
       "button": "エクスポート",

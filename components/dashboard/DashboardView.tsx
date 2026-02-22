@@ -10,7 +10,8 @@ import { TaskList } from './TaskList';
 import { TaskBoard } from './TaskBoard';
 import { GanttChart } from './GanttChart';
 import { AnalyticsView } from './AnalyticsView';
-import { LayoutList, KanbanSquare, GanttChartSquare, LogOut, Plus, Settings, PieChart, Lightbulb, FileUp } from 'lucide-react';
+import { ProjectOverview } from './ProjectOverview';
+import { LayoutList, KanbanSquare, GanttChartSquare, LogOut, Plus, Settings, PieChart, Lightbulb, FileUp, Monitor } from 'lucide-react';
 import { logout } from '@/app/actions/auth';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -40,6 +41,7 @@ interface DashboardViewProps {
   allProjects: Project[];
   defaultView?: 'list' | 'board' | 'gantt';
   currentUserEmail?: string;
+  scanData?: any;
 }
 
 // Recursive filter function for hierarchical tasks
@@ -117,7 +119,7 @@ function filterTasks(
   }, []);
 }
 
-export function DashboardView({ initialTasks, projectName, projectId, allProjects, defaultView = 'list', currentUserEmail }: DashboardViewProps) {
+export function DashboardView({ initialTasks, projectName, projectId, allProjects, defaultView = 'list', currentUserEmail, scanData }: DashboardViewProps) {
   const router = useRouter();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
@@ -320,6 +322,10 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
             <Tabs value={activeView} onValueChange={setActiveView} className="flex-1 flex flex-col min-w-0">
               <div className="flex items-center justify-between pb-4">
                 <TabsList>
+                  <TabsTrigger value="overview" className="flex items-center gap-2">
+                      <Monitor className="h-4 w-4" />
+                      {t('views.overview')}
+                  </TabsTrigger>
                   <TabsTrigger value="list" className="flex items-center gap-2">
                       <LayoutList className="h-4 w-4" />
                       {t('views.list')}
@@ -346,6 +352,10 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
                   }
                 </span>
               </div>
+
+              <TabsContent value="overview" className="flex-1 border-none p-0 outline-none overflow-y-auto">
+                <ProjectOverview scanData={scanData} tasks={initialTasks} />
+              </TabsContent>
 
               <TabsContent value="list" className="flex-1 border-none p-0 outline-none">
                 <TaskList 

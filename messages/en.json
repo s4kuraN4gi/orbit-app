@@ -66,7 +66,8 @@
       "list": "List",
       "board": "Board",
       "gantt": "Gantt",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "overview": "Overview"
     },
     "analytics": {
       "totalTasks": "Total Tasks",
@@ -120,6 +121,16 @@
       "todo": "To Do",
       "inProgress": "In Progress",
       "done": "Done"
+    },
+    "scan": {
+      "title": "Project Overview",
+      "noData": "No scan data available",
+      "noDataDesc": "Run orbit scan from your CLI to see project information",
+      "techStack": "Tech Stack",
+      "environment": "Environment",
+      "dependencies": "Dependencies",
+      "packageCount": "{total} packages ({dev} dev)",
+      "tasks": "Tasks"
     },
     "export": {
       "button": "Export",

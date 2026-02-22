@@ -55,7 +55,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   // Fetch All Projects for the user
   const allProjects = await db
-    .select({ id: projects.id, name: projects.name, key: projects.key })
+    .select({ id: projects.id, name: projects.name, key: projects.key, scanData: projects.scanData })
     .from(projects)
     .where(eq(projects.ownerId, user.id))
     .orderBy(desc(projects.createdAt));
@@ -137,6 +137,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         allProjects={allProjects}
         defaultView={userSettings?.default_view || 'list'}
         currentUserEmail={user.email || ''}
+        scanData={currentProject.scanData}
       />
     </main>
   );

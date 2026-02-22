@@ -75,6 +75,7 @@ export const projects = pgTable('projects', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   localPath: text('local_path'),
+  scanData: jsonb('scan_data'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
