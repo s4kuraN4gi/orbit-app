@@ -1,0 +1,426 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "loading": "Loading...",
+    "noData": "No data",
+    "confirm": "Confirm",
+    "reset": "Reset",
+    "search": "Search",
+    "required": "Required",
+    "settings": "Settings"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "newTask": "Create New Task",
+    "search": "Focus Search",
+    "viewList": "List View",
+    "viewBoard": "Board View",
+    "viewGantt": "Gantt Chart",
+    "showShortcuts": "Show Shortcuts"
+  },
+  "project": {
+    "createTitle": "Create New Project",
+    "createDesc": "Enter project details.",
+    "name": "Project Name",
+    "key": "Key",
+    "keyHelper": "Used as prefix for task numbers (max 10 chars)",
+    "namePlaceholder": "e.g. Orbit Dev",
+    "keyPlaceholder": "e.g. ORB",
+    "createSuccess": "Project created",
+    "createError": "Failed to create project",
+    "nameRequired": "Please enter project name",
+    "keyRequired": "Please enter key (1-10 chars)",
+    "deleteConfirm": "Are you sure you want to delete \"{name}\"?\n\n⚠️ All tasks in this project will also be deleted. This action cannot be undone.",
+    "deleteSuccess": "Project deleted",
+    "deleteError": "Failed to delete project",
+    "selectPlaceholder": "Select Project",
+    "createTooltip": "Create new project",
+    "deleteTooltip": "Delete project"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Login",
+    "signupButton": "Create Account",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "noTasks": "No tasks. Create a new task to get started.",
+    "noProjectTitle": "No Project Found",
+    "noProjectDesc": "Create a new project from the \"+\" button in the top right.",
+    "newTask": "New Task",
+    "newProject": "New Project",
+    "projectDelete": "Delete Project",
+    "projectDeleteConfirm": "Are you sure you want to delete this project?",
+    "views": {
+      "list": "List",
+      "board": "Board",
+      "gantt": "Gantt",
+      "analytics": "Analytics"
+    },
+    "analytics": {
+      "totalTasks": "Total Tasks",
+      "doneTasks": "Done Tasks",
+      "completionRate": "Completion Rate",
+      "statusDistribution": "Status Distribution",
+      "statusDistributionDesc": "Breakdown of tasks by status",
+      "priorityBreakdown": "Tasks by Priority",
+      "priorityBreakdownDesc": "Count of tasks per priority level",
+      "noData": "No data available",
+      "timeframe": {
+        "title": "Period Progress",
+        "all": "All Time",
+        "today": "Today",
+        "thisWeek": "This Week",
+        "thisMonth": "This Month"
+      },
+      "trendTitle": "Completion Trend",
+      "trendDesc": "Tasks completed over time",
+      "completedCount": "Completed"
+    },
+    "filters": {
+      "all": "All",
+      "searchPlaceholder": "Search... (/ to focus)",
+      "status": "Status",
+      "priority": "Priority",
+      "resultsCount": "{count} results",
+      "showCompleted": "Show Completed",
+      "timeframe": {
+        "title": "Timeframe",
+        "all": "All Time",
+        "today": "Today",
+        "thisWeek": "This Week",
+        "thisMonth": "This Month"
+      }
+    },
+    "keyboard": {
+      "title": "Keyboard shortcuts",
+      "upDown": "Navigate",
+      "enter": "Open",
+      "expand": "Expand/Collapse"
+    },
+    "gantt": {
+      "noTasks": "No tasks to display",
+      "dateUpdated": "Date updated",
+      "dateUpdateError": "Failed to update date"
+    },
+    "stats": {
+      "totalTasks": "Total Tasks",
+      "completionRate": "{rate}% Completed",
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "done": "Done"
+    },
+    "export": {
+      "button": "Export",
+      "csv": "CSV (.csv)",
+      "json": "JSON (.json)",
+      "contextTitle": "AI Context Export",
+      "contextDescription": "Export project status for use in AI prompts",
+      "contextButton": "AI Context",
+      "format": "Format",
+      "depth": "Hierarchy Depth",
+      "depthShallow": "Shallow",
+      "depthDefault": "Default",
+      "depthDeep": "Deep",
+      "includeCompleted": "Include completed",
+      "includeDescription": "Include descriptions",
+      "preview": "Preview",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyError": "Copy failed",
+      "close": "Close"
+    }
+  },
+  "task": {
+    "title": "Title",
+    "description": "Description",
+    "noDescription": "No description",
+    "descriptionPlaceholder": "Enter task description...",
+    "titlePlaceholder": "Task title",
+    "status": {
+      "label": "Status",
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "priority": {
+      "label": "Priority",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "schedule": "Schedule",
+    "startDate": "Start Date",
+    "dueDate": "Due Date",
+    "notSet": "Not set",
+    "createdAt": "Created",
+    "subtasks": "Subtasks",
+    "noSubtasks": "No subtasks",
+    "addSubtask": "Add",
+    "subtaskPlaceholder": "Subtask title",
+    "createSubtask": "Create",
+    "cancelSubtask": "Cancel",
+    "subtaskCount": "{count} items",
+    "createTask": "Create Task",
+    "editTask": "Edit Task",
+    "deleteTask": "Delete",
+    "deleteConfirm": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
+    "deleting": "Deleting...",
+    "saving": "Saving...",
+    "close": "Close",
+    "loadingComments": "Loading comments...",
+    "statusUpdated": "Status updated",
+    "statusUpdateError": "Failed to update status",
+    "priorityUpdated": "Priority updated",
+    "priorityUpdateError": "Failed to update priority",
+    "taskDeleted": "Task deleted",
+    "taskDeleteError": "Failed to delete task",
+    "taskUpdated": "Task updated",
+    "taskUpdateError": "Failed to update task",
+    "titleRequired": "Please enter a title",
+    "dateError": "Due date must be after start date",
+    "subtaskCreated": "Subtask created",
+    "subtaskCreateError": "Failed to create subtask",
+    "subtaskTitleRequired": "Please enter subtask title",
+    "projectNotFound": "Project ID not found",
+    "create": {
+      "title": "Create New Task",
+      "desc": "Enter task details.",
+      "success": "Task created",
+      "error": "Failed to create task"
+    },
+    "dependencies": {
+      "title": "Dependencies",
+      "add": "Add Dependency",
+      "predecessor": "Predecessor (Wait for this)",
+      "successor": "Successor (Blocking this)",
+      "noDependencies": "No dependencies",
+      "selectTask": "Select task...",
+      "blockedBy": "Blocked by: {task}",
+      "blocking": "Blocking: {task}"
+    }
+  },
+  "comments": {
+    "title": "Comments",
+    "count": "Comments ({count})",
+    "noComments": "No comments yet",
+    "placeholder": "Add a comment... (Cmd+Enter to send)",
+    "submit": "Comment",
+    "submitting": "Sending...",
+    "edited": "edited",
+    "showOlder": "Show older comments ({count})",
+    "showRecent": "Show recent {count} only",
+    "addSuccess": "Comment added",
+    "addError": "Failed to add comment",
+    "updateSuccess": "Comment updated",
+    "updateError": "Failed to update",
+    "deleteSuccess": "Comment deleted",
+    "deleteError": "Failed to delete"
+  },
+  "labels": {
+    "title": "Labels",
+    "noLabels": "No labels",
+    "selectLabel": "Select label",
+    "noLabelsInProject": "No labels available",
+    "createNew": "Create new label",
+    "newLabel": "New Label",
+    "labelName": "Label name",
+    "createSuccess": "Label created",
+    "createError": "Failed to create label",
+    "updateError": "Failed to update label",
+    "loadError": "Failed to load labels"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "generalDesc": "Basic application settings",
+    "themeDesc": "Select appearance mode",
+    "theme": {
+      "title": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Language",
+      "desc": "Display language setting",
+      "ja": "日本語",
+      "en": "English"
+    },
+    "defaultView": {
+      "title": "Default View",
+      "description": "Initial dashboard display mode"
+    },
+    "customColors": {
+      "title": "Custom Colors",
+      "desc": "Customize UI colors freely",
+      "lightMode": "Light Mode",
+      "darkMode": "Dark Mode",
+      "preview": "Preview",
+      "primary": "Primary Color",
+      "primaryForeground": "Text on Primary",
+      "background": "Background",
+      "foreground": "Text Color",
+      "card": "Card Background",
+      "accent": "Accent",
+      "destructive": "Destructive",
+      "muted": "Muted Text",
+      "border": "Border"
+    },
+    "saveSuccess": "Settings saved",
+    "saveError": "Failed to save settings",
+    "resetColors": "Reset to Default",
+    "resetSuccess": "Colors reset to default",
+    "saveColors": "Save Colors",
+    "saving": "Saving...",
+    "shortcuts": {
+      "title": "Keyboard Shortcuts",
+      "desc": "Shortcuts for common actions",
+      "newTask": "New Task",
+      "focusSearch": "Focus Search",
+      "listView": "List View",
+      "boardView": "Board View",
+      "ganttView": "Gantt View",
+      "closeModal": "Close Modal",
+      "showShortcuts": "Show Shortcuts"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "desc": "Configure browser notifications",
+      "browserNotifications": "Browser Notifications",
+      "statusEnabled": "Notifications are enabled",
+      "statusDenied": "Notifications are blocked",
+      "statusDefault": "You can request notification permission",
+      "enabled": "Enabled",
+      "denied": "Blocked",
+      "enable": "Enable Notifications",
+      "notSupported": "This browser does not support notifications"
+    },
+    "preview": {
+      "title": "Preview",
+      "button": "Button",
+      "cardContent": "Sample card content text",
+      "mutedText": "Muted text sample",
+      "accent": "Accent",
+      "destructive": "Delete"
+    }
+  },
+  "notifications": {
+    "overdueTitle": "You have overdue tasks",
+    "overdueBody": "{count} tasks are overdue",
+    "dueTodayTitle": "Tasks due today",
+    "dueTodayBody": "{count} tasks are due today",
+    "permissionGranted": "Notifications enabled",
+    "permissionDenied": "Notifications denied"
+  },
+  "landing": {
+    "hero": {
+      "title": "Simple and Powerful Task Management",
+      "subtitle": "Organize your work with Orbit and maximize team productivity"
+    },
+    "features": {
+      "views": "3 Views",
+      "viewsDesc": "List, Board, and Gantt Chart views",
+      "collaboration": "Team Collaboration",
+      "collaborationDesc": "Smooth teamwork with comments and labels"
+    },
+    "cta": {
+      "start": "Get Started Free",
+      "login": "Login"
+    }
+  },
+  "templates": {
+    "title": "Template Management",
+    "manage": "Manage Templates",
+    "select": "Select Template",
+    "saveAs": "Save as Template",
+    "create": "Create Template",
+    "namePlaceholder": "Template Name",
+    "noTemplates": "No templates found",
+    "confirmDelete": "Are you sure you want to delete this template?",
+    "saved": "Template saved",
+    "deleted": "Template deleted",
+    "loaded": "Template loaded",
+    "manageDesc": "View and delete task templates"
+  },
+  "dateGroups": {
+    "overdue": "Overdue",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "thisWeek": "This Week",
+    "nextWeek": "Next Week",
+    "later": "Later",
+    "noDate": "No Date"
+  },
+  "recurrence": {
+    "title": "Recurrence",
+    "select": "Frequency",
+    "none": "Does not repeat",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "every": "Every:",
+    "units": {
+      "daily": "day(s)",
+      "weekly": "week(s)",
+      "monthly": "month(s)",
+      "yearly": "year(s)"
+    },
+    "repeatOn": "Repeat on",
+    "days": {
+      "su": "S",
+      "mo": "M",
+      "tu": "T",
+      "we": "W",
+      "th": "T",
+      "fr": "F",
+      "sa": "S"
+    },
+    "endDate": "End date",
+    "noEndDate": "No end date"
+  },
+  "ideas": {
+    "title": "Idea Box",
+    "placeholder": "Enter your idea...",
+    "add": "Add",
+    "convertToTask": "To Task",
+    "empty": "No ideas yet",
+    "converted": "Converted to task",
+    "convertError": "Failed to convert to task",
+    "deleteError": "Failed to delete",
+    "addError": "Failed to add",
+    "notesPlaceholder": "Enter notes...",
+    "loading": "Loading...",
+    "convertedLabel": "Converted",
+    "hasNotes": "Has notes"
+  },
+  "import": {
+    "title": "Import Implementation Plan",
+    "description": "Paste your AI-generated implementation plan in Markdown format",
+    "markdownLabel": "Markdown",
+    "placeholder": "## Feature Name\n- [ ] Task 1\n- [ ] Task 2",
+    "preview": "Preview",
+    "tasks": "tasks",
+    "noPreview": "Enter Markdown to see preview",
+    "noTasksError": "No tasks to import",
+    "success": "Imported {count} tasks",
+    "error": "Import failed",
+    "cancel": "Cancel",
+    "import": "Import",
+    "importing": "Importing...",
+    "sourceManual": "Manual",
+    "button": "Import"
+  }
+}

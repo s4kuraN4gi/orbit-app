@@ -11,6 +11,7 @@ export interface Project {
   name: string;
   key: string; // "ORB" etc.
   owner_id: string;
+  local_path?: string | null; // CLI linked directory path
 }
 
 export interface AIContext {
@@ -33,10 +34,28 @@ export interface Task {
 
   start_date: string | null; // ISO Date string
   due_date: string | null;
+  created_at: string; // ISO Date string
+  position?: number; // Sorting order
+  
+  // Recurrence properties
+  recurrence_type?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_interval?: number;
+  recurrence_days?: string[];
+  recurrence_end_date?: string; // ISO Date string
+  completed_at?: string | null; // ISO Date string
 
   // Frontend display properties
   ai_context?: AIContext;
   depth?: number; // Indent depth
-  children?: Task[]; // Child tasks
   board_order?: number; // Kanban order
+  children?: Task[]; // Nested subtasks for hierarchical display
 }
+
+export interface TaskDependency {
+  id: string;
+  project_id: string;
+  predecessor_id: string;
+  successor_id: string;
+  dependency_type: string | null;
+}
+

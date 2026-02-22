@@ -1,22 +1,24 @@
-
 import { redirect } from 'next/navigation';
-import { createClient } from '@/utils/supabase/server';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { projects, tasks, aiContexts } from '@/lib/schema';
+import { eq, desc, asc } from 'drizzle-orm';
 import { DashboardView } from '@/components/dashboard/DashboardView';
 import { Task } from '@/types';
+import { getUserSettings } from '@/app/actions/settings';
 
 // Utility to build tree from flat list
-function buildTaskTree(tasks: Task[]): Task[] {
+function buildTaskTree(taskList: Task[]): Task[] {
   const taskMap = new Map<string, Task & { children: Task[] }>();
-  
-  // 1. Initialize map and add children array
-  tasks.forEach(task => {
+
+  taskList.forEach((task) => {
     taskMap.set(task.id, { ...task, children: [] });
   });
 
   const roots: Task[] = [];
 
-  // 2. Build Hierarchy
-  tasks.forEach(task => {
+  taskList.forEach((task) => {
     const node = taskMap.get(task.id);
     if (!node) return;
 
@@ -31,55 +33,111 @@ function buildTaskTree(tasks: Task[]): Task[] {
   return roots;
 }
 
-export const dynamic = 'force-dynamic'; // Ensure we fetch fresh data
+export const dynamic = 'force-dynamic';
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
+interface DashboardPageProps {
+  searchParams: Promise<{ projectId?: string }>;
+}
 
-  // 1. Check Authentication
-  const { data: { user } } = await supabase.auth.getUser();
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const headersList = await headers();
+  const session = await auth.api.getSession({ headers: headersList });
+  const params = await searchParams;
 
-  if (!user) {
+  if (!session) {
     redirect('/login');
   }
 
-  // 2. Fetch First Project (Temporary logic for MVP)
-  // In real app, we would get project ID from params or user preference
-  const { data: projects, error: projectError } = await supabase
-    .from('projects')
-    .select('*')
-    .limit(1);
+  const user = session.user;
 
-  if (projectError || !projects || projects.length === 0) {
+  // Fetch user settings for default view
+  const userSettings = await getUserSettings();
+
+  // Fetch All Projects for the user
+  const allProjects = await db
+    .select({ id: projects.id, name: projects.name, key: projects.key })
+    .from(projects)
+    .where(eq(projects.ownerId, user.id))
+    .orderBy(desc(projects.createdAt));
+
+  // Determine current project
+  let currentProject = null;
+
+  if (params.projectId) {
+    currentProject = allProjects.find((p) => p.id === params.projectId) || null;
+  }
+
+  if (!currentProject && allProjects.length > 0) {
+    currentProject = allProjects[0];
+  }
+
+  // No projects at all - show empty state
+  if (!currentProject) {
     return (
-      <div className="p-10 text-center">
-        <h2 className="text-xl font-semibold">No Projects Found</h2>
-        <p className="text-muted-foreground">Please create a project or use the API to create one.</p>
-        {projectError && <p className="text-red-500 mt-2">{projectError.message}</p>}
-      </div>
+      <main className="container mx-auto py-6">
+        <DashboardView
+          initialTasks={[]}
+          projectName="プロジェクトなし"
+          projectId=""
+          allProjects={[]}
+        />
+      </main>
     );
   }
 
-  const project = projects[0];
+  // Fetch Tasks for the current Project with ai_context join
+  const tasksData = await db
+    .select({
+      task: tasks,
+      aiContext: aiContexts,
+    })
+    .from(tasks)
+    .leftJoin(aiContexts, eq(tasks.aiContextId, aiContexts.id))
+    .where(eq(tasks.projectId, currentProject.id))
+    .orderBy(asc(tasks.createdAt));
 
-  // 3. Fetch Tasks for the Project
-  const { data: tasksData, error: taskError } = await supabase
-    .from('tasks')
-    .select('*, ai_context:ai_contexts(*)')
-    .eq('project_id', project.id)
-    .order('created_at', { ascending: true });
+  // Transform to Task type
+  const taskList: Task[] = tasksData.map((row) => ({
+    id: row.task.id,
+    project_id: row.task.projectId,
+    parent_id: row.task.parentId,
+    ai_context_id: row.task.aiContextId,
+    title: row.task.title,
+    description: row.task.description ?? '',
+    status: row.task.status as Task['status'],
+    priority: row.task.priority as Task['priority'],
+    start_date: row.task.startDate?.toISOString() ?? null,
+    due_date: row.task.dueDate?.toISOString() ?? null,
+    created_at: row.task.createdAt?.toISOString() ?? '',
+    position: row.task.position ?? undefined,
+    completed_at: row.task.completedAt?.toISOString() ?? null,
+    recurrence_type: row.task.recurrenceType as Task['recurrence_type'],
+    recurrence_interval: row.task.recurrenceInterval ?? undefined,
+    recurrence_days: row.task.recurrenceDays ?? undefined,
+    recurrence_end_date: row.task.recurrenceEndDate?.toISOString(),
+    board_order: row.task.boardOrder ?? undefined,
+    ai_context: row.aiContext
+      ? {
+          id: row.aiContext.id,
+          source_tool: row.aiContext.sourceTool as 'Cursor' | 'Antigravity' | 'Manual',
+          original_prompt: row.aiContext.originalPrompt ?? '',
+          created_at: row.aiContext.createdAt ?? new Date(),
+        }
+      : undefined,
+  }));
 
-  if (taskError) {
-    return <div className="p-10 text-red-500">Error loading tasks: {taskError.message}</div>;
-  }
-
-  // 4. Transform to Tree
-  const tasks = (tasksData as unknown as Task[]) || [];
-  const taskTree = buildTaskTree(tasks);
+  const taskTree = buildTaskTree(taskList);
 
   return (
     <main className="container mx-auto py-6">
-      <DashboardView initialTasks={taskTree} projectName={project.name} />
+      <DashboardView
+        initialTasks={taskTree}
+        projectName={currentProject.name}
+        projectId={currentProject.id}
+        allProjects={allProjects}
+        defaultView={userSettings?.default_view || 'list'}
+        currentUserEmail={user.email || ''}
+      />
     </main>
   );
 }

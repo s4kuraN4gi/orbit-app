@@ -1,0 +1,32 @@
+{
+  "name": "@orbit-app/cli",
+  "version": "0.1.0",
+  "description": "Orbit CLI — manage tasks from the terminal",
+  "type": "module",
+  "bin": {
+    "orbit": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.0",
+    "drizzle-orm": "^0.41.0",
+    "chalk": "^5.4.1",
+    "commander": "^12.1.0",
+    "ora": "^8.2.0",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/prompts": "^2.4.9",
+    "@types/node": "^20",
+    "tsup": "^8.4.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

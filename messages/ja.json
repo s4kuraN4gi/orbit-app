@@ -1,0 +1,427 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "close": "閉じる",
+    "loading": "読み込み中...",
+    "noData": "データがありません",
+    "confirm": "確認",
+    "reset": "リセット",
+    "search": "検索",
+    "required": "必須",
+    "settings": "設定"
+  },
+  "shortcuts": {
+    "title": "キーボードショートカット",
+    "newTask": "新規タスク作成",
+    "search": "検索にフォーカス",
+    "viewList": "リストビュー",
+    "viewBoard": "ボードビュー",
+    "viewGantt": "ガントチャート",
+    "showShortcuts": "ショートカット一覧"
+  },
+  "project": {
+    "createTitle": "新しいプロジェクトを作成",
+    "createDesc": "プロジェクトの情報を入力してください。",
+    "name": "プロジェクト名",
+    "key": "キー",
+    "keyHelper": "タスク番号のプレフィックスに使用されます（最大10文字）",
+    "namePlaceholder": "例: Orbit開発",
+    "keyPlaceholder": "例: ORB",
+    "createSuccess": "プロジェクトを作成しました",
+    "createError": "プロジェクトの作成に失敗しました",
+    "nameRequired": "プロジェクト名を入力してください",
+    "keyRequired": "キー（1〜10文字）を入力してください",
+    "deleteConfirm": "「{name}」を削除してもよろしいですか？\n\n⚠️ このプロジェクトに含まれる全てのタスクも削除されます。この操作は取り消せません。",
+    "deleteSuccess": "プロジェクトを削除しました",
+    "deleteError": "プロジェクトの削除に失敗しました",
+    "selectPlaceholder": "プロジェクトを選択",
+    "createTooltip": "新しいプロジェクトを作成",
+    "deleteTooltip": "プロジェクトを削除"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "signup": "アカウント作成",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "loginButton": "ログイン",
+    "signupButton": "アカウント作成",
+    "noAccount": "アカウントをお持ちでない方",
+    "hasAccount": "アカウントをお持ちの方"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "noTasks": "タスクがありません。新しいタスクを作成してください。",
+    "noProjectTitle": "プロジェクトがありません",
+    "noProjectDesc": "右上の「+」ボタンから新しいプロジェクトを作成してください。",
+    "newTask": "新規タスク",
+    "newProject": "新規プロジェクト",
+    "projectDelete": "プロジェクト削除",
+    "projectDeleteConfirm": "本当にこのプロジェクトを削除しますか？",
+    "views": {
+      "list": "リスト",
+      "board": "ボード",
+      "gantt": "ガント",
+      "analytics": "分析"
+    },
+    "analytics": {
+      "totalTasks": "総タスク数",
+      "doneTasks": "完了タスク",
+      "completionRate": "完了率",
+      "statusDistribution": "ステータス分布",
+      "statusDistributionDesc": "全タスクにおける各ステータスの割合",
+      "priorityBreakdown": "優先度別タスク数",
+      "priorityBreakdownDesc": "優先度ごとのタスク量の可視化",
+      "noData": "データがありません",
+      "timeframe": {
+        "title": "期間別進捗",
+        "all": "全期間",
+        "today": "今日",
+        "thisWeek": "今週",
+        "thisMonth": "今月"
+      },
+      "trendTitle": "完了タスクの推移",
+      "trendDesc": "日ごとの完了タスク数",
+      "completedCount": "完了数"
+    },
+    "filters": {
+      "all": "すべて",
+      "searchPlaceholder": "検索... (/ でフォーカス)",
+      "status": "ステータス",
+      "priority": "優先度",
+      "resultsCount": "{count}件表示",
+      "showCompleted": "完了済みを表示",
+      "timeframe": {
+        "title": "期間",
+        "all": "全期間",
+        "today": "今日",
+        "thisWeek": "今週",
+        "thisMonth": "今月"
+      }
+    },
+    "keyboard": {
+      "title": "キーボード操作",
+      "upDown": "移動",
+      "enter": "開く",
+      "expand": "折りたたみ"
+    },
+    "gantt": {
+      "noTasks": "表示するタスクがありません",
+      "dateUpdated": "期間を更新しました",
+      "dateUpdateError": "期間の更新に失敗しました",
+      "taskName": "タスク名"
+    },
+    "stats": {
+      "totalTasks": "総タスク",
+      "completionRate": "完了率 {rate}%",
+      "todo": "未着手",
+      "inProgress": "進行中",
+      "done": "完了"
+    },
+    "export": {
+      "button": "エクスポート",
+      "csv": "CSV形式 (.csv)",
+      "json": "JSON形式 (.json)",
+      "contextTitle": "AIコンテキスト出力",
+      "contextDescription": "プロジェクトの状態をAIプロンプト用にエクスポートします",
+      "contextButton": "AIコンテキスト",
+      "format": "フォーマット",
+      "depth": "階層の深さ",
+      "depthShallow": "浅い",
+      "depthDefault": "デフォルト",
+      "depthDeep": "深い",
+      "includeCompleted": "完了タスクを含む",
+      "includeDescription": "説明を含む",
+      "preview": "プレビュー",
+      "copy": "コピー",
+      "copied": "コピーしました",
+      "copyError": "コピーに失敗しました",
+      "close": "閉じる"
+    }
+  },
+  "task": {
+    "title": "タイトル",
+    "description": "説明",
+    "noDescription": "説明なし",
+    "descriptionPlaceholder": "タスクの説明を入力...",
+    "titlePlaceholder": "タスクのタイトル",
+    "status": {
+      "label": "ステータス",
+      "todo": "Todo",
+      "in_progress": "進行中",
+      "done": "完了"
+    },
+    "priority": {
+      "label": "優先度",
+      "low": "低",
+      "medium": "中",
+      "high": "高"
+    },
+    "schedule": "スケジュール",
+    "startDate": "開始日",
+    "dueDate": "期限日",
+    "notSet": "未設定",
+    "createdAt": "作成日",
+    "subtasks": "サブタスク",
+    "noSubtasks": "サブタスクはありません",
+    "addSubtask": "追加",
+    "subtaskPlaceholder": "サブタスクのタイトル",
+    "createSubtask": "作成",
+    "cancelSubtask": "取消",
+    "subtaskCount": "{count}件",
+    "createTask": "タスク作成",
+    "editTask": "タスク編集",
+    "deleteTask": "削除",
+    "deleteConfirm": "「{title}」を削除してもよろしいですか？この操作は取り消せません。",
+    "deleting": "削除中...",
+    "saving": "保存中...",
+    "close": "閉じる",
+    "loadingComments": "コメントを読み込み中...",
+    "statusUpdated": "ステータスを更新しました",
+    "statusUpdateError": "ステータスの更新に失敗しました",
+    "priorityUpdated": "優先度を更新しました",
+    "priorityUpdateError": "優先度の更新に失敗しました",
+    "taskDeleted": "タスクを削除しました",
+    "taskDeleteError": "タスクの削除に失敗しました",
+    "taskUpdated": "タスクを更新しました",
+    "taskUpdateError": "タスクの更新に失敗しました",
+    "titleRequired": "タイトルを入力してください",
+    "dateError": "期限日は開始日より後に設定してください",
+    "subtaskCreated": "サブタスクを作成しました",
+    "subtaskCreateError": "サブタスクの作成に失敗しました",
+    "subtaskTitleRequired": "サブタスクのタイトルを入力してください",
+    "projectNotFound": "プロジェクトIDが見つかりません",
+    "create": {
+      "title": "新しいタスクを作成",
+      "desc": "タスクの詳細を入力してください。",
+      "success": "タスクを作成しました",
+      "error": "タスクの作成に失敗しました"
+    },
+    "dependencies": {
+      "title": "依存関係",
+      "add": "依存関係を追加",
+      "predecessor": "先行タスク（これが終わるのを待つ）",
+      "successor": "後続タスク（これが終わると開始できる）",
+      "noDependencies": "依存関係はありません",
+      "selectTask": "タスクを選択...",
+      "blockedBy": "ブロック中: {task}",
+      "blocking": "ブロック先: {task}"
+    }
+  },
+  "comments": {
+    "title": "コメント",
+    "count": "コメント ({count})",
+    "noComments": "まだコメントはありません",
+    "placeholder": "コメントを入力... (Cmd+Enter で送信)",
+    "submit": "コメント",
+    "submitting": "送信中...",
+    "edited": "編集済み",
+    "showOlder": "古いコメントを表示 ({count}件)",
+    "showRecent": "最新{count}件のみ表示",
+    "addSuccess": "コメントを追加しました",
+    "addError": "コメントの追加に失敗しました",
+    "updateSuccess": "コメントを更新しました",
+    "updateError": "更新に失敗しました",
+    "deleteSuccess": "コメントを削除しました",
+    "deleteError": "削除に失敗しました"
+  },
+  "labels": {
+    "title": "ラベル",
+    "noLabels": "ラベルなし",
+    "selectLabel": "ラベルを選択",
+    "noLabelsInProject": "ラベルがありません",
+    "createNew": "新しいラベルを作成",
+    "newLabel": "新しいラベル",
+    "labelName": "ラベル名",
+    "createSuccess": "ラベルを作成しました",
+    "createError": "ラベルの作成に失敗しました",
+    "updateError": "ラベルの更新に失敗しました",
+    "loadError": "ラベルの読み込みに失敗しました"
+  },
+  "settings": {
+    "title": "設定",
+    "general": "一般設定",
+    "generalDesc": "アプリケーションの基本設定",
+    "themeDesc": "外観モードを選択",
+    "theme": {
+      "title": "テーマ",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム"
+    },
+    "language": {
+      "title": "言語",
+      "desc": "表示言語の設定",
+      "ja": "日本語",
+      "en": "English"
+    },
+    "defaultView": {
+      "title": "デフォルトビュー",
+      "description": "ダッシュボードの初期表示"
+    },
+    "customColors": {
+      "title": "カラーカスタマイズ",
+      "desc": "UIカラーを自由にカスタマイズ",
+      "lightMode": "ライトモード",
+      "darkMode": "ダークモード",
+      "preview": "プレビュー",
+      "primary": "メインカラー",
+      "primaryForeground": "メインカラー上のテキスト",
+      "background": "背景色",
+      "foreground": "テキスト色",
+      "card": "カード背景",
+      "accent": "アクセント色",
+      "destructive": "削除・エラー色",
+      "muted": "薄いテキスト色",
+      "border": "ボーダー色"
+    },
+    "saveSuccess": "設定を保存しました",
+    "saveError": "設定の保存に失敗しました",
+    "resetColors": "デフォルトに戻す",
+    "resetSuccess": "カラー設定をリセットしました",
+    "saveColors": "カラー設定を保存",
+    "saving": "保存中...",
+    "shortcuts": {
+      "title": "キーボードショートカット",
+      "desc": "よく使う操作のショートカット",
+      "newTask": "新規タスク作成",
+      "focusSearch": "検索にフォーカス",
+      "listView": "リストビュー",
+      "boardView": "ボードビュー",
+      "ganttView": "ガントビュー",
+      "closeModal": "モーダルを閉じる",
+      "showShortcuts": "ショートカット一覧"
+    },
+    "notifications": {
+      "title": "通知設定",
+      "desc": "ブラウザ通知の設定",
+      "browserNotifications": "ブラウザ通知",
+      "statusEnabled": "通知が有効になっています",
+      "statusDenied": "通知がブロックされています",
+      "statusDefault": "通知の許可をリクエストできます",
+      "enabled": "有効",
+      "denied": "ブロック済み",
+      "enable": "通知を有効にする",
+      "notSupported": "このブラウザは通知に対応していません"
+    },
+    "preview": {
+      "title": "プレビュー",
+      "button": "ボタン",
+      "cardContent": "カードコンテンツのサンプルテキスト",
+      "mutedText": "薄いテキストのサンプル",
+      "accent": "アクセント",
+      "destructive": "削除"
+    }
+  },
+  "notifications": {
+    "overdueTitle": "期限切れタスクがあります",
+    "overdueBody": "{count}件のタスクが期限切れです",
+    "dueTodayTitle": "今日が期限のタスク",
+    "dueTodayBody": "{count}件のタスクが今日期限です",
+    "permissionGranted": "通知が有効になりました",
+    "permissionDenied": "通知が拒否されました"
+  },
+  "landing": {
+    "hero": {
+      "title": "シンプルで強力なタスク管理",
+      "subtitle": "Orbitで仕事を整理し、チームの生産性を最大化"
+    },
+    "features": {
+      "views": "3つのビュー",
+      "viewsDesc": "リスト、ボード、ガントチャートで自由に表示",
+      "collaboration": "チームコラボ",
+      "collaborationDesc": "コメントとラベルでスムーズな連携"
+    },
+    "cta": {
+      "start": "無料で始める",
+      "login": "ログイン"
+    }
+  },
+  "templates": {
+    "title": "テンプレート管理",
+    "manage": "テンプレートを管理",
+    "select": "テンプレートを選択",
+    "saveAs": "テンプレートとして保存",
+    "create": "テンプレートを作成",
+    "namePlaceholder": "テンプレート名",
+    "noTemplates": "テンプレートがありません",
+    "confirmDelete": "このテンプレートを削除してもよろしいですか？",
+    "saved": "テンプレートを保存しました",
+    "deleted": "テンプレートを削除しました",
+    "loaded": "テンプレートを読み込みました",
+    "manageDesc": "タスクテンプレートの確認と削除"
+  },
+  "dateGroups": {
+    "overdue": "期限切れ",
+    "today": "今日",
+    "tomorrow": "明日",
+    "thisWeek": "今週",
+    "nextWeek": "来週",
+    "later": "以降",
+    "noDate": "期限なし"
+  },
+  "recurrence": {
+    "title": "繰り返し設定",
+    "select": "繰り返し頻度",
+    "none": "繰り返さない",
+    "daily": "毎日",
+    "weekly": "毎週",
+    "monthly": "毎月",
+    "yearly": "毎年",
+    "every": "間隔:",
+    "units": {
+      "daily": "日ごと",
+      "weekly": "週ごと",
+      "monthly": "ヶ月ごと",
+      "yearly": "年ごと"
+    },
+    "repeatOn": "曜日指定",
+    "days": {
+      "su": "日",
+      "mo": "月",
+      "tu": "火",
+      "we": "水",
+      "th": "木",
+      "fr": "金",
+      "sa": "土"
+    },
+    "endDate": "終了日",
+    "noEndDate": "終了日なし"
+  },
+  "ideas": {
+    "title": "アイデアボックス",
+    "placeholder": "アイデアを入力...",
+    "add": "追加",
+    "convertToTask": "タスク化",
+    "empty": "アイデアはまだありません",
+    "converted": "タスクに変換しました",
+    "convertError": "タスク変換に失敗しました",
+    "deleteError": "削除に失敗しました",
+    "addError": "追加に失敗しました",
+    "notesPlaceholder": "メモを入力...",
+    "loading": "読み込み中...",
+    "convertedLabel": "変換済み",
+    "hasNotes": "メモあり"
+  },
+  "import": {
+    "title": "実装計画をインポート",
+    "description": "AIが生成したMarkdown形式の実装計画を貼り付けてください",
+    "markdownLabel": "Markdown",
+    "placeholder": "## 機能名\n- [ ] タスク1\n- [ ] タスク2",
+    "preview": "プレビュー",
+    "tasks": "件",
+    "noPreview": "Markdownを入力するとプレビューが表示されます",
+    "noTasksError": "インポートするタスクがありません",
+    "success": "{count}件のタスクをインポートしました",
+    "error": "インポートに失敗しました",
+    "cancel": "キャンセル",
+    "import": "インポート",
+    "importing": "インポート中...",
+    "sourceManual": "手動",
+    "button": "インポート"
+  }
+}

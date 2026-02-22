@@ -1,0 +1,88 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { userSettings } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
+import { UserSettings, CustomColors } from '@/lib/theme';
+
+async function requireUser() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error('Not authenticated');
+  return session.user;
+}
+
+function toUserSettings(row: typeof userSettings.$inferSelect): UserSettings {
+  return {
+    id: row.id,
+    user_id: row.userId,
+    theme: (row.theme as 'light' | 'dark' | 'system') ?? 'system',
+    default_view: (row.defaultView as 'list' | 'board' | 'gantt') ?? 'list',
+    language: (row.language as 'ja' | 'en') ?? 'ja',
+    custom_colors: row.customColors as CustomColors | null,
+    created_at: row.createdAt?.toISOString() ?? '',
+    updated_at: row.updatedAt?.toISOString() ?? '',
+  };
+}
+
+export async function getUserSettings(): Promise<UserSettings | null> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return null;
+
+  const [existing] = await db
+    .select()
+    .from(userSettings)
+    .where(eq(userSettings.userId, session.user.id));
+
+  if (existing) return toUserSettings(existing);
+
+  // Create default settings if not exists
+  const [newSettings] = await db
+    .insert(userSettings)
+    .values({
+      userId: session.user.id,
+      theme: 'system',
+      defaultView: 'list',
+      language: 'ja',
+      customColors: null,
+    })
+    .returning();
+
+  if (!newSettings) return null;
+  return toUserSettings(newSettings);
+}
+
+export async function updateUserSettings(
+  updates: Partial<Omit<UserSettings, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<UserSettings | null> {
+  const user = await requireUser();
+
+  const setValues: Record<string, any> = { updatedAt: new Date() };
+  if (updates.theme !== undefined) setValues.theme = updates.theme;
+  if (updates.default_view !== undefined) setValues.defaultView = updates.default_view;
+  if (updates.language !== undefined) setValues.language = updates.language;
+  if (updates.custom_colors !== undefined) setValues.customColors = updates.custom_colors;
+
+  const [data] = await db
+    .update(userSettings)
+    .set(setValues)
+    .where(eq(userSettings.userId, user.id))
+    .returning();
+
+  if (!data) throw new Error('Failed to update settings');
+
+  revalidatePath('/settings');
+  revalidatePath('/dashboard');
+
+  return toUserSettings(data);
+}
+
+export async function updateCustomColors(customColors: CustomColors): Promise<UserSettings | null> {
+  return updateUserSettings({ custom_colors: customColors });
+}
+
+export async function resetCustomColors(): Promise<UserSettings | null> {
+  return updateUserSettings({ custom_colors: null });
+}

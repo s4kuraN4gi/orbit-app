@@ -1,20 +1,22 @@
-
 'use client';
 
-import React, { useOptimistic } from 'react';
+import React, { useOptimistic, useState } from 'react';
 import { Task, TaskStatus } from '@/types';
 import { 
   DndContext, 
   DragEndEvent, 
+  DragStartEvent,
+  DragOverlay,
   useSensor, 
   useSensors, 
   PointerSensor 
 } from '@dnd-kit/core';
 import { BoardColumn } from './BoardColumn';
+import { TaskCard } from './TaskCard';
 import { updateTaskStatus } from '@/app/actions/task';
-import { toast } from 'sonner'; // Using sonner for optional toasts (if shadcn has it, otherwise default logging)
-// We didn't install sonner yet but shadcn usually recommends it. We'll stick to console for now or use basic alert if needed.
-// Correction: we haven't added sonner. We'll just log/optimistically update.
+import { toast } from 'sonner';
+
+import { useTranslations } from 'next-intl';
 
 interface TaskBoardProps {
   tasks: Task[];
@@ -22,6 +24,9 @@ interface TaskBoardProps {
 }
 
 export function TaskBoard({ tasks, onTaskClick }: TaskBoardProps) {
+  const t = useTranslations('task');
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+
   // Sensors for better drag experience
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -31,10 +36,6 @@ export function TaskBoard({ tasks, onTaskClick }: TaskBoardProps) {
     })
   );
 
-  // Optimistic UI could be handled here by local state override,
-  // but since we are revalidating path, it might flicker if slow.
-  // For MVP, simple revalidate is acceptable.
-  // If we want instant feedback, we can use useOptimistic hook from React 18/Next 14.
   const [optimisticTasks, setOptimisticTasks] = useOptimistic(
     tasks,
     (state, { taskId, newStatus }: { taskId: string; newStatus: TaskStatus }) => {
@@ -47,8 +48,17 @@ export function TaskBoard({ tasks, onTaskClick }: TaskBoardProps) {
   const inProgressTasks = optimisticTasks.filter(t => t.status === 'in_progress');
   const doneTasks = optimisticTasks.filter(t => t.status === 'done');
 
+  function handleDragStart(event: DragStartEvent) {
+    const { active } = event;
+    const task = tasks.find(t => t.id === active.id);
+    if (task) {
+      setActiveTask(task);
+    }
+  }
+
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    setActiveTask(null);
 
     if (!over) return;
 
@@ -59,7 +69,6 @@ export function TaskBoard({ tasks, onTaskClick }: TaskBoardProps) {
     if (!currentTask || currentTask.status === newStatus) return;
 
     // Trigger Optimistic Update
-    // Trigger Optimistic Update
     React.startTransition(() => {
         setOptimisticTasks({ taskId, newStatus });
     });
@@ -67,20 +76,36 @@ export function TaskBoard({ tasks, onTaskClick }: TaskBoardProps) {
     try {
         await updateTaskStatus(taskId, newStatus);
     } catch (error) {
-        // Rollback is tricky with useOptimistic combined with server revalidation without full state control, 
-        // but normally revalidatePath will fix it on next render if failed.
         console.error("Failed to move task", error);
-        // Maybe show toast error
+        toast.error(t('statusUpdateError'));
     }
   }
 
+  function handleDragCancel() {
+    setActiveTask(null);
+  }
+
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext 
+      sensors={sensors} 
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full min-h-[600px]">
             <BoardColumn status="todo" tasks={todoTasks} onTaskClick={onTaskClick} />
             <BoardColumn status="in_progress" tasks={inProgressTasks} onTaskClick={onTaskClick} />
             <BoardColumn status="done" tasks={doneTasks} onTaskClick={onTaskClick} />
         </div>
+        
+        {/* Drag Overlay - renders above all content via portal */}
+        <DragOverlay dropAnimation={null}>
+          {activeTask && (
+            <div className="opacity-90 shadow-2xl">
+              <TaskCard task={activeTask} onClick={() => {}} />
+            </div>
+          )}
+        </DragOverlay>
     </DndContext>
   );
 }

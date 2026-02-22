@@ -1,66 +1,51 @@
-
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { db } from '@/lib/db';
+import { tasks, aiContexts } from '@/lib/schema';
 import type { Task } from '@/types';
 
-// Initialize Supabase client
-// NOTE: In a real production environment, you should use the Service Role Key for backend-only APIs
-// to bypass RLS, or ensure the request is authenticated with a user token.
-// For this implementation, we assume the environment variables are set.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''; // Or Service Role Key if needed
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-interface BulkCreateRequestBody {
-  project_id: string;
-  source_tool: 'Antigravity' | 'Cursor' | 'Manual';
-  original_prompt: string;
-  tasks: Task[]; // Using the Task type defined in types/index.ts
-}
-
-// Recursive function to insert tasks
 async function insertTasks(
-  tasks: Task[],
+  taskList: Task[],
   projectId: string,
   aiContextId: string,
   parentId: string | null = null
 ) {
-  for (const task of tasks) {
-    // 1. Insert the current task
-    const { data: insertedTask, error } = await supabase
-      .from('tasks')
-      .insert({
-        project_id: projectId,
-        parent_id: parentId,
-        ai_context_id: aiContextId,
+  for (const task of taskList) {
+    const [insertedTask] = await db
+      .insert(tasks)
+      .values({
+        projectId,
+        parentId,
+        aiContextId,
         title: task.title,
         description: task.description,
         status: task.status || 'todo',
         priority: task.priority || 'medium',
-        start_date: task.start_date,
-        due_date: task.due_date,
-        // board_order is optional, default handled by DB or could be calculated
+        startDate: task.start_date ? new Date(task.start_date) : null,
+        dueDate: task.due_date ? new Date(task.due_date) : null,
       })
-      .select('id')
-      .single();
+      .returning({ id: tasks.id });
 
-    if (error) {
-      console.error('Error inserting task:', error);
+    if (!insertedTask) {
       throw new Error(`Failed to insert task: ${task.title}`);
     }
 
-    // 2. If there are children, process them recursively
     if (task.children && task.children.length > 0) {
       await insertTasks(task.children, projectId, aiContextId, insertedTask.id);
     }
   }
 }
 
+interface BulkCreateRequestBody {
+  project_id: string;
+  source_tool: 'Antigravity' | 'Cursor' | 'Manual';
+  original_prompt: string;
+  tasks: Task[];
+}
+
 export async function POST(request: Request) {
   try {
     const body: BulkCreateRequestBody = await request.json();
 
-    // Basic Validation
     if (!body.project_id || !body.tasks || !Array.isArray(body.tasks)) {
       return NextResponse.json(
         { error: 'Invalid request body. project_id and tasks array are required.' },
@@ -69,21 +54,19 @@ export async function POST(request: Request) {
     }
 
     // 1. Create AI Context
-    const { data: aiContext, error: contextError } = await supabase
-      .from('ai_contexts')
-      .insert({
-        project_id: body.project_id,
-        source_tool: body.source_tool || 'Manual',
-        original_prompt: body.original_prompt || '',
-        raw_data: body, // Store the raw payload for debugging
+    const [aiContext] = await db
+      .insert(aiContexts)
+      .values({
+        projectId: body.project_id,
+        sourceTool: body.source_tool || 'Manual',
+        originalPrompt: body.original_prompt || '',
+        rawData: body,
       })
-      .select('id')
-      .single();
+      .returning({ id: aiContexts.id });
 
-    if (contextError) {
-      console.error('Error creating AI context:', contextError);
+    if (!aiContext) {
       return NextResponse.json(
-        { error: 'Failed to create AI context contextError' + contextError.message },
+        { error: 'Failed to create AI context' },
         { status: 500 }
       );
     }
