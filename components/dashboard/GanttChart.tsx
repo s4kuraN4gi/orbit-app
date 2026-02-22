@@ -97,7 +97,7 @@ export function GanttChart({ tasks }: GanttChartProps) {
   };
 
   if (ganttTasks.length === 0) {
-      return <div className="p-8 text-center text-slate-500">{t('noTasks')}</div>;
+      return <div className="p-8 text-center text-muted-foreground">{t('noTasks')}</div>;
   }
 
   // Set the view date to today initially
@@ -115,7 +115,7 @@ export function GanttChart({ tasks }: GanttChartProps) {
   const TaskListHeader = ({ headerHeight }: { headerHeight: number }) => {
     return (
       <div 
-        className="h-full border-b flex items-center px-4 bg-slate-50 font-medium text-sm text-slate-500 border-r"
+        className="h-full border-b flex items-center px-4 bg-muted font-medium text-sm text-muted-foreground border-r"
         style={{ height: headerHeight, width: '155px' }}
       >
         {t('taskName')}
@@ -138,12 +138,12 @@ export function GanttChart({ tasks }: GanttChartProps) {
     rowHeight: number;
   }) => {
     return (
-      <div className="font-sans border-r bg-white" style={{ width: '155px' }}>
+      <div className="font-sans border-r bg-background" style={{ width: '155px' }}>
         {tasks.map((task) => (
             <div 
                 key={task.id} 
                 className={`
-                    border-b flex items-center px-4 text-sm cursor-pointer hover:bg-slate-50 transition-colors
+                    border-b flex items-center px-4 text-sm cursor-pointer hover:bg-muted transition-colors
                     ${task.id === selectedTaskId ? 'bg-orange-50' : ''}
                 `}
                 style={{ height: rowHeight }}

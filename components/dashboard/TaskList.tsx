@@ -477,7 +477,7 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
   }, [visibleTasks.length, focusedIndex]);
 
   if (tasks.length === 0) {
-     return <div className="p-8 text-center text-slate-500">{t('dashboard.noTasks')}</div>;
+     return <div className="p-8 text-center text-muted-foreground">{t('dashboard.noTasks')}</div>;
   }
 
   const focusedTaskId = focusedIndex >= 0 && focusedIndex < visibleTasks.length 
@@ -519,14 +519,14 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
                     return (
                         <React.Fragment key={groupKey}>
                             <TableRow 
-                                className="bg-slate-50/50 hover:bg-slate-100/50 cursor-pointer transition-colors"
+                                className="bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
                                 onClick={() => handleToggleGroup(groupKey)}
                             >
                                 <TableCell colSpan={4} className="py-2 px-4">
                                     <div className="flex items-center gap-2 font-semibold text-xs text-muted-foreground uppercase tracking-wider">
                                         {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                                         <span>{tDateGroups(groupKey)}</span>
-                                        <span className="ml-1 bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full text-[10px]">
+                                        <span className="ml-1 bg-muted text-foreground px-1.5 py-0.5 rounded-full text-[10px]">
                                             {items.length}
                                         </span>
                                     </div>
@@ -568,8 +568,8 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
 
         <DragOverlay>
             {activeId ? (
-                 <div className="bg-white border rounded p-3 shadow-lg flex items-center gap-2 opacity-90 overflow-hidden w-[300px]">
-                     <GripVertical className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                 <div className="bg-background border rounded p-3 shadow-lg flex items-center gap-2 opacity-90 overflow-hidden w-[300px]">
+                     <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                      <span className="font-medium truncate">
                          {visibleTasks.find(t => t.task.id === activeId)?.task.title}
                      </span>

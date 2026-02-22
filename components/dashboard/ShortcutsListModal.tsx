@@ -35,18 +35,18 @@ export function ShortcutsListModal({ open, onOpenChange }: ShortcutsListModalPro
             {shortcuts.map((shortcut) => (
               <div
                 key={shortcut.key}
-                className="flex items-center justify-between p-3 rounded-lg border bg-slate-50/50"
+                className="flex items-center justify-between p-3 rounded-lg border bg-muted/50"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white rounded-md shadow-sm border text-slate-500">
+                  <div className="p-2 bg-background rounded-md shadow-sm border text-muted-foreground">
                     {shortcut.icon}
                   </div>
-                  <span className="text-sm font-medium text-slate-700">
+                  <span className="text-sm font-medium text-foreground">
                     {shortcut.description}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <kbd className="pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded border bg-white px-2.5 font-mono text-[11px] font-medium text-slate-500 shadow-sm opacity-100">
+                  <kbd className="pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded border bg-background px-2.5 font-mono text-[11px] font-medium text-muted-foreground shadow-sm opacity-100">
                     <span className="text-xs">{shortcut.key}</span>
                   </kbd>
                 </div>

@@ -57,7 +57,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50">
+    <div className="flex items-center justify-center min-h-screen bg-muted">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Welcome to Orbit</CardTitle>
@@ -65,7 +65,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           {error && (
-            <div className="mb-4 p-2 text-sm text-red-600 bg-red-50 rounded">
+            <div className="mb-4 p-2 text-sm text-red-600 bg-red-50 dark:bg-red-950 dark:text-red-300 rounded">
               {error}
             </div>
           )}

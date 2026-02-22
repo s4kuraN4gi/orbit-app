@@ -99,7 +99,7 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
       {/* Charts Row: Distribution */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Status Chart */}
-        <Card className="shadow-sm border-slate-200">
+        <Card className="shadow-sm border-border">
           <CardHeader>
             <CardTitle>{t('statusDistribution')}</CardTitle>
             <CardDescription>{t('statusDistributionDesc')}</CardDescription>
@@ -132,7 +132,7 @@ export function AnalyticsView({ tasks }: AnalyticsViewProps) {
         </Card>
 
         {/* Priority Chart */}
-        <Card className="shadow-sm border-slate-200">
+        <Card className="shadow-sm border-border">
           <CardHeader>
             <CardTitle>{t('priorityBreakdown')}</CardTitle>
             <CardDescription>{t('priorityBreakdownDesc')}</CardDescription>
@@ -221,7 +221,7 @@ function TrendChart({ tasks }: { tasks: Task[] }) {
   if (data.length === 0) return null;
 
   return (
-    <Card className="shadow-sm border-slate-200">
+    <Card className="shadow-sm border-border">
       <CardHeader>
         <CardTitle>{t('trendTitle')}</CardTitle>
         <CardDescription>{t('trendDesc')}</CardDescription>

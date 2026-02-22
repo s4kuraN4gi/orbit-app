@@ -257,9 +257,9 @@ export function TaskDetailModal({ task, isOpen, onClose, projectId, currentUserE
   };
 
   const statusColors = {
-      todo: 'bg-slate-100',
-      in_progress: 'bg-blue-50 text-blue-700',
-      done: 'bg-green-50 text-green-700'
+      todo: 'bg-muted',
+      in_progress: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+      done: 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300'
   };
 
   return (
@@ -414,18 +414,18 @@ export function TaskDetailModal({ task, isOpen, onClose, projectId, currentUserE
               ) : (
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="p-3 bg-slate-50 rounded-lg border">
+                    <div className="p-3 bg-muted rounded-lg border">
                       <div className="text-muted-foreground mb-1">{t('startDate')}</div>
                       <div className="font-medium">{editStartDate ? formatDate(editStartDate) : t('notSet')}</div>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-lg border">
+                    <div className="p-3 bg-muted rounded-lg border">
                       <div className="text-muted-foreground mb-1">{t('dueDate')}</div>
                       <div className="font-medium">{editDueDate ? formatDate(editDueDate) : t('notSet')}</div>
                     </div>
                   </div>
                   
                   {task.recurrence_type && (
-                    <div className="flex items-center gap-2 p-3 bg-blue-50 text-blue-800 rounded-lg border border-blue-100 text-sm">
+                    <div className="flex items-center gap-2 p-3 bg-blue-50 text-blue-800 dark:bg-blue-950 dark:text-blue-300 rounded-lg border border-blue-100 dark:border-blue-900 text-sm">
                       <Repeat className="h-4 w-4" />
                       <div className="flex flex-col">
                         <span className="font-medium">
@@ -481,7 +481,7 @@ export function TaskDetailModal({ task, isOpen, onClose, projectId, currentUserE
                     }}
                   />
                 ) : (
-                  <div className="p-4 bg-slate-50 border rounded-lg text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                  <div className="p-4 bg-muted border rounded-lg text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                       {task.description || t('noDescription')}
                   </div>
                 )}
@@ -521,7 +521,7 @@ export function TaskDetailModal({ task, isOpen, onClose, projectId, currentUserE
                   {task.children.map((subtask) => (
                     <div 
                       key={subtask.id} 
-                      className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border text-sm"
+                      className="flex items-center gap-2 p-2 bg-muted rounded-lg border text-sm"
                     >
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       <span className={subtask.status === 'done' ? 'line-through text-muted-foreground' : ''}>

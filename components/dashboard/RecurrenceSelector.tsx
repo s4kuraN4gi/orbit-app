@@ -80,7 +80,7 @@ export function RecurrenceSelector({
   };
 
   return (
-    <div className="space-y-4 rounded-lg border p-4 bg-slate-50">
+    <div className="space-y-4 rounded-lg border p-4 bg-muted">
       <div className="flex items-center gap-2 mb-2">
         <Repeat className="h-4 w-4 text-muted-foreground" />
         <Label className="font-semibold">{t('title')}</Label>
@@ -139,7 +139,7 @@ export function RecurrenceSelector({
                         "h-8 w-8 rounded-full text-xs flex items-center justify-center border transition-colors",
                         recurrenceDays?.includes(day.key)
                           ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background hover:bg-slate-100"
+                          : "bg-background hover:bg-muted"
                       )}
                     >
                       {day.label}

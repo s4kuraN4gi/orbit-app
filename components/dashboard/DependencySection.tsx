@@ -125,21 +125,21 @@ export function DependencySection({ task, projectId }: DependencySectionProps) {
         {/* Existing Links */}
         <div className="space-y-2">
             {myPredecessors.map(dep => (
-                <div key={dep.id} className="flex items-center gap-2 p-2 bg-orange-50 border border-orange-100 rounded text-sm text-orange-800">
+                <div key={dep.id} className="flex items-center gap-2 p-2 bg-orange-50 dark:bg-orange-950 border border-orange-100 dark:border-orange-900 rounded text-sm text-orange-800 dark:text-orange-300">
                     <ArrowRight className="h-4 w-4" />
                     <span className="text-xs font-semibold uppercase opacity-70">Blocked By</span>
                     <span className="truncate">{getTaskTitle(dep.predecessor_id)}</span>
-                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-auto text-orange-800 hover:text-orange-900 hover:bg-orange-100" onClick={() => handleRemove(dep.id)}>
+                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-auto text-orange-800 dark:text-orange-300 hover:text-orange-900 dark:hover:text-orange-200 hover:bg-orange-100 dark:hover:bg-orange-900" onClick={() => handleRemove(dep.id)}>
                         <X className="h-3 w-3" />
                     </Button>
                 </div>
             ))}
             {mySuccessors.map(dep => (
-                <div key={dep.id} className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-100 rounded text-sm text-blue-800">
+                <div key={dep.id} className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 rounded text-sm text-blue-800 dark:text-blue-300">
                     <ArrowRight className="h-4 w-4" />
                     <span className="text-xs font-semibold uppercase opacity-70">Blocking</span>
                     <span className="truncate">{getTaskTitle(dep.successor_id)}</span>
-                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-auto text-blue-800 hover:text-blue-900 hover:bg-blue-100" onClick={() => handleRemove(dep.id)}>
+                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-auto text-blue-800 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900" onClick={() => handleRemove(dep.id)}>
                         <X className="h-3 w-3" />
                     </Button>
                 </div>
@@ -151,7 +151,7 @@ export function DependencySection({ task, projectId }: DependencySectionProps) {
 
         {/* Add Form */}
         {isAdding && (
-            <div className="p-3 border rounded-lg bg-slate-50 space-y-3">
+            <div className="p-3 border rounded-lg bg-muted space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                      <div className="space-y-1">
                         <Label className="text-xs">Relation</Label>
