@@ -1,11 +1,22 @@
+import { writeFile } from 'node:fs/promises';
+import { join, basename } from 'node:path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { apiRequest } from '../lib/api.js';
-import { requireAuth } from '../lib/session.js';
+import { sessionExists } from '../lib/config.js';
 import { getProjectLink } from '../lib/project.js';
 import { scanProject } from '../lib/detector.js';
+import { generateContext } from '../lib/context-generator.js';
+import { formatScanResult } from '../lib/formatters.js';
+import type { OutputFormat } from '../lib/formatters.js';
 import { error, dim } from '../lib/display.js';
-import type { Task } from '../types.js';
+import type { Task, OrbitProjectLink } from '../types.js';
+
+export interface ScanOptions {
+  generateContext?: boolean;
+  output?: string;
+  format?: OutputFormat;
+}
 
 function progressBar(pct: number, width = 20): string {
   const filled = Math.round((pct / 100) * width);
@@ -20,20 +31,36 @@ function daysAgo(dateStr: string): string {
   return `${diff} days ago`;
 }
 
-export async function scanCommand(): Promise<void> {
-  await requireAuth();
-  const link = await getProjectLink();
+/**
+ * Try to resolve auth + project link.
+ * Returns null if not authenticated or no .orbit.json found.
+ */
+async function tryGetProjectLink(): Promise<OrbitProjectLink | null> {
+  if (!sessionExists()) return null;
+  try {
+    return await getProjectLink();
+  } catch {
+    return null;
+  }
+}
+
+export async function scanCommand(options: ScanOptions = {}): Promise<void> {
+  const link = await tryGetProjectLink();
 
   const spinner = ora('Scanning project...').start();
 
   try {
-    const [scan, taskData] = await Promise.all([
-      scanProject(process.cwd()),
-      apiRequest('GET', `/api/cli/projects/${link.project_id}/tasks`),
-    ]);
+    // Always run local scan; fetch tasks only when authenticated + linked
+    const scanPromise = scanProject(process.cwd());
+    const taskPromise = link
+      ? apiRequest('GET', `/api/cli/projects/${link.project_id}/tasks`).catch(() => null)
+      : Promise.resolve(null);
+
+    const [scan, taskData] = await Promise.all([scanPromise, taskPromise]);
     spinner.stop();
 
-    const tasks: Task[] = taskData.tasks;
+    const tasks: Task[] = taskData?.tasks ?? [];
+    const projectName = link?.project_name ?? basename(process.cwd());
 
     // Header
     console.log('');
@@ -117,6 +144,16 @@ export async function scanCommand(): Promise<void> {
         .join(', ');
       console.log(`    ${chalk.dim('Largest:')}  ${top}`);
     }
+    if (scan.exports.length > 0) {
+      const components = scan.exports.filter(e => e.kind === 'component').length;
+      const functions = scan.exports.filter(e => e.kind === 'function').length;
+      const types = scan.exports.filter(e => e.kind === 'type').length;
+      console.log(`    ${chalk.dim('Exports:')}  ${scan.exports.length} (${components} components, ${functions} functions, ${types} types)`);
+    }
+    if (scan.importGraph.length > 0) {
+      const totalImports = scan.importGraph.reduce((sum, f) => sum + f.imports.length, 0);
+      console.log(`    ${chalk.dim('Imports:')}  ${totalImports} local imports across ${scan.importGraph.length} files`);
+    }
     console.log('');
 
     // Scripts
@@ -145,30 +182,53 @@ export async function scanCommand(): Promise<void> {
       console.log('');
     }
 
-    // Tasks
-    const total = tasks.length;
-    const todo = tasks.filter((t) => t.status === 'todo').length;
-    const inProgress = tasks.filter((t) => t.status === 'in_progress').length;
-    const done = tasks.filter((t) => t.status === 'done').length;
-    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    // Tasks (only shown when connected)
+    if (tasks.length > 0) {
+      const total = tasks.length;
+      const todo = tasks.filter((t) => t.status === 'todo').length;
+      const inProgress = tasks.filter((t) => t.status === 'in_progress').length;
+      const done = tasks.filter((t) => t.status === 'done').length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
-    console.log(chalk.bold('  Tasks') + `                          ${progressBar(pct)}  ${pct}%`);
-    console.log(`    ${chalk.gray('[ ]')} Todo:         ${todo}`);
-    console.log(`    ${chalk.blue('[~]')} In Progress:  ${inProgress}`);
-    console.log(`    ${chalk.green('[x]')} Done:         ${done}`);
-    console.log(`    ${chalk.dim('Total:')}        ${total}`);
-    console.log('');
-
-    // Upload scan data to server
-    try {
-      await apiRequest('PUT', `/api/cli/projects/${link.project_id}/scan`, {
-        scan_data: scan,
-      });
-      console.log(dim('Synced to Orbit.'));
-    } catch {
-      console.log(dim('(Sync skipped)'));
+      console.log(chalk.bold('  Tasks') + `                          ${progressBar(pct)}  ${pct}%`);
+      console.log(`    ${chalk.gray('[ ]')} Todo:         ${todo}`);
+      console.log(`    ${chalk.blue('[~]')} In Progress:  ${inProgress}`);
+      console.log(`    ${chalk.green('[x]')} Done:         ${done}`);
+      console.log(`    ${chalk.dim('Total:')}        ${total}`);
+      console.log('');
+    } else if (!link) {
+      console.log(dim('  Run `orbit login` + `orbit init` to include task context.'));
+      console.log('');
     }
-    console.log('');
+
+    // Format output (--format json|yaml|markdown)
+    if (options.format) {
+      const formatted = formatScanResult(scan, options.format);
+      console.log(formatted);
+    }
+
+    // Generate context file
+    if (options.generateContext) {
+      const outputFile = options.output ?? 'CLAUDE.md';
+      const content = generateContext(scan, tasks, projectName);
+      const outputPath = join(process.cwd(), outputFile);
+      await writeFile(outputPath, content, 'utf-8');
+      console.log(chalk.green(`  Generated: ${outputFile}`));
+      console.log('');
+    }
+
+    // Upload scan data to server (only when connected)
+    if (link) {
+      try {
+        await apiRequest('PUT', `/api/cli/projects/${link.project_id}/scan`, {
+          scan_data: scan,
+        });
+        console.log(dim('  Synced to Orbit.'));
+      } catch {
+        console.log(dim('  (Sync skipped)'));
+      }
+      console.log('');
+    }
   } catch (err: unknown) {
     spinner.stop();
     const message = err instanceof Error ? err.message : String(err);

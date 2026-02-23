@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Task } from '@/types';
+import { Badge } from '@/components/ui/badge';
+import { Task, PlanTier } from '@/types';
 import { generateProjectContext, ContextOptions } from '@/lib/contextGenerator';
 
 interface ExportContextModalProps {
@@ -30,9 +31,10 @@ interface ExportContextModalProps {
   onClose: () => void;
   tasks: Task[];
   projectName: string;
+  planTier?: PlanTier;
 }
 
-export function ExportContextModal({ isOpen, onClose, tasks, projectName }: ExportContextModalProps) {
+export function ExportContextModal({ isOpen, onClose, tasks, projectName, planTier = 'free' }: ExportContextModalProps) {
   const t = useTranslations('dashboard.export');
   const [format, setFormat] = useState<'markdown' | 'json'>('markdown');
   const [includeCompleted, setIncludeCompleted] = useState(false);
@@ -92,9 +94,16 @@ export function ExportContextModal({ isOpen, onClose, tasks, projectName }: Expo
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="markdown">Markdown</SelectItem>
-                  <SelectItem value="json">JSON</SelectItem>
+                  {planTier !== 'free' && (
+                    <SelectItem value="json">JSON</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
+              {planTier === 'free' && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  JSON <Badge variant="secondary" className="text-[10px] px-1 py-0">Pro</Badge>
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

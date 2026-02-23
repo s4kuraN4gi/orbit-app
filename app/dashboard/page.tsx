@@ -7,6 +7,7 @@ import { eq, desc, asc } from 'drizzle-orm';
 import { DashboardView } from '@/components/dashboard/DashboardView';
 import { Task } from '@/types';
 import { getUserSettings } from '@/app/actions/settings';
+import { getUserPlan } from '@/lib/plan';
 
 // Utility to build tree from flat list
 function buildTaskTree(taskList: Task[]): Task[] {
@@ -50,8 +51,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const user = session.user;
 
-  // Fetch user settings for default view
-  const userSettings = await getUserSettings();
+  // Fetch user settings and plan
+  const [userSettings, planLimits] = await Promise.all([
+    getUserSettings(),
+    getUserPlan(),
+  ]);
 
   // Fetch All Projects for the user
   const allProjects = await db
@@ -80,6 +84,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           projectName="プロジェクトなし"
           projectId=""
           allProjects={[]}
+          planTier={planLimits.tier}
         />
       </main>
     );
@@ -111,11 +116,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     created_at: row.task.createdAt?.toISOString() ?? '',
     position: row.task.position ?? undefined,
     completed_at: row.task.completedAt?.toISOString() ?? null,
-    recurrence_type: row.task.recurrenceType as Task['recurrence_type'],
-    recurrence_interval: row.task.recurrenceInterval ?? undefined,
-    recurrence_days: row.task.recurrenceDays ?? undefined,
-    recurrence_end_date: row.task.recurrenceEndDate?.toISOString(),
-    board_order: row.task.boardOrder ?? undefined,
     ai_context: row.aiContext
       ? {
           id: row.aiContext.id,
@@ -135,9 +135,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         projectName={currentProject.name}
         projectId={currentProject.id}
         allProjects={allProjects}
-        defaultView={userSettings?.default_view || 'list'}
+        defaultView="overview"
         currentUserEmail={user.email || ''}
         scanData={currentProject.scanData}
+        planTier={planLimits.tier}
+        currentProjectCount={allProjects.length}
       />
     </main>
   );

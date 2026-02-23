@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { ideas, tasks } from '@/lib/schema';
 import { eq, desc } from 'drizzle-orm';
+import { requireProjectOwner, requireUser } from '@/lib/auth-helpers';
 
 export interface Idea {
   id: string;
@@ -26,6 +27,8 @@ function toIdea(row: typeof ideas.$inferSelect): Idea {
 }
 
 export async function getIdeas(projectId: string): Promise<Idea[]> {
+  await requireProjectOwner(projectId);
+
   const data = await db
     .select()
     .from(ideas)
@@ -36,6 +39,8 @@ export async function getIdeas(projectId: string): Promise<Idea[]> {
 }
 
 export async function createIdea(projectId: string, content: string): Promise<Idea | null> {
+  await requireProjectOwner(projectId);
+
   const [data] = await db
     .insert(ideas)
     .values({ projectId, content })
@@ -48,12 +53,24 @@ export async function createIdea(projectId: string, content: string): Promise<Id
 }
 
 export async function deleteIdea(ideaId: string): Promise<boolean> {
+  const user = await requireUser();
+
+  // Verify ownership via the idea's project
+  const [idea] = await db.select().from(ideas).where(eq(ideas.id, ideaId));
+  if (!idea) throw new Error('Idea not found');
+  await requireProjectOwner(idea.projectId);
+
   await db.delete(ideas).where(eq(ideas.id, ideaId));
   revalidatePath('/dashboard');
   return true;
 }
 
 export async function updateIdea(ideaId: string, updates: { content?: string; notes?: string | null }): Promise<Idea | null> {
+  // Verify ownership via the idea's project
+  const [idea] = await db.select().from(ideas).where(eq(ideas.id, ideaId));
+  if (!idea) throw new Error('Idea not found');
+  await requireProjectOwner(idea.projectId);
+
   const [data] = await db
     .update(ideas)
     .set(updates)
@@ -67,13 +84,10 @@ export async function updateIdea(ideaId: string, updates: { content?: string; no
 }
 
 export async function convertIdeaToTask(ideaId: string): Promise<string | null> {
-  // Get the idea first
-  const [idea] = await db
-    .select()
-    .from(ideas)
-    .where(eq(ideas.id, ideaId));
-
-  if (!idea) return null;
+  // Verify ownership via the idea's project
+  const [idea] = await db.select().from(ideas).where(eq(ideas.id, ideaId));
+  if (!idea) throw new Error('Idea not found');
+  await requireProjectOwner(idea.projectId);
 
   // Create a new task from the idea content
   const [task] = await db

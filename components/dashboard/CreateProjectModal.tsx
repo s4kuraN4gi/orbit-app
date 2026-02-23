@@ -16,14 +16,18 @@ import { createProject } from '@/app/actions/project';
 import { toast } from 'sonner';
 
 import { useTranslations } from 'next-intl';
+import { PricingGate } from './PricingGate';
+import type { PlanTier } from '@/types';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onProjectCreated: (projectId: string) => void;
+  planTier?: PlanTier;
+  currentProjectCount?: number;
 }
 
-export function CreateProjectModal({ isOpen, onClose, onProjectCreated }: CreateProjectModalProps) {
+export function CreateProjectModal({ isOpen, onClose, onProjectCreated, planTier = 'free', currentProjectCount = 0 }: CreateProjectModalProps) {
   const t = useTranslations('project');
   const tCommon = useTranslations('common');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -66,42 +70,44 @@ export function CreateProjectModal({ isOpen, onClose, onProjectCreated }: Create
             {t('createDesc')}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">{t('name')} *</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('namePlaceholder')}
-                required
-              />
+        <PricingGate feature="project_limit" currentPlan={planTier} itemIndex={currentProjectCount}>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">{t('name')} *</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t('namePlaceholder')}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="key">{t('key')} *</Label>
+                <Input
+                  id="key"
+                  value={key}
+                  onChange={(e) => setKey(e.target.value.toUpperCase())}
+                  placeholder={t('keyPlaceholder')}
+                  maxLength={10}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('keyHelper')}
+                </p>
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="key">{t('key')} *</Label>
-              <Input
-                id="key"
-                value={key}
-                onChange={(e) => setKey(e.target.value.toUpperCase())}
-                placeholder={t('keyPlaceholder')}
-                maxLength={10}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                {t('keyHelper')}
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              {tCommon('cancel')}
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? tCommon('loading') : tCommon('create')}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                {tCommon('cancel')}
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? tCommon('loading') : tCommon('create')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </PricingGate>
       </DialogContent>
     </Dialog>
   );

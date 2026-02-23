@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { tasks, aiContexts } from '@/lib/schema';
+import { tasks, aiContexts, projects } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
 import type { Task } from '@/types';
 
 async function insertTasks(
@@ -44,6 +47,12 @@ interface BulkCreateRequestBody {
 
 export async function POST(request: Request) {
   try {
+    // Authentication
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body: BulkCreateRequestBody = await request.json();
 
     if (!body.project_id || !body.tasks || !Array.isArray(body.tasks)) {
@@ -51,6 +60,20 @@ export async function POST(request: Request) {
         { error: 'Invalid request body. project_id and tasks array are required.' },
         { status: 400 }
       );
+    }
+
+    // Authorization: verify project ownership
+    const [project] = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, body.project_id));
+
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    if (project.ownerId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // 1. Create AI Context
@@ -79,10 +102,10 @@ export async function POST(request: Request) {
       message: 'Tasks created successfully',
       ai_context_id: aiContext.id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Unexpected error:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }

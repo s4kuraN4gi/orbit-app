@@ -25,11 +25,14 @@ import {
 import { toast } from 'sonner';
 import { parsePlanMarkdown, convertToApiFormat, ParsedTask } from '@/lib/planParser';
 import { bulkCreateTasks } from '@/app/actions/bulkCreate';
+import { Badge } from '@/components/ui/badge';
+import type { PlanTier } from '@/types';
 
 interface ImportPlanModalProps {
   isOpen: boolean;
   onClose: () => void;
   projectId: string;
+  planTier?: PlanTier;
 }
 
 // Recursive component to display task preview
@@ -73,7 +76,7 @@ function countTasks(tasks: ParsedTask[]): number {
   }, 0);
 }
 
-export function ImportPlanModal({ isOpen, onClose, projectId }: ImportPlanModalProps) {
+export function ImportPlanModal({ isOpen, onClose, projectId, planTier = 'free' }: ImportPlanModalProps) {
   const t = useTranslations('import');
   const router = useRouter();
   const [markdown, setMarkdown] = useState('');
@@ -138,6 +141,12 @@ export function ImportPlanModal({ isOpen, onClose, projectId }: ImportPlanModalP
           </DialogTitle>
           <DialogDescription>
             {t('description')}
+            {planTier === 'free' && (
+              <span className="block mt-1 text-xs">
+                <Badge variant="secondary" className="text-[10px]">Free</Badge>{' '}
+                {t('freeLimit')}
+              </span>
+            )}
           </DialogDescription>
         </DialogHeader>
 

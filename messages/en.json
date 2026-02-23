@@ -165,7 +165,8 @@
       "copy": "Copy",
       "copied": "Copied",
       "copyError": "Copy failed",
-      "close": "Close"
+      "close": "Close",
+      "jsonProOnly": "JSON export requires Pro plan"
     }
   },
   "task": {
@@ -447,6 +448,61 @@
     "import": "Import",
     "importing": "Importing...",
     "sourceManual": "Manual",
-    "button": "Import"
+    "button": "Import",
+    "freeLimit": "Free plan: up to 3 imports per month"
+  },
+  "pricing": {
+    "mostPopular": "Most Popular",
+    "free": {
+      "name": "Free",
+      "period": "/ forever",
+      "feature1": "Up to 3 projects",
+      "feature2": "50 tasks per project",
+      "feature3": "5 context history entries",
+      "feature4": "Markdown export",
+      "cta": "Get Started"
+    },
+    "pro": {
+      "name": "Pro",
+      "period": "/ month",
+      "feature1": "Unlimited projects",
+      "feature2": "Unlimited tasks",
+      "feature3": "Unlimited context history",
+      "feature4": "JSON & custom export",
+      "feature5": "Context Diff view",
+      "cta": "Coming Soon"
+    },
+    "team": {
+      "name": "Team",
+      "period": "/ user / month",
+      "feature1": "Everything in Pro",
+      "feature2": "Team collaboration",
+      "feature3": "Shared project contexts",
+      "feature4": "Admin dashboard",
+      "feature5": "Priority support",
+      "cta": "Coming Soon"
+    }
+  },
+  "gate": {
+    "title": "Pro Feature",
+    "description": "Upgrade to Pro to unlock this feature",
+    "upgrade": "View Plans"
+  },
+  "contextHistory": {
+    "title": "Context History",
+    "loading": "Loading context history...",
+    "empty": "No AI contexts yet",
+    "emptyHint": "Import a plan or link tasks to an AI context to see history",
+    "tasks": "tasks",
+    "expand": "Show prompt",
+    "collapse": "Hide prompt"
+  },
+  "contextDiff": {
+    "title": "Context Diff",
+    "loading": "Loading scan snapshots...",
+    "notEnough": "Need at least 2 scans to compare. Run orbit scan again to create a second snapshot.",
+    "before": "Before",
+    "after": "After",
+    "noDifferences": "No differences found between selected snapshots"
   }
 }

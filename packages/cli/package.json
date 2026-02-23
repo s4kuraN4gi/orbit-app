@@ -1,11 +1,27 @@
 {
-  "name": "@orbit-app/cli",
+  "name": "@orbit-cli/core",
   "version": "0.1.0",
-  "description": "Orbit CLI — manage tasks from the terminal",
+  "description": "AI context engine for your codebase — generate structured context files for Claude, Cursor, and other AI assistants",
   "type": "module",
+  "license": "MIT",
   "bin": {
     "orbit": "./dist/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/s4kuraN4gi/orbit-cli.git"
+  },
+  "homepage": "https://github.com/s4kuraN4gi/orbit-cli#readme",
+  "keywords": [
+    "ai",
+    "context",
+    "claude",
+    "cursor",
+    "codebase",
+    "scan",
+    "developer-tools",
+    "cli"
+  ],
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsup src/index.ts --format esm --dts --clean",
@@ -26,5 +42,10 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
 }

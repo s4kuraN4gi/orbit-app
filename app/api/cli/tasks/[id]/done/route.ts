@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tasks, projects } from '@/lib/schema';
-import { eq, desc, sql } from 'drizzle-orm';
-import { addDays, addWeeks, addMonths, addYears, nextDay, Day } from 'date-fns';
+import { eq, sql } from 'drizzle-orm';
 import { authenticateRequest } from '../../../auth';
 
 export async function PATCH(
@@ -23,7 +22,6 @@ export async function PATCH(
     );
   }
 
-  // Find tasks matching the prefix (cast UUID to text for LIKE)
   const matchingTasks = await db
     .select()
     .from(tasks)
@@ -60,118 +58,6 @@ export async function PATCH(
     return NextResponse.json({ task: formatTask(task) });
   }
 
-  // Handle recurring tasks
-  if (task.recurrenceType) {
-    let nextStartDate: Date | null = null;
-    let nextDueDate: Date | null = null;
-
-    const baseDate = task.dueDate
-      ? new Date(task.dueDate)
-      : task.startDate
-        ? new Date(task.startDate)
-        : new Date();
-
-    const interval = task.recurrenceInterval || 1;
-
-    switch (task.recurrenceType) {
-      case 'daily':
-        nextDueDate = addDays(baseDate, interval);
-        break;
-      case 'weekly':
-        if (task.recurrenceDays && task.recurrenceDays.length > 0) {
-          const dayMap: Record<string, Day> = {
-            su: 0, mo: 1, tu: 2, we: 3, th: 4, fr: 5, sa: 6,
-          };
-          const targetDays = task.recurrenceDays
-            .map((d: string) => dayMap[d])
-            .sort((a: number, b: number) => a - b);
-
-          const currentDay = baseDate.getDay();
-          const nextDayInWeek = targetDays.find((d: number) => d > currentDay);
-
-          if (nextDayInWeek !== undefined) {
-            nextDueDate = nextDay(baseDate, nextDayInWeek as Day);
-          } else {
-            const firstDay = targetDays[0];
-            const nextFirstDay = nextDay(baseDate, firstDay as Day);
-            nextDueDate = addWeeks(nextFirstDay, interval - 1);
-          }
-        } else {
-          nextDueDate = addWeeks(baseDate, interval);
-        }
-        break;
-      case 'monthly':
-        nextDueDate = addMonths(baseDate, interval);
-        break;
-      case 'yearly':
-        nextDueDate = addYears(baseDate, interval);
-        break;
-    }
-
-    // Check end date
-    if (
-      nextDueDate &&
-      task.recurrenceEndDate &&
-      nextDueDate > new Date(task.recurrenceEndDate)
-    ) {
-      nextDueDate = null;
-    }
-
-    if (nextDueDate) {
-      if (task.startDate && task.dueDate) {
-        const duration =
-          new Date(task.dueDate).getTime() -
-          new Date(task.startDate).getTime();
-        nextStartDate = new Date(nextDueDate.getTime() - duration);
-      } else if (task.startDate && !task.dueDate) {
-        nextStartDate = nextDueDate;
-        nextDueDate = null;
-      }
-
-      // Calculate position for new recurring task
-      const [maxPosData] = await db
-        .select({ position: tasks.position })
-        .from(tasks)
-        .where(eq(tasks.projectId, task.projectId))
-        .orderBy(desc(tasks.position))
-        .limit(1);
-      const newPosition = (maxPosData?.position || 0) + 65536;
-
-      await db.insert(tasks).values({
-        projectId: task.projectId,
-        parentId: task.parentId,
-        title: task.title,
-        description: task.description,
-        priority: task.priority,
-        status: 'todo',
-        startDate: nextStartDate,
-        dueDate: nextDueDate,
-        position: newPosition,
-        recurrenceType: task.recurrenceType,
-        recurrenceInterval: task.recurrenceInterval,
-        recurrenceDays: task.recurrenceDays,
-        recurrenceEndDate: task.recurrenceEndDate,
-      });
-
-      // Mark current task as done and remove recurrence
-      const [updated] = await db
-        .update(tasks)
-        .set({
-          status: 'done',
-          completedAt: new Date(),
-          recurrenceType: null,
-          recurrenceInterval: null,
-          recurrenceDays: null,
-          recurrenceEndDate: null,
-        })
-        .where(eq(tasks.id, task.id))
-        .returning();
-
-      return NextResponse.json({ task: formatTask(updated) });
-    }
-  }
-
-  // Non-recurring or recurrence ended
   const [updated] = await db
     .update(tasks)
     .set({

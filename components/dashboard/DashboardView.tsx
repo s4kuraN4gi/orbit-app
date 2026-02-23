@@ -1,22 +1,21 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Task } from '@/types';
+import { Task, PlanTier } from '@/types';
 import { isToday, isThisWeek, isThisMonth, parseISO } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { TaskList } from './TaskList';
-import { TaskBoard } from './TaskBoard';
-import { GanttChart } from './GanttChart';
-import { AnalyticsView } from './AnalyticsView';
 import { ProjectOverview } from './ProjectOverview';
-import { LayoutList, KanbanSquare, GanttChartSquare, LogOut, Plus, Settings, PieChart, Lightbulb, FileUp, Monitor } from 'lucide-react';
+import { ContextHistoryView } from './ContextHistoryView';
+import { ContextDiffView } from './ContextDiffView';
+import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, History, GitCompareArrows } from 'lucide-react';
 import { logout } from '@/app/actions/auth';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { TaskDetailModal } from './TaskDetailModal';
 import { CreateTaskModal } from './CreateTaskModal';
 import { ProjectSelector } from './ProjectSelector';
 import { TaskFilters } from './TaskFilters';
@@ -39,92 +38,60 @@ interface DashboardViewProps {
   projectName: string;
   projectId: string;
   allProjects: Project[];
-  defaultView?: 'list' | 'board' | 'gantt';
+  defaultView?: 'list' | 'overview';
   currentUserEmail?: string;
   scanData?: any;
+  planTier?: PlanTier;
+  currentProjectCount?: number;
 }
 
 // Recursive filter function for hierarchical tasks
 function filterTasks(
-  tasks: Task[], 
-  searchQuery: string, 
-  statusFilter: string, 
-  priorityFilter: string,
+  tasks: Task[],
+  searchQuery: string,
+  statusFilter: string,
   showCompleted: boolean
 ): Task[] {
   const searchLower = searchQuery.toLowerCase();
-  
+
   return tasks.reduce<Task[]>((filtered, task) => {
-    // Check if task ID matches exactly (case-insensitive, supports partial ID)
     const idMatches = searchQuery && (
       task.id.toLowerCase().includes(searchLower) ||
-      task.id.slice(0, 8).toLowerCase() === searchLower // Match short ID format
+      task.id.slice(0, 8).toLowerCase() === searchLower
     );
-    
-    // If ID matches exactly, include this task with ALL its children (no further filtering)
+
     if (idMatches) {
-      filtered.push({
-        ...task,
-        children: task.children || [], // Include all children as-is
-      });
+      filtered.push({ ...task, children: task.children || [] });
       return filtered;
     }
-    
-    // Check if task matches text search (title/description)
-    const matchesSearch = !searchQuery || 
+
+    const matchesSearch = !searchQuery ||
       task.title.toLowerCase().includes(searchLower) ||
       (task.description?.toLowerCase().includes(searchLower) ?? false);
-    
-    // Status Filter: "All", "Todo", "In Progress", "Done"
-    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
 
-    // Show Completed Toggle Logic:
-    // If showCompleted is FALSE, exclude 'done' tasks.
-    // However, if Status Filter is explicitly 'done', we probably should show them anyway?
-    // Let's keep it simple: Toggle is a master visibility switch for completed tasks, UNLESS status is exclusively 'done'.
-    // If user sets Status='Done' and ShowCompleted=False, showing nothing is confusing.
-    // Logic: 
-    // If StatusFilter == 'done', ignore showCompleted (Implicitly Show).
-    // Else, apply showCompleted logic.
-    // const showDone = showCompleted || statusFilter === 'done';
-    // if (!showDone && task.status === 'done') return filtered;
-    
+    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
     const showDone = showCompleted || statusFilter === 'done';
     if (!showDone && task.status === 'done') return filtered;
 
-    const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
-    
-    const taskMatches = matchesSearch && matchesStatus && matchesPriority;
-    
-    // Recursively filter children
-    const filteredChildren = task.children 
-      ? filterTasks(task.children, searchQuery, statusFilter, priorityFilter, showCompleted) 
+    const taskMatches = matchesSearch && matchesStatus;
+
+    const filteredChildren = task.children
+      ? filterTasks(task.children, searchQuery, statusFilter, showCompleted)
       : [];
-    
-    // Include task if it matches or has matching children
-    // Note: If task is hidden (e.g. done and showCompleted=false), we returned early above.
-    // But wait, what if a DONE parent has OPEN children?
-    // If parent is hidden, children are hidden in the current UI structure (nested).
-    // If we want to show open children of done parents, we need to return the child but maybe "flatten" it or show parent as "ghost"?
-    // For now, simpler behavior: Parent Hidden -> Children Hidden.
-    
+
     if (taskMatches || filteredChildren.length > 0) {
-      filtered.push({
-        ...task,
-        children: filteredChildren,
-      });
+      filtered.push({ ...task, children: filteredChildren });
     }
-    
+
     return filtered;
   }, []);
 }
 
-export function DashboardView({ initialTasks, projectName, projectId, allProjects, defaultView = 'list', currentUserEmail, scanData }: DashboardViewProps) {
+export function DashboardView({ initialTasks, projectName, projectId, allProjects, defaultView = 'overview', currentUserEmail, scanData, planTier = 'free', currentProjectCount }: DashboardViewProps) {
   const router = useRouter();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
   const tAuth = useTranslations('auth');
-  const [selectedTaskId, setSelectedTaskId] = React.useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = React.useState(false);
   const [activeView, setActiveView] = React.useState<string>(defaultView);
@@ -132,48 +99,23 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
   const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
   const tImport = useTranslations('import');
 
-
-  // Derive selected task from initialTasks to ensure it receives updates
-  // Need to search recursively if tasks are hierarchical
-  const findTaskById = (tasks: Task[], id: string): Task | undefined => {
-    for (const task of tasks) {
-        if (task.id === id) return task;
-        if (task.children) {
-            const found = findTaskById(task.children, id);
-            if (found) return found;
-        }
-    }
-    return undefined;
-  };
-
-  const selectedTask = React.useMemo(() => {
-    if (!selectedTaskId) return null;
-    return findTaskById(initialTasks, selectedTaskId);
-  }, [initialTasks, selectedTaskId]);
-
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onNewTask: () => projectId && setIsCreateModalOpen(true),
     onSearch: () => searchInputRef.current?.focus(),
     onViewList: () => setActiveView('list'),
-    onViewBoard: () => setActiveView('board'),
-    onViewGantt: () => setActiveView('gantt'),
     onCloseModal: () => {
       if (isCreateModalOpen) setIsCreateModalOpen(false);
       if (isShortcutsModalOpen) setIsShortcutsModalOpen(false);
-      if (selectedTaskId) setSelectedTaskId(null);
     },
     onShowShortcuts: () => setIsShortcutsModalOpen(true),
   });
 
-  // ... (notifications logic remains same)
   // Task notifications
   const { checkOverdueTasks, permission } = useTaskNotifications();
 
-  // Check for overdue tasks on load (only if notifications are granted)
   useEffect(() => {
     if (permission === 'granted' && initialTasks.length > 0) {
-      // Small delay to avoid showing notification immediately on page load
       const timeout = setTimeout(() => {
         checkOverdueTasks(initialTasks);
       }, 2000);
@@ -188,70 +130,31 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
   // Filters
   const [searchQuery, setSearchQuery] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('all');
-  const [priorityFilter, setPriorityFilter] = React.useState('all');
   const [showCompleted, setShowCompleted] = React.useState(false);
-  const [timeframe, setTimeframe] = React.useState('all');
 
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleClearFilters = () => {
     setSearchQuery('');
     setStatusFilter('all');
-    setPriorityFilter('all');
-    setTimeframe('all');
     if (searchInputRef.current) {
-        searchInputRef.current.focus();
+      searchInputRef.current.focus();
     }
   };
 
-  // Apply filters to tasks (Base filter for Search/Status/Priority/ShowCompleted)
   const filteredTasks = React.useMemo(() => {
-    return filterTasks(initialTasks, searchQuery, statusFilter, priorityFilter, showCompleted);
-  }, [initialTasks, searchQuery, statusFilter, priorityFilter, showCompleted]);
-
-  // Apply Timeframe Filter (Used by List, Board, Analytics)
-  const dateFilteredTasks = React.useMemo(() => {
-    if (timeframe === 'all') return filteredTasks;
-    return filteredTasks.filter(t => {
-       if (!t.due_date) return false;
-       const date = parseISO(t.due_date);
-       if (timeframe === 'today') return isToday(date);
-       if (timeframe === 'thisWeek') return isThisWeek(date, { weekStartsOn: 1 });
-       if (timeframe === 'thisMonth') return isThisMonth(date);
-       return true;
-    });
-  }, [filteredTasks, timeframe]);
-
-  // Analytics always shows completed tasks to ensure accurate charts, BUT respects Timeframe
-  const analyticsTasks = React.useMemo(() => {
-    // 1. Base filter (Force showCompleted=true)
-    const base = filterTasks(initialTasks, searchQuery, statusFilter, priorityFilter, true);
-    
-    // 2. Apply Timeframe
-    if (timeframe === 'all') return base;
-    return base.filter(t => {
-       if (!t.due_date) return false;
-       const date = parseISO(t.due_date);
-       if (timeframe === 'today') return isToday(date);
-       if (timeframe === 'thisWeek') return isThisWeek(date, { weekStartsOn: 1 });
-       if (timeframe === 'thisMonth') return isThisMonth(date);
-       return true;
-    });
-  }, [initialTasks, searchQuery, statusFilter, priorityFilter, timeframe]);
-
-  const handleTaskClick = (task: Task) => {
-      setSelectedTaskId(task.id);
-  };
+    return filterTasks(initialTasks, searchQuery, statusFilter, showCompleted);
+  }, [initialTasks, searchQuery, statusFilter, showCompleted]);
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      {/* ... (header remains same) ... */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <ProjectSelector
             projects={allProjects}
             currentProjectId={projectId}
             onProjectChange={handleProjectChange}
+            planTier={planTier}
           />
         </div>
         <div className="flex items-center gap-2">
@@ -259,9 +162,9 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
             <Plus className="h-4 w-4" />
             {t('newTask')}
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setIsImportModalOpen(true)}
             className="flex items-center gap-2"
             disabled={!projectId}
@@ -269,16 +172,16 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
             <FileUp className="h-4 w-4" />
             {tImport('button')}
           </Button>
-          <Button 
-            variant={isIdeaBoxOpen ? "default" : "outline"} 
-            size="sm" 
+          <Button
+            variant={isIdeaBoxOpen ? "default" : "outline"}
+            size="sm"
             onClick={() => setIsIdeaBoxOpen(!isIdeaBoxOpen)}
             className="flex items-center gap-2"
             disabled={!projectId}
           >
             <Lightbulb className="h-4 w-4" />
           </Button>
-          <ExportMenu tasks={initialTasks} projectName={projectName} />
+          <ExportMenu tasks={initialTasks} projectName={projectName} planTier={planTier} />
           <Link href="/settings">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -296,60 +199,44 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
 
       {projectId ? (
         <>
-          {/* Stats */}
-          <DashboardStats tasks={analyticsTasks} />
+          <DashboardStats tasks={filteredTasks} />
 
-          {/* Search and Filters */}
           <TaskFilters
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             statusFilter={statusFilter}
             onStatusChange={setStatusFilter}
-            priorityFilter={priorityFilter}
-            onPriorityChange={setPriorityFilter}
             onClearFilters={handleClearFilters}
             showCompleted={showCompleted}
             onShowCompletedChange={setShowCompleted}
-            timeframe={timeframe}
-            onTimeframeChange={setTimeframe}
             searchInputRef={searchInputRef}
-            view={activeView}
           />
 
-          {/* Main content area with optional IdeaBox sidebar */}
           <div className="flex-1 flex gap-4 min-h-0">
-            {/* Tabs - Main content */}
             <Tabs value={activeView} onValueChange={setActiveView} className="flex-1 flex flex-col min-w-0">
               <div className="flex items-center justify-between pb-4">
                 <TabsList>
                   <TabsTrigger value="overview" className="flex items-center gap-2">
-                      <Monitor className="h-4 w-4" />
-                      {t('views.overview')}
+                    <Monitor className="h-4 w-4" />
+                    {t('views.overview')}
                   </TabsTrigger>
                   <TabsTrigger value="list" className="flex items-center gap-2">
-                      <LayoutList className="h-4 w-4" />
-                      {t('views.list')}
+                    <LayoutList className="h-4 w-4" />
+                    {t('views.list')}
                   </TabsTrigger>
-                  <TabsTrigger value="board" className="flex items-center gap-2">
-                      <KanbanSquare className="h-4 w-4" />
-                      {t('views.board')}
+                  <TabsTrigger value="context" className="flex items-center gap-2">
+                    <History className="h-4 w-4" />
+                    Context History
                   </TabsTrigger>
-                  <TabsTrigger value="gantt" className="flex items-center gap-2">
-                      <GanttChartSquare className="h-4 w-4" />
-                      {t('views.gantt')}
-                  </TabsTrigger>
-                  <TabsTrigger value="analytics" className="flex items-center gap-2">
-                      <PieChart className="h-4 w-4" />
-                      {t('views.analytics')}
+                  <TabsTrigger value="diff" className="flex items-center gap-2">
+                    <GitCompareArrows className="h-4 w-4" />
+                    Context Diff
+                    {planTier === 'free' && <Badge variant="secondary" className="ml-1 text-[10px] px-1 py-0">Pro</Badge>}
                   </TabsTrigger>
                 </TabsList>
-                
-                {/* Result Count - Shows count for ACTIVE view context */}
+
                 <span className="text-sm text-muted-foreground">
-                  {activeView === 'gantt' 
-                    ? t('filters.resultsCount', { count: filteredTasks.length })
-                    : t('filters.resultsCount', { count: dateFilteredTasks.length })
-                  }
+                  {t('filters.resultsCount', { count: filteredTasks.length })}
                 </span>
               </div>
 
@@ -358,41 +245,27 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
               </TabsContent>
 
               <TabsContent value="list" className="flex-1 border-none p-0 outline-none">
-                <TaskList 
-                  tasks={dateFilteredTasks} 
-                  onTaskClick={handleTaskClick} 
-                  isModalOpen={!!selectedTaskId || isCreateModalOpen || isShortcutsModalOpen}
+                <TaskList
+                  tasks={filteredTasks}
+                  isModalOpen={isCreateModalOpen || isShortcutsModalOpen}
                 />
               </TabsContent>
 
-              <TabsContent value="board" className="flex-1 border-none p-0 outline-none">
-                <TaskBoard tasks={dateFilteredTasks} onTaskClick={handleTaskClick} />
+              <TabsContent value="context" className="flex-1 border-none p-0 outline-none overflow-y-auto">
+                <ContextHistoryView projectId={projectId} currentPlan={planTier} />
               </TabsContent>
 
-              <TabsContent value="gantt" className="flex-1 border-none p-0 outline-none">
-                   <GanttChart tasks={filteredTasks} />
-              </TabsContent>
-
-              <TabsContent value="analytics" className="flex-1 border-none p-0 outline-none overflow-y-auto">
-                   <AnalyticsView tasks={analyticsTasks} />
+              <TabsContent value="diff" className="flex-1 border-none p-0 outline-none overflow-y-auto">
+                <ContextDiffView projectId={projectId} currentPlan={planTier} />
               </TabsContent>
             </Tabs>
 
-            {/* IdeaBox Side Panel */}
             {isIdeaBoxOpen && (
               <div className="w-80 shrink-0">
                 <IdeaBox projectId={projectId} onTaskCreated={() => router.refresh()} />
               </div>
             )}
           </div>
-
-          <TaskDetailModal 
-            task={selectedTask || null} 
-            isOpen={!!selectedTask} 
-            onClose={() => setSelectedTaskId(null)}
-            projectId={projectId}
-            currentUserEmail={currentUserEmail}
-          />
 
           <CreateTaskModal
             isOpen={isCreateModalOpen}
@@ -409,6 +282,7 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
             isOpen={isImportModalOpen}
             onClose={() => setIsImportModalOpen(false)}
             projectId={projectId}
+            planTier={planTier}
           />
         </>
       ) : (

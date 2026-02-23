@@ -1,5 +1,22 @@
 export type TaskStatus = "todo" | "in_progress" | "done";
 export type TaskPriority = "low" | "medium" | "high";
+export type PlanTier = 'free' | 'pro' | 'team';
+
+export interface PlanLimits {
+  tier: PlanTier;
+  maxProjects: number;
+  maxTasksPerProject: number;
+  maxContextHistory: number;
+  exportFormats: ('markdown' | 'json' | 'custom')[];
+  contextDiff: boolean;
+}
+
+export interface ScanSnapshot {
+  id: string;
+  project_id: string;
+  scan_data: any;
+  created_at: string;
+}
 
 export interface User {
   id: string; // UUID
@@ -36,26 +53,10 @@ export interface Task {
   due_date: string | null;
   created_at: string; // ISO Date string
   position?: number; // Sorting order
-  
-  // Recurrence properties
-  recurrence_type?: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  recurrence_interval?: number;
-  recurrence_days?: string[];
-  recurrence_end_date?: string; // ISO Date string
   completed_at?: string | null; // ISO Date string
 
   // Frontend display properties
   ai_context?: AIContext;
   depth?: number; // Indent depth
-  board_order?: number; // Kanban order
   children?: Task[]; // Nested subtasks for hierarchical display
 }
-
-export interface TaskDependency {
-  id: string;
-  project_id: string;
-  predecessor_id: string;
-  successor_id: string;
-  dependency_type: string | null;
-}
-

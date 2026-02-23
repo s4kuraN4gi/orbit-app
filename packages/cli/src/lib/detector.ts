@@ -30,6 +30,8 @@ export interface ScanResult {
     byDirectory: { dir: string; files: number }[];
     largestFiles: { path: string; lines: number }[];
   };
+  exports: { file: string; name: string; kind: 'function' | 'component' | 'type' | 'const' }[];
+  importGraph: { file: string; imports: string[] }[];
   scripts: Record<string, string>;
   deployment: {
     platform: string | null;
@@ -176,10 +178,15 @@ function scanAiContext(dir: string): { files: { name: string; path: string }[] }
   const checks: { name: string; path: string }[] = [
     { name: 'CLAUDE.md', path: 'CLAUDE.md' },
     { name: 'CLAUDE.md', path: '.claude/CLAUDE.md' },
+    { name: 'AGENTS.md', path: 'AGENTS.md' },
     { name: '.cursorrules', path: '.cursorrules' },
     { name: '.cursor/rules/', path: '.cursor/rules' },
     { name: '.windsurfrules', path: '.windsurfrules' },
     { name: 'copilot-instructions.md', path: '.github/copilot-instructions.md' },
+    { name: '.aider.conf.yml', path: '.aider.conf.yml' },
+    { name: '.aiderignore', path: '.aiderignore' },
+    { name: '.roomodes', path: '.roomodes' },
+    { name: 'devin.json', path: '.devin/devin.json' },
   ];
 
   const found: { name: string; path: string }[] = [];
@@ -189,6 +196,92 @@ function scanAiContext(dir: string): { files: { name: string; path: string }[] }
     }
   }
   return { files: found };
+}
+
+// ─── Export Signatures ───
+async function scanExports(dir: string): Promise<ScanResult['exports']> {
+  const files = await globFiles(dir, /\.(ts|tsx)$/);
+  const results: ScanResult['exports'] = [];
+
+  const exportPatterns = [
+    // export function foo(...) or export async function foo(...)
+    /export\s+(?:async\s+)?function\s+(\w+)/g,
+    // export const foo =
+    /export\s+const\s+(\w+)\s*[=:]/g,
+    // export type/interface foo
+    /export\s+(?:type|interface)\s+(\w+)/g,
+    // export default function foo(...)
+    /export\s+default\s+(?:async\s+)?function\s+(\w+)/g,
+  ];
+
+  for (const file of files) {
+    const content = await readText(file);
+    if (!content) continue;
+    const relPath = relative(dir, file).replace(/\\/g, '/');
+
+    // export function / export async function
+    for (const m of content.matchAll(/export\s+(?:async\s+)?function\s+([A-Z]\w*)/g)) {
+      results.push({ file: relPath, name: m[1], kind: 'component' });
+    }
+    for (const m of content.matchAll(/export\s+(?:async\s+)?function\s+([a-z]\w*)/g)) {
+      results.push({ file: relPath, name: m[1], kind: 'function' });
+    }
+    // export default function (PascalCase = component)
+    for (const m of content.matchAll(/export\s+default\s+(?:async\s+)?function\s+([A-Z]\w*)/g)) {
+      if (!results.some(r => r.file === relPath && r.name === m[1])) {
+        results.push({ file: relPath, name: m[1], kind: 'component' });
+      }
+    }
+    for (const m of content.matchAll(/export\s+default\s+(?:async\s+)?function\s+([a-z]\w*)/g)) {
+      if (!results.some(r => r.file === relPath && r.name === m[1])) {
+        results.push({ file: relPath, name: m[1], kind: 'function' });
+      }
+    }
+    // export const (PascalCase = component, otherwise const)
+    for (const m of content.matchAll(/export\s+const\s+([A-Z]\w*)\s*[=:]/g)) {
+      results.push({ file: relPath, name: m[1], kind: 'component' });
+    }
+    for (const m of content.matchAll(/export\s+const\s+([a-z]\w*)\s*[=:]/g)) {
+      results.push({ file: relPath, name: m[1], kind: 'const' });
+    }
+    // export type / export interface
+    for (const m of content.matchAll(/export\s+(?:type|interface)\s+(\w+)/g)) {
+      results.push({ file: relPath, name: m[1], kind: 'type' });
+    }
+  }
+
+  return results;
+}
+
+// ─── Import Graph ───
+async function scanImportGraph(dir: string): Promise<ScanResult['importGraph']> {
+  const files = await globFiles(dir, /\.(ts|tsx)$/);
+  const results: ScanResult['importGraph'] = [];
+
+  // Match: import ... from '...' or import '...'
+  const importPattern = /(?:import\s+(?:[\s\S]*?\s+from\s+)?['"]([^'"]+)['"]|require\s*\(\s*['"]([^'"]+)['"]\s*\))/g;
+
+  for (const file of files) {
+    const content = await readText(file);
+    if (!content) continue;
+    const relPath = relative(dir, file).replace(/\\/g, '/');
+    const imports: string[] = [];
+
+    for (const m of content.matchAll(importPattern)) {
+      const specifier = m[1] || m[2];
+      if (!specifier) continue;
+      // Only track local imports (starting with . or @/)
+      if (specifier.startsWith('.') || specifier.startsWith('@/')) {
+        imports.push(specifier);
+      }
+    }
+
+    if (imports.length > 0) {
+      results.push({ file: relPath, imports });
+    }
+  }
+
+  return results;
 }
 
 // ─── Git Activity ───
@@ -356,13 +449,15 @@ export async function scanProject(dir: string): Promise<ScanResult> {
     dev: Object.keys(devDeps).length,
   };
 
-  // Run all new scans in parallel
-  const [pages, apiRoutes, dbTables, codeMetrics, envVars] = await Promise.all([
+  // Run all scans in parallel
+  const [pages, apiRoutes, dbTables, codeMetrics, envVars, exports, importGraph] = await Promise.all([
     scanPages(dir),
     scanApiRoutes(dir),
     scanDbTables(dir),
     scanCodeMetrics(dir),
     scanEnvVars(dir),
+    scanExports(dir),
+    scanImportGraph(dir),
   ]);
 
   const structure = { pages, apiRoutes, dbTables };
@@ -373,6 +468,7 @@ export async function scanProject(dir: string): Promise<ScanResult> {
 
   return {
     techStack, nodeVersion, packageManager, dependencies, depCount,
-    structure, aiContext, git, codeMetrics, scripts, deployment, envVars,
+    structure, aiContext, git, codeMetrics, exports, importGraph,
+    scripts, deployment, envVars,
   };
 }

@@ -11,6 +11,7 @@ import { doneCommand } from './commands/done.js';
 import { startCommand } from './commands/start.js';
 import { listCommand } from './commands/list.js';
 import { scanCommand } from './commands/scan.js';
+import type { ScanOptions } from './commands/scan.js';
 import { OrbitError } from './lib/errors.js';
 import type { TaskPriority, TaskStatus } from './types.js';
 
@@ -18,7 +19,7 @@ const program = new Command();
 
 program
   .name('orbit')
-  .description('Orbit CLI — manage tasks from the terminal')
+  .description('Orbit — AI context engine for your codebase')
   .version('0.1.0');
 
 // --- Auth ---
@@ -89,7 +90,10 @@ program
 program
   .command('scan')
   .description('Scan project and show overview')
-  .action(scanCommand);
+  .option('-g, --generate-context', 'Generate AI context file from scan results')
+  .option('-o, --output <file>', 'Output file for context (default: CLAUDE.md)')
+  .option('-f, --format <format>', 'Output format: json, yaml, or markdown')
+  .action((options: ScanOptions) => scanCommand(options));
 
 // --- Error handling ---
 

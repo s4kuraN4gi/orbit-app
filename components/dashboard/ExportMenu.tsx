@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Task } from '@/types';
+import { Task, PlanTier } from '@/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,16 +10,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Download, FileJson, FileSpreadsheet, Bot } from 'lucide-react';
+import { Download, FileJson, FileSpreadsheet, Bot, Lock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { ExportContextModal } from './ExportContextModal';
 
 interface ExportMenuProps {
   tasks: Task[];
   projectName: string;
+  planTier?: PlanTier;
 }
 
-export function ExportMenu({ tasks, projectName }: ExportMenuProps) {
+export function ExportMenu({ tasks, projectName, planTier }: ExportMenuProps) {
   const t = useTranslations('dashboard.export');
   const [isContextModalOpen, setIsContextModalOpen] = useState(false);
 
@@ -123,9 +126,21 @@ export function ExportMenu({ tasks, projectName }: ExportMenuProps) {
             <FileSpreadsheet className="mr-2 h-4 w-4" />
             {t('csv')}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleExportJSON}>
+          <DropdownMenuItem
+            onClick={() => {
+              if (planTier === 'free') {
+                toast.error(t('jsonProOnly'));
+                return;
+              }
+              handleExportJSON();
+            }}
+            className={planTier === 'free' ? 'opacity-50' : ''}
+          >
             <FileJson className="mr-2 h-4 w-4" />
             {t('json')}
+            {planTier === 'free' && (
+              <Badge variant="secondary" className="ml-auto text-[10px] px-1 py-0">Pro</Badge>
+            )}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -135,6 +150,7 @@ export function ExportMenu({ tasks, projectName }: ExportMenuProps) {
         onClose={() => setIsContextModalOpen(false)}
         tasks={tasks}
         projectName={projectName}
+        planTier={planTier}
       />
     </>
   );

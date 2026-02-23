@@ -16,6 +16,7 @@ import { deleteProject } from '@/app/actions/project';
 import { toast } from 'sonner';
 
 import { useTranslations } from 'next-intl';
+import type { PlanTier } from '@/types';
 
 interface Project {
   id: string;
@@ -27,9 +28,10 @@ interface ProjectSelectorProps {
   projects: Project[];
   currentProjectId: string;
   onProjectChange: (projectId: string) => void;
+  planTier?: PlanTier;
 }
 
-export function ProjectSelector({ projects, currentProjectId, onProjectChange }: ProjectSelectorProps) {
+export function ProjectSelector({ projects, currentProjectId, onProjectChange, planTier }: ProjectSelectorProps) {
   const router = useRouter();
   const t = useTranslations('project');
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
@@ -105,6 +107,8 @@ export function ProjectSelector({ projects, currentProjectId, onProjectChange }:
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onProjectCreated={handleProjectCreated}
+        planTier={planTier}
+        currentProjectCount={projects.length}
       />
     </div>
   );

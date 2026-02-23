@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { tasks, aiContexts } from '@/lib/schema';
+import { requireProjectOwner } from '@/lib/auth-helpers';
 
 interface TaskInput {
   title: string;
@@ -56,6 +57,9 @@ export async function bulkCreateTasks(
     return { success: false, error: 'Invalid input: project_id and tasks array are required' };
   }
 
+  // Auth + Authorization: verify project ownership
+  await requireProjectOwner(input.project_id);
+
   try {
     // 1. Create AI Context
     const [aiContext] = await db
@@ -80,6 +84,6 @@ export async function bulkCreateTasks(
     return { success: true, ai_context_id: aiContext.id };
   } catch (error: any) {
     console.error('Bulk create error:', error);
-    return { success: false, error: error.message || 'Unknown error' };
+    return { success: false, error: 'Internal error' };
   }
 }

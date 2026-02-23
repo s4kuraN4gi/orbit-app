@@ -107,81 +107,7 @@ export const tasks = pgTable('tasks', {
   dueDate: timestamp('due_date', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
   position: integer('position').default(0),
-  boardOrder: integer('board_order'),
-  recurrenceType: text('recurrence_type'),
-  recurrenceInterval: integer('recurrence_interval').default(1),
-  recurrenceDays: text('recurrence_days').array(),
-  recurrenceEndDate: timestamp('recurrence_end_date', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
-
-export const taskDependencies = pgTable(
-  'task_dependencies',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    projectId: uuid('project_id')
-      .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
-    predecessorId: uuid('predecessor_id')
-      .notNull()
-      .references(() => tasks.id, { onDelete: 'cascade' }),
-    successorId: uuid('successor_id')
-      .notNull()
-      .references(() => tasks.id, { onDelete: 'cascade' }),
-    dependencyType: text('dependency_type'),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (table) => [unique().on(table.predecessorId, table.successorId)]
-);
-
-export const taskTemplates = pgTable('task_templates', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  projectId: uuid('project_id')
-    .notNull()
-    .references(() => projects.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  title: text('title').notNull(),
-  description: text('description').default(''),
-  priority: text('priority').default('medium'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
-
-export const labels = pgTable('labels', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  projectId: uuid('project_id')
-    .notNull()
-    .references(() => projects.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  color: text('color').notNull().default('#6366f1'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
-
-export const taskLabels = pgTable(
-  'task_labels',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    taskId: uuid('task_id')
-      .notNull()
-      .references(() => tasks.id, { onDelete: 'cascade' }),
-    labelId: uuid('label_id')
-      .notNull()
-      .references(() => labels.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (table) => [unique().on(table.taskId, table.labelId)]
-);
-
-export const taskComments = pgTable('task_comments', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  taskId: uuid('task_id')
-    .notNull()
-    .references(() => tasks.id, { onDelete: 'cascade' }),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  content: text('content').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 export const ideas = pgTable('ideas', {
@@ -206,7 +132,17 @@ export const userSettings = pgTable('user_settings', {
   theme: text('theme').default('system'),
   defaultView: text('default_view').default('list'),
   language: text('language').default('ja'),
+  plan: text('plan').default('free'),
   customColors: jsonb('custom_colors'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const scanSnapshots = pgTable('scan_snapshots', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  scanData: jsonb('scan_data').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });

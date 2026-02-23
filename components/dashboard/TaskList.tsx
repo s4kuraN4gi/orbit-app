@@ -37,7 +37,7 @@ import {
 
 interface TaskListProps {
   tasks: Task[];
-  onTaskClick: (task: Task) => void;
+  onTaskClick?: (task: Task) => void;
   isModalOpen?: boolean;
 }
 
@@ -421,7 +421,7 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
       case 'Enter':
         e.preventDefault();
         if (focusedIndex >= 0 && focusedIndex < totalTasks) {
-          onTaskClick(visibleTasks[focusedIndex].task);
+          onTaskClick?.(visibleTasks[focusedIndex].task);
         }
         break;
       case 'ArrowRight':
@@ -546,7 +546,7 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
                                             onClick={() => {
                                                  const idx = visibleTasks.findIndex(vt => vt.task.id === task.id);
                                                  setFocusedIndex(idx);
-                                                 onTaskClick(task);
+                                                 onTaskClick?.(task);
                                             }}
                                             hasChildren={!!(task.children && task.children.length > 0)}
                                             isExpanded={expandedIds.has(task.id)}
