@@ -161,9 +161,9 @@ npx @orbit-cli/core scan -g -o .cursorrules  # 出力先指定
 
 ### 修正
 
-- [ ] `DashboardView.tsx` — ProjectOverview をデフォルトタブに。タスクは従属表示
-- [ ] `ProjectOverview.tsx` — scanData 可視化をメインコンテンツに昇格
-- [ ] `ExportContextModal.tsx` — 「メイン機能」として UI 上の優先度を上げる
+- [x] `DashboardView.tsx` — ProjectOverview をデフォルトタブに。タスクは従属表示
+- [x] `ProjectOverview.tsx` — scanData 可視化をメインコンテンツに昇格
+- [x] `ExportContextModal.tsx` — 「メイン機能」として UI 上の優先度を上げる
 
 ### フリーミアム設計
 
@@ -347,5 +347,5 @@ CREATE TABLE usage (
 | Phase 1: CLI OSS + scan 認証不要化 | 1週間 | [x] 完了 | 2026-02-22 |
 | Phase 2: LP 英語化 + 削除 + detector 強化 | 1.5週間 | [x] 完了 | 2026-02-22 |
 | Phase 3: Web UI ピボット + Pricing | 2週間 | [x] 完了 | 2026-02-23 |
-| Phase 4: MCP Server + orbit watch | 2週間 | [ ] 未着手 | |
+| Phase 4: MCP Server + orbit watch | 2週間 | [x] 完了 | 2026-02-24 |
 | Phase 5: Stripe 課金 + Team | 2週間 | [ ] 未着手 | |

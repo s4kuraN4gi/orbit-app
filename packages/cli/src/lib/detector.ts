@@ -65,7 +65,7 @@ function categorize(pkg: string): string {
   return 'Other';
 }
 
-async function readJson(path: string): Promise<any> {
+export async function readJson(path: string): Promise<any> {
   try {
     const raw = await readFile(path, 'utf-8');
     return JSON.parse(raw);
@@ -74,7 +74,7 @@ async function readJson(path: string): Promise<any> {
   }
 }
 
-async function readText(path: string): Promise<string | null> {
+export async function readText(path: string): Promise<string | null> {
   try {
     return await readFile(path, 'utf-8');
   } catch {
@@ -83,9 +83,9 @@ async function readText(path: string): Promise<string | null> {
 }
 
 // Recursive glob (simple, avoids external dependency)
-const IGNORE_DIRS = new Set(['node_modules', '.next', 'dist', '.git', '.vercel', 'coverage']);
+export const IGNORE_DIRS = new Set(['node_modules', '.next', 'dist', '.git', '.vercel', 'coverage']);
 
-async function globFiles(dir: string, pattern: RegExp, results: string[] = []): Promise<string[]> {
+export async function globFiles(dir: string, pattern: RegExp, results: string[] = []): Promise<string[]> {
   try {
     const entries = await readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
@@ -111,7 +111,7 @@ function execGit(cmd: string, cwd: string): string | null {
 }
 
 // ─── Structure: Pages ───
-async function scanPages(dir: string): Promise<string[]> {
+export async function scanPages(dir: string): Promise<string[]> {
   const files = await globFiles(join(dir, 'app'), /^page\.tsx?$/);
   return files.map(f => {
     let route = relative(join(dir, 'app'), dirname(f));
@@ -122,7 +122,7 @@ async function scanPages(dir: string): Promise<string[]> {
 }
 
 // ─── Structure: API Routes ───
-async function scanApiRoutes(dir: string): Promise<{ method: string; path: string }[]> {
+export async function scanApiRoutes(dir: string): Promise<{ method: string; path: string }[]> {
   const files = await globFiles(join(dir, 'app', 'api'), /^route\.ts$/);
   const routes: { method: string; path: string }[] = [];
   const methodPattern = /export\s+(?:async\s+)?function\s+(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)/g;
@@ -143,7 +143,7 @@ async function scanApiRoutes(dir: string): Promise<{ method: string; path: strin
 }
 
 // ─── Structure: DB Tables ───
-async function scanDbTables(dir: string): Promise<{ name: string; columns: number }[]> {
+export async function scanDbTables(dir: string): Promise<{ name: string; columns: number }[]> {
   // Find schema files
   const candidates = [
     join(dir, 'lib', 'schema.ts'),
@@ -174,7 +174,7 @@ async function scanDbTables(dir: string): Promise<{ name: string; columns: numbe
 }
 
 // ─── AI Context Files ───
-function scanAiContext(dir: string): { files: { name: string; path: string }[] } {
+export function scanAiContext(dir: string): { files: { name: string; path: string }[] } {
   const checks: { name: string; path: string }[] = [
     { name: 'CLAUDE.md', path: 'CLAUDE.md' },
     { name: 'CLAUDE.md', path: '.claude/CLAUDE.md' },
@@ -199,7 +199,7 @@ function scanAiContext(dir: string): { files: { name: string; path: string }[] }
 }
 
 // ─── Export Signatures ───
-async function scanExports(dir: string): Promise<ScanResult['exports']> {
+export async function scanExports(dir: string): Promise<ScanResult['exports']> {
   const files = await globFiles(dir, /\.(ts|tsx)$/);
   const results: ScanResult['exports'] = [];
 
@@ -254,7 +254,7 @@ async function scanExports(dir: string): Promise<ScanResult['exports']> {
 }
 
 // ─── Import Graph ───
-async function scanImportGraph(dir: string): Promise<ScanResult['importGraph']> {
+export async function scanImportGraph(dir: string): Promise<ScanResult['importGraph']> {
   const files = await globFiles(dir, /\.(ts|tsx)$/);
   const results: ScanResult['importGraph'] = [];
 
@@ -285,7 +285,7 @@ async function scanImportGraph(dir: string): Promise<ScanResult['importGraph']> 
 }
 
 // ─── Git Activity ───
-function scanGit(dir: string): ScanResult['git'] {
+export function scanGit(dir: string): ScanResult['git'] {
   if (!existsSync(join(dir, '.git'))) return null;
 
   const branch = execGit('git branch --show-current', dir) || 'unknown';
@@ -301,7 +301,7 @@ function scanGit(dir: string): ScanResult['git'] {
 }
 
 // ─── Code Metrics ───
-async function scanCodeMetrics(dir: string): Promise<ScanResult['codeMetrics']> {
+export async function scanCodeMetrics(dir: string): Promise<ScanResult['codeMetrics']> {
   const files = await globFiles(dir, /\.(ts|tsx)$/);
   const fileData: { path: string; lines: number; dir: string }[] = [];
 
@@ -336,7 +336,7 @@ async function scanCodeMetrics(dir: string): Promise<ScanResult['codeMetrics']> 
 }
 
 // ─── Deployment Detection ───
-function scanDeployment(dir: string): ScanResult['deployment'] {
+export function scanDeployment(dir: string): ScanResult['deployment'] {
   let platform: string | null = null;
   if (existsSync(join(dir, '.vercel')) || existsSync(join(dir, 'vercel.json'))) platform = 'Vercel';
   else if (existsSync(join(dir, 'netlify.toml'))) platform = 'Netlify';
@@ -352,7 +352,7 @@ function scanDeployment(dir: string): ScanResult['deployment'] {
 }
 
 // ─── Environment Variables (KEYS ONLY, never read .env values) ───
-async function scanEnvVars(dir: string): Promise<string[]> {
+export async function scanEnvVars(dir: string): Promise<string[]> {
   // Try .env.example first (safe to read)
   const examplePath = join(dir, '.env.example');
   if (existsSync(examplePath)) {
@@ -384,8 +384,18 @@ async function scanEnvVars(dir: string): Promise<string[]> {
   return [...keys].sort();
 }
 
-// ─── Main ───
-export async function scanProject(dir: string): Promise<ScanResult> {
+// ─── Tech Stack & Dependencies ───
+
+export interface TechAndDeps {
+  techStack: string[];
+  nodeVersion: string | null;
+  packageManager: string | null;
+  dependencies: { category: string; packages: string[] }[];
+  depCount: { total: number; dev: number };
+  scripts: Record<string, string>;
+}
+
+export async function scanTechAndDeps(dir: string): Promise<TechAndDeps> {
   const pkg = await readJson(join(dir, 'package.json'));
 
   const techStack: string[] = [];
@@ -448,6 +458,15 @@ export async function scanProject(dir: string): Promise<ScanResult> {
     total: Object.keys(prodDeps).length + Object.keys(devDeps).length,
     dev: Object.keys(devDeps).length,
   };
+  const scripts = pkg?.scripts ?? {};
+
+  return { techStack, nodeVersion, packageManager, dependencies, depCount, scripts };
+}
+
+// ─── Main ───
+export async function scanProject(dir: string): Promise<ScanResult> {
+  const techAndDeps = await scanTechAndDeps(dir);
+  const { techStack, nodeVersion, packageManager, dependencies, depCount, scripts } = techAndDeps;
 
   // Run all scans in parallel
   const [pages, apiRoutes, dbTables, codeMetrics, envVars, exports, importGraph] = await Promise.all([
@@ -463,7 +482,6 @@ export async function scanProject(dir: string): Promise<ScanResult> {
   const structure = { pages, apiRoutes, dbTables };
   const aiContext = scanAiContext(dir);
   const git = scanGit(dir);
-  const scripts = pkg?.scripts ?? {};
   const deployment = scanDeployment(dir);
 
   return {

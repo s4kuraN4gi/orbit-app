@@ -11,7 +11,7 @@ import { TaskList } from './TaskList';
 import { ProjectOverview } from './ProjectOverview';
 import { ContextHistoryView } from './ContextHistoryView';
 import { ContextDiffView } from './ContextDiffView';
-import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, History, GitCompareArrows } from 'lucide-react';
+import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, History, GitCompareArrows, Bot } from 'lucide-react';
 import { logout } from '@/app/actions/auth';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -23,6 +23,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { ShortcutsListModal } from './ShortcutsListModal';
 import { DashboardStats } from './DashboardStats';
 import { ExportMenu } from './ExportMenu';
+import { ExportContextModal } from './ExportContextModal';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
 import { IdeaBox } from './IdeaBox';
 import { ImportPlanModal } from './ImportPlanModal';
@@ -97,7 +98,9 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
   const [activeView, setActiveView] = React.useState<string>(defaultView);
   const [isIdeaBoxOpen, setIsIdeaBoxOpen] = React.useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
+  const [isExportContextOpen, setIsExportContextOpen] = React.useState(false);
   const tImport = useTranslations('import');
+  const tExport = useTranslations('dashboard.export');
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -180,6 +183,16 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
             disabled={!projectId}
           >
             <Lightbulb className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setIsExportContextOpen(true)}
+            className="flex items-center gap-2"
+            disabled={!projectId}
+          >
+            <Bot className="h-4 w-4" />
+            {tExport('contextButton')}
           </Button>
           <ExportMenu tasks={initialTasks} projectName={projectName} planTier={planTier} />
           <Link href="/settings">
@@ -282,6 +295,14 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
             isOpen={isImportModalOpen}
             onClose={() => setIsImportModalOpen(false)}
             projectId={projectId}
+            planTier={planTier}
+          />
+
+          <ExportContextModal
+            isOpen={isExportContextOpen}
+            onClose={() => setIsExportContextOpen(false)}
+            tasks={initialTasks}
+            projectName={projectName}
             planTier={planTier}
           />
         </>

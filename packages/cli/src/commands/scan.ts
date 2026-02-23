@@ -1,12 +1,14 @@
-import { writeFile } from 'node:fs/promises';
-import { join, basename } from 'node:path';
+import { writeFile, mkdir } from 'node:fs/promises';
+import { join, basename, dirname } from 'node:path';
 import ora from 'ora';
 import chalk from 'chalk';
 import { apiRequest } from '../lib/api.js';
 import { sessionExists } from '../lib/config.js';
 import { getProjectLink } from '../lib/project.js';
 import { scanProject } from '../lib/detector.js';
-import { generateContext } from '../lib/context-generator.js';
+import { buildContextIR } from '../lib/context-ir.js';
+import { renderContext, RENDER_TARGETS } from '../lib/renderers.js';
+import type { RenderTarget } from '../lib/renderers.js';
 import { formatScanResult } from '../lib/formatters.js';
 import type { OutputFormat } from '../lib/formatters.js';
 import { error, dim } from '../lib/display.js';
@@ -16,6 +18,7 @@ export interface ScanOptions {
   generateContext?: boolean;
   output?: string;
   format?: OutputFormat;
+  target?: RenderTarget;
 }
 
 function progressBar(pct: number, width = 20): string {
@@ -209,9 +212,12 @@ export async function scanCommand(options: ScanOptions = {}): Promise<void> {
 
     // Generate context file
     if (options.generateContext) {
-      const outputFile = options.output ?? 'CLAUDE.md';
-      const content = generateContext(scan, tasks, projectName);
+      const target: RenderTarget = options.target ?? 'claude';
+      const outputFile = options.output ?? RENDER_TARGETS[target];
+      const ir = buildContextIR(scan, tasks, projectName);
+      const content = renderContext(ir, target);
       const outputPath = join(process.cwd(), outputFile);
+      await mkdir(dirname(outputPath), { recursive: true });
       await writeFile(outputPath, content, 'utf-8');
       console.log(chalk.green(`  Generated: ${outputFile}`));
       console.log('');

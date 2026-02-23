@@ -12,6 +12,9 @@ import { startCommand } from './commands/start.js';
 import { listCommand } from './commands/list.js';
 import { scanCommand } from './commands/scan.js';
 import type { ScanOptions } from './commands/scan.js';
+import { watchCommand } from './commands/watch.js';
+import type { WatchOptions } from './commands/watch.js';
+import { mcpServeCommand } from './commands/mcp-serve.js';
 import { OrbitError } from './lib/errors.js';
 import type { TaskPriority, TaskStatus } from './types.js';
 
@@ -91,9 +94,27 @@ program
   .command('scan')
   .description('Scan project and show overview')
   .option('-g, --generate-context', 'Generate AI context file from scan results')
-  .option('-o, --output <file>', 'Output file for context (default: CLAUDE.md)')
+  .option('-o, --output <file>', 'Output file for context (default: auto by target)')
   .option('-f, --format <format>', 'Output format: json, yaml, or markdown')
+  .option('-t, --target <target>', 'Context target: claude, cursor, copilot, windsurf (default: claude)')
   .action((options: ScanOptions) => scanCommand(options));
+
+// --- Watch ---
+
+program
+  .command('watch')
+  .description('Watch for file changes and auto-regenerate context')
+  .option('-o, --output <file>', 'Output file (default: auto by target)')
+  .option('-t, --target <target>', 'Context target: claude, cursor, copilot, windsurf (default: claude)')
+  .option('--debounce <ms>', 'Debounce interval in ms (default: 2000)')
+  .action((options: WatchOptions) => watchCommand(options));
+
+// --- MCP ---
+
+program
+  .command('mcp-serve')
+  .description('Start MCP server for AI tool integration (stdio)')
+  .action(() => mcpServeCommand());
 
 // --- Error handling ---
 
