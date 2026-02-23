@@ -166,7 +166,10 @@
       "copied": "Copied",
       "copyError": "Copy failed",
       "close": "Close",
-      "jsonProOnly": "JSON export requires Pro plan"
+      "jsonProOnly": "JSON export requires Pro plan",
+      "markdownFormat": "Markdown",
+      "jsonFormat": "JSON",
+      "proBadge": "Pro"
     }
   },
   "task": {
@@ -449,7 +452,8 @@
     "importing": "Importing...",
     "sourceManual": "Manual",
     "button": "Import",
-    "freeLimit": "Free plan: up to 3 imports per month"
+    "freeLimit": "Free plan: up to 3 imports per month",
+    "freeBadge": "Free"
   },
   "pricing": {
     "mostPopular": "Most Popular",
@@ -503,6 +507,9 @@
     "notEnough": "Need at least 2 scans to compare. Run orbit scan again to create a second snapshot.",
     "before": "Before",
     "after": "After",
-    "noDifferences": "No differences found between selected snapshots"
+    "noDifferences": "No differences found between selected snapshots",
+    "added": "Added",
+    "removed": "Removed",
+    "changed": "Changed"
   }
 }

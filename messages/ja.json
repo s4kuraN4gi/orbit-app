@@ -167,7 +167,10 @@
       "copied": "コピーしました",
       "copyError": "コピーに失敗しました",
       "close": "閉じる",
-      "jsonProOnly": "JSONエクスポートにはProプランが必要です"
+      "jsonProOnly": "JSONエクスポートにはProプランが必要です",
+      "markdownFormat": "Markdown",
+      "jsonFormat": "JSON",
+      "proBadge": "Pro"
     }
   },
   "task": {
@@ -450,7 +453,8 @@
     "importing": "インポート中...",
     "sourceManual": "手動",
     "button": "インポート",
-    "freeLimit": "Freeプラン: 月3回まで"
+    "freeLimit": "Freeプラン: 月3回まで",
+    "freeBadge": "Free"
   },
   "pricing": {
     "mostPopular": "人気No.1",
@@ -504,6 +508,9 @@
     "notEnough": "比較するには2回以上のスキャンが必要です。orbit scan を再実行してください。",
     "before": "変更前",
     "after": "変更後",
-    "noDifferences": "選択したスナップショット間に差分はありません"
+    "noDifferences": "選択したスナップショット間に差分はありません",
+    "added": "追加",
+    "removed": "削除",
+    "changed": "変更"
   }
 }

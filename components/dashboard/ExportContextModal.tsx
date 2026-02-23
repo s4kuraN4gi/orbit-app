@@ -93,15 +93,15 @@ export function ExportContextModal({ isOpen, onClose, tasks, projectName, planTi
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="markdown">Markdown</SelectItem>
+                  <SelectItem value="markdown">{t('markdownFormat')}</SelectItem>
                   {planTier !== 'free' && (
-                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="json">{t('jsonFormat')}</SelectItem>
                   )}
                 </SelectContent>
               </Select>
               {planTier === 'free' && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  JSON <Badge variant="secondary" className="text-[10px] px-1 py-0">Pro</Badge>
+                  {t('jsonFormat')} <Badge variant="secondary" className="text-[10px] px-1 py-0">{t('proBadge')}</Badge>
                 </p>
               )}
             </div>

@@ -143,7 +143,7 @@ export function ImportPlanModal({ isOpen, onClose, projectId, planTier = 'free' 
             {t('description')}
             {planTier === 'free' && (
               <span className="block mt-1 text-xs">
-                <Badge variant="secondary" className="text-[10px]">Free</Badge>{' '}
+                <Badge variant="secondary" className="text-[10px]">{t('freeBadge')}</Badge>{' '}
                 {t('freeLimit')}
               </span>
             )}

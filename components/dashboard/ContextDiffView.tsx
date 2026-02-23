@@ -88,9 +88,9 @@ function formatSnapshotDate(iso: string) {
   });
 }
 
-function DiffBadge({ type }: { type: DiffItem['type'] }) {
+function DiffBadge({ type, t }: { type: DiffItem['type']; t: (key: string) => string }) {
   const variant = type === 'added' ? 'default' : type === 'removed' ? 'destructive' : 'secondary';
-  const label = type === 'added' ? 'Added' : type === 'removed' ? 'Removed' : 'Changed';
+  const label = t(type);
   return <Badge variant={variant} className="text-xs">{label}</Badge>;
 }
 
@@ -180,7 +180,7 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
             <div className="space-y-2">
               {diffs.map((diff) => (
                 <div key={diff.key} className="flex items-center gap-2 p-2 rounded border text-sm">
-                  <DiffBadge type={diff.type} />
+                  <DiffBadge type={diff.type} t={t} />
                   <span className="font-mono text-xs">{diff.key}</span>
                   {diff.type === 'changed' && (
                     <span className="text-muted-foreground ml-auto text-xs">

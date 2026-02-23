@@ -346,6 +346,6 @@ CREATE TABLE usage (
 | Phase 0: Security Hotfix | 3日 | [x] 完了 | 2026-02-22 |
 | Phase 1: CLI OSS + scan 認証不要化 | 1週間 | [x] 完了 | 2026-02-22 |
 | Phase 2: LP 英語化 + 削除 + detector 強化 | 1.5週間 | [x] 完了 | 2026-02-22 |
-| Phase 3: Web UI ピボット + Pricing | 2週間 | [ ] 未着手 | |
+| Phase 3: Web UI ピボット + Pricing | 2週間 | [x] 完了 | 2026-02-23 |
 | Phase 4: MCP Server + orbit watch | 2週間 | [ ] 未着手 | |
 | Phase 5: Stripe 課金 + Team | 2週間 | [ ] 未着手 | |
