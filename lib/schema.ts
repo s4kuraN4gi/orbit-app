@@ -34,6 +34,7 @@ export const session = pgTable('session', {
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
+  activeOrganizationId: text('active_organization_id'),
 });
 
 export const account = pgTable('account', {
@@ -64,6 +65,47 @@ export const verification = pgTable('verification', {
 });
 
 // --------------------------------------------------------
+// Better Auth organization plugin tables
+// --------------------------------------------------------
+
+export const organization = pgTable('organization', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  logo: text('logo'),
+  metadata: text('metadata'),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at'),
+});
+
+export const member = pgTable('member', {
+  id: text('id').primaryKey(),
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organization.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  role: text('role').notNull().default('member'),
+  createdAt: timestamp('created_at').notNull(),
+});
+
+export const invitation = pgTable('invitation', {
+  id: text('id').primaryKey(),
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organization.id, { onDelete: 'cascade' }),
+  email: text('email').notNull(),
+  role: text('role').notNull(),
+  status: text('status').notNull().default('pending'),
+  expiresAt: timestamp('expires_at'),
+  createdAt: timestamp('created_at').notNull(),
+  inviterId: text('inviter_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+});
+
+// --------------------------------------------------------
 // App tables
 // --------------------------------------------------------
 
@@ -74,6 +116,9 @@ export const projects = pgTable('projects', {
   ownerId: text('owner_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
+  organizationId: text('organization_id').references(() => organization.id, {
+    onDelete: 'set null',
+  }),
   localPath: text('local_path'),
   scanData: jsonb('scan_data'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -145,4 +190,63 @@ export const scanSnapshots = pgTable('scan_snapshots', {
     .references(() => projects.id, { onDelete: 'cascade' }),
   scanData: jsonb('scan_data').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
+// --------------------------------------------------------
+// Stripe billing tables
+// --------------------------------------------------------
+
+export const subscriptions = pgTable('subscriptions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  plan: text('plan').notNull().default('free'),
+  stripeCustomerId: text('stripe_customer_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  stripePriceId: text('stripe_price_id'),
+  status: text('status').notNull().default('active'),
+  currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const orgSubscriptions = pgTable('org_subscriptions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  organizationId: text('organization_id')
+    .notNull()
+    .unique()
+    .references(() => organization.id, { onDelete: 'cascade' }),
+  plan: text('plan').notNull().default('team'),
+  stripeCustomerId: text('stripe_customer_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  stripePriceId: text('stripe_price_id'),
+  quantity: integer('quantity').notNull().default(1),
+  status: text('status').notNull().default('active'),
+  currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const usage = pgTable(
+  'usage',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    feature: text('feature').notNull(),
+    month: text('month').notNull(), // "2026-02" format
+    count: integer('count').notNull().default(0),
+  },
+  (t) => [unique('usage_user_feature_month').on(t.userId, t.feature, t.month)]
+);
+
+export const webhookEvents = pgTable('webhook_events', {
+  id: text('id').primaryKey(), // Stripe event.id for idempotency
+  type: text('type').notNull(),
+  processedAt: timestamp('processed_at', { withTimezone: true }).defaultNow(),
 });

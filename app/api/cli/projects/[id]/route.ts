@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { projects } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
-import { authenticateRequest } from '../../auth';
+import { authenticateRequest, checkProjectAccess } from '../../auth';
 
 export async function PATCH(
   request: Request,
@@ -15,16 +15,8 @@ export async function PATCH(
 
   const { id } = await params;
 
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, id));
-
+  const project = await checkProjectAccess(session.user.id, id);
   if (!project) {
-    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
-  }
-
-  if (project.ownerId !== session.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -43,6 +35,7 @@ export async function PATCH(
       name: updated.name,
       key: updated.key,
       owner_id: updated.ownerId,
+      organization_id: updated.organizationId,
       local_path: updated.localPath,
       created_at: updated.createdAt?.toISOString() ?? '',
     },

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { projects, scanSnapshots } from '@/lib/schema';
 import { eq, asc } from 'drizzle-orm';
-import { authenticateRequest } from '../../../auth';
+import { authenticateRequest, checkProjectAccess } from '../../../auth';
 
 export async function PUT(
   request: Request,
@@ -15,16 +15,8 @@ export async function PUT(
 
   const { id } = await params;
 
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, id));
-
+  const project = await checkProjectAccess(session.user.id, id);
   if (!project) {
-    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
-  }
-
-  if (project.ownerId !== session.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

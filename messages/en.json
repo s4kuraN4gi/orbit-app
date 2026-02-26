@@ -325,6 +325,16 @@
       "closeModal": "Close Modal",
       "showShortcuts": "Show Shortcuts"
     },
+    "subscription": {
+      "title": "Subscription",
+      "desc": "Manage your plan and billing",
+      "currentPlan": "Current Plan",
+      "upgrade": "Upgrade",
+      "manage": "Manage Subscription",
+      "renewsOn": "Renews on",
+      "canceling": "Canceling at period end",
+      "portalError": "Failed to open billing portal"
+    },
     "notifications": {
       "title": "Notification Settings",
       "desc": "Configure browser notifications",
@@ -474,8 +484,10 @@
       "feature3": "Unlimited context history",
       "feature4": "JSON & custom export",
       "feature5": "Context Diff view",
-      "cta": "Coming Soon"
+      "cta": "Upgrade to Pro"
     },
+    "currentPlan": "Current Plan",
+    "processing": "Processing...",
     "team": {
       "name": "Team",
       "period": "/ user / month",
@@ -484,8 +496,9 @@
       "feature3": "Shared project contexts",
       "feature4": "Admin dashboard",
       "feature5": "Priority support",
-      "cta": "Coming Soon"
-    }
+      "cta": "Upgrade to Team"
+    },
+    "checkoutSuccess": "Subscription activated! Welcome to {plan}."
   },
   "gate": {
     "title": "Pro Feature",
@@ -511,5 +524,65 @@
     "added": "Added",
     "removed": "Removed",
     "changed": "Changed"
+  },
+  "team": {
+    "title": "Team",
+    "desc": "Create and manage your teams",
+    "loading": "Loading teams...",
+    "createTeam": "Create Team",
+    "teamName": "Team Name",
+    "teamNamePlaceholder": "e.g. My Team",
+    "teamSlug": "Slug (URL)",
+    "teamSlugPlaceholder": "e.g. my-team",
+    "create": "Create",
+    "cancel": "Cancel",
+    "createSuccess": "Team created",
+    "createError": "Failed to create team",
+    "selectTeam": "Select Team",
+    "noTeams": "No teams yet. Create one to collaborate.",
+    "members": "Members",
+    "pendingInvitations": "Pending Invitations",
+    "inviteMember": "Invite Member",
+    "inviteEmailPlaceholder": "member@example.com",
+    "invite": "Invite",
+    "inviteSuccess": "Invitation created",
+    "inviteError": "Failed to create invitation",
+    "linkCopied": "Link copied to clipboard",
+    "linkCopyError": "Failed to copy link",
+    "copyLink": "Copy",
+    "removeMemberConfirm": "Are you sure you want to remove this member?",
+    "memberRemoved": "Member removed",
+    "removeMemberError": "Failed to remove member",
+    "roleUpdated": "Role updated",
+    "roleUpdateError": "Failed to update role",
+    "cancelInvitation": "Cancel",
+    "invitationCanceled": "Invitation canceled",
+    "invitationCancelError": "Failed to cancel invitation",
+    "billing": "Team Billing",
+    "subscribeTeam": "Subscribe Team Plan",
+    "manageBilling": "Manage Billing",
+    "billingError": "Failed to open billing portal",
+    "ownerLabel": "Owner",
+    "personal": "Personal",
+    "role": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    }
+  },
+  "invite": {
+    "title": "Team Invitation",
+    "description": "You've been invited to join {org}",
+    "invitedAs": "You will join as",
+    "accept": "Accept",
+    "decline": "Decline",
+    "accepting": "Accepting...",
+    "acceptSuccess": "Invitation accepted! Welcome to the team.",
+    "acceptError": "Failed to accept invitation",
+    "rejectSuccess": "Invitation declined",
+    "rejectError": "Failed to decline invitation",
+    "wrongAccount": "Different account signed in",
+    "wrongAccountDesc": "This invitation is for {invited}, but you are signed in as {current}. Please switch accounts.",
+    "switchAccount": "Sign out and switch account"
   }
 }

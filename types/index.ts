@@ -2,11 +2,36 @@ export type TaskStatus = "todo" | "in_progress" | "done";
 export type TaskPriority = "low" | "medium" | "high";
 export type PlanTier = 'free' | 'pro' | 'team';
 
+export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'incomplete';
+export type OrgRole = 'owner' | 'admin' | 'member';
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  createdAt: string;
+}
+
+export interface OrgMember {
+  id: string;
+  organizationId: string;
+  userId: string;
+  role: OrgRole;
+  user: {
+    name: string;
+    email: string;
+    image?: string | null;
+  };
+  createdAt: string;
+}
+
 export interface PlanLimits {
   tier: PlanTier;
   maxProjects: number;
   maxTasksPerProject: number;
   maxContextHistory: number;
+  maxImportsPerMonth: number;
   exportFormats: ('markdown' | 'json' | 'custom')[];
   contextDiff: boolean;
 }
@@ -28,6 +53,7 @@ export interface Project {
   name: string;
   key: string; // "ORB" etc.
   owner_id: string;
+  organization_id?: string | null;
   local_path?: string | null; // CLI linked directory path
 }
 

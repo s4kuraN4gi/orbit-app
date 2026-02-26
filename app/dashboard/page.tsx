@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { projects, tasks, aiContexts } from '@/lib/schema';
-import { eq, desc, asc } from 'drizzle-orm';
+import { projects, tasks, aiContexts, member, organization } from '@/lib/schema';
+import { eq, desc, asc, or, inArray } from 'drizzle-orm';
 import { DashboardView } from '@/components/dashboard/DashboardView';
 import { Task } from '@/types';
 import { getUserSettings } from '@/app/actions/settings';
@@ -37,7 +37,7 @@ function buildTaskTree(taskList: Task[]): Task[] {
 export const dynamic = 'force-dynamic';
 
 interface DashboardPageProps {
-  searchParams: Promise<{ projectId?: string }>;
+  searchParams: Promise<{ projectId?: string; checkout?: string }>;
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
@@ -57,11 +57,39 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     getUserPlan(),
   ]);
 
-  // Fetch All Projects for the user
+  // Get org IDs user belongs to
+  const memberships = await db
+    .select({ organizationId: member.organizationId })
+    .from(member)
+    .where(eq(member.userId, user.id));
+
+  const orgIds = memberships.map((m) => m.organizationId);
+
+  // Fetch org names for CreateProjectModal
+  let userOrgs: { id: string; name: string }[] = [];
+  if (orgIds.length > 0) {
+    userOrgs = await db
+      .select({ id: organization.id, name: organization.name })
+      .from(organization)
+      .where(inArray(organization.id, orgIds));
+  }
+
+  // Fetch personal + team projects
+  const projectConditions = [eq(projects.ownerId, user.id)];
+  if (orgIds.length > 0) {
+    projectConditions.push(inArray(projects.organizationId, orgIds));
+  }
+
   const allProjects = await db
-    .select({ id: projects.id, name: projects.name, key: projects.key, scanData: projects.scanData })
+    .select({
+      id: projects.id,
+      name: projects.name,
+      key: projects.key,
+      scanData: projects.scanData,
+      organizationId: projects.organizationId,
+    })
     .from(projects)
-    .where(eq(projects.ownerId, user.id))
+    .where(or(...projectConditions))
     .orderBy(desc(projects.createdAt));
 
   // Determine current project
@@ -85,6 +113,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           projectId=""
           allProjects={[]}
           planTier={planLimits.tier}
+          organizations={userOrgs}
         />
       </main>
     );
@@ -140,6 +169,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         scanData={currentProject.scanData}
         planTier={planLimits.tier}
         currentProjectCount={allProjects.length}
+        checkoutSuccess={params.checkout === 'success'}
+        organizations={userOrgs}
       />
     </main>
   );

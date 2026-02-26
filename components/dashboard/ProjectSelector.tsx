@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Plus, FolderKanban, Trash2 } from 'lucide-react';
+import { Plus, FolderKanban, Trash2, Users } from 'lucide-react';
 import { CreateProjectModal } from './CreateProjectModal';
 import { deleteProject } from '@/app/actions/project';
 import { toast } from 'sonner';
@@ -22,6 +22,12 @@ interface Project {
   id: string;
   name: string;
   key: string;
+  organizationId?: string | null;
+}
+
+interface OrgOption {
+  id: string;
+  name: string;
 }
 
 interface ProjectSelectorProps {
@@ -29,9 +35,10 @@ interface ProjectSelectorProps {
   currentProjectId: string;
   onProjectChange: (projectId: string) => void;
   planTier?: PlanTier;
+  organizations?: OrgOption[];
 }
 
-export function ProjectSelector({ projects, currentProjectId, onProjectChange, planTier }: ProjectSelectorProps) {
+export function ProjectSelector({ projects, currentProjectId, onProjectChange, planTier, organizations }: ProjectSelectorProps) {
   const router = useRouter();
   const t = useTranslations('project');
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
@@ -43,14 +50,14 @@ export function ProjectSelector({ projects, currentProjectId, onProjectChange, p
 
   const handleDeleteProject = async () => {
     if (!currentProjectId) return;
-    
+
     const currentProject = projects.find(p => p.id === currentProjectId);
     if (!currentProject) return;
 
     const confirmed = confirm(
       t('deleteConfirm', { name: currentProject.name })
     );
-    
+
     if (!confirmed) return;
 
     setIsDeleting(true);
@@ -77,7 +84,12 @@ export function ProjectSelector({ projects, currentProjectId, onProjectChange, p
         <SelectContent>
           {projects.map((project) => (
             <SelectItem key={project.id} value={project.id}>
-              [{project.key}] {project.name}
+              <span className="flex items-center gap-1.5">
+                [{project.key}] {project.name}
+                {project.organizationId && (
+                  <Users className="h-3 w-3 text-muted-foreground" />
+                )}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -109,6 +121,7 @@ export function ProjectSelector({ projects, currentProjectId, onProjectChange, p
         onProjectCreated={handleProjectCreated}
         planTier={planTier}
         currentProjectCount={projects.length}
+        organizations={organizations}
       />
     </div>
   );

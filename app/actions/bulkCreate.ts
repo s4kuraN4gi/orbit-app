@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { tasks, aiContexts } from '@/lib/schema';
 import { requireProjectOwner } from '@/lib/auth-helpers';
+import { getSubscriptionPlan, getUsageCount, incrementUsage } from '@/lib/subscription';
+import { getPlanLimits } from '@/lib/plan-client';
 
 interface TaskInput {
   title: string;
@@ -58,7 +60,17 @@ export async function bulkCreateTasks(
   }
 
   // Auth + Authorization: verify project ownership
-  await requireProjectOwner(input.project_id);
+  const { user } = await requireProjectOwner(input.project_id);
+
+  // Usage limit check for Free plan
+  const plan = await getSubscriptionPlan(user.id);
+  const limits = getPlanLimits(plan);
+  if (limits.maxImportsPerMonth !== Infinity) {
+    const currentUsage = await getUsageCount(user.id, 'import_plan');
+    if (currentUsage >= limits.maxImportsPerMonth) {
+      return { success: false, error: `Free plan limit: ${limits.maxImportsPerMonth} imports per month` };
+    }
+  }
 
   try {
     // 1. Create AI Context
@@ -78,6 +90,9 @@ export async function bulkCreateTasks(
 
     // 2. Insert Tasks Recursively
     await insertTasks(input.tasks, input.project_id, aiContext.id, null);
+
+    // 3. Increment usage counter
+    await incrementUsage(user.id, 'import_plan');
 
     revalidatePath('/dashboard');
 

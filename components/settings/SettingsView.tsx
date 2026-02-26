@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Moon, Sun, Monitor, Palette, Keyboard, User, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Monitor, Palette, Keyboard, User, Bell, BellOff, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { updateUserSettings } from '@/app/actions/settings';
 import { UserSettings, defaultColors, CustomColors, ThemeColors } from '@/lib/theme';
@@ -16,10 +17,23 @@ import { ThemePreview } from './ThemePreview';
 import { useTheme } from '@/components/ThemeProvider';
 import { useTranslations } from 'next-intl';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
+import type { PlanTier } from '@/types';
+import { format } from 'date-fns';
+import { TeamSettings } from './TeamSettings';
+
+interface SubscriptionInfo {
+  status: string;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  hasStripeCustomer: boolean;
+}
 
 interface SettingsViewProps {
   initialSettings: UserSettings | null;
   userEmail: string;
+  userId: string;
+  currentPlan?: PlanTier;
+  subscription?: SubscriptionInfo | null;
 }
 
 const colorKeys: (keyof ThemeColors)[] = [
@@ -27,7 +41,7 @@ const colorKeys: (keyof ThemeColors)[] = [
   'card', 'accent', 'destructive', 'muted', 'border'
 ];
 
-export function SettingsView({ initialSettings, userEmail }: SettingsViewProps) {
+export function SettingsView({ initialSettings, userEmail, userId, currentPlan = 'free', subscription }: SettingsViewProps) {
   const t = useTranslations('settings');
   const tCommon = useTranslations('common');
   const tDashboard = useTranslations('dashboard');
@@ -44,6 +58,25 @@ export function SettingsView({ initialSettings, userEmail }: SettingsViewProps) 
 
   // Notification hook
   const { permission, isSupported, requestPermission } = useTaskNotifications();
+
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(t('subscription.portalError'));
+      }
+    } catch {
+      toast.error(t('subscription.portalError'));
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   const handleEnableNotifications = async () => {
     const result = await requestPermission();
@@ -238,6 +271,57 @@ export function SettingsView({ initialSettings, userEmail }: SettingsViewProps) 
             </div>
           </CardContent>
         </Card>
+
+        {/* Subscription */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              <CardTitle>{t('subscription.title')}</CardTitle>
+            </div>
+            <CardDescription>{t('subscription.desc')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>{t('subscription.currentPlan')}</Label>
+                <div className="flex items-center gap-2">
+                  <Badge variant={currentPlan === 'free' ? 'secondary' : 'default'}>
+                    {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
+                  </Badge>
+                  {subscription?.cancelAtPeriodEnd && (
+                    <span className="text-sm text-muted-foreground">{t('subscription.canceling')}</span>
+                  )}
+                </div>
+              </div>
+              {currentPlan === 'free' ? (
+                <Link href="/pricing">
+                  <Button>{t('subscription.upgrade')}</Button>
+                </Link>
+              ) : subscription?.hasStripeCustomer ? (
+                <Button
+                  variant="outline"
+                  onClick={handleManageSubscription}
+                  disabled={portalLoading}
+                >
+                  {portalLoading ? t('saving') : t('subscription.manage')}
+                </Button>
+              ) : null}
+            </div>
+            {subscription?.currentPeriodEnd && currentPlan !== 'free' && (
+              <>
+                <Separator />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('subscription.renewsOn')}</span>
+                  <span>{format(new Date(subscription.currentPeriodEnd), 'yyyy/MM/dd')}</span>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Team */}
+        <TeamSettings userId={userId} />
 
         {/* Custom Colors */}
         <Card>

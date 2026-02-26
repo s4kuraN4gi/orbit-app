@@ -326,6 +326,16 @@
       "closeModal": "モーダルを閉じる",
       "showShortcuts": "ショートカット一覧"
     },
+    "subscription": {
+      "title": "サブスクリプション",
+      "desc": "プランと請求を管理",
+      "currentPlan": "現在のプラン",
+      "upgrade": "アップグレード",
+      "manage": "サブスクリプション管理",
+      "renewsOn": "更新日",
+      "canceling": "期間終了時にキャンセル",
+      "portalError": "請求ポータルを開けませんでした"
+    },
     "notifications": {
       "title": "通知設定",
       "desc": "ブラウザ通知の設定",
@@ -475,8 +485,10 @@
       "feature3": "コンテキスト履歴無制限",
       "feature4": "JSON・カスタムエクスポート",
       "feature5": "Context Diff ビュー",
-      "cta": "近日公開"
+      "cta": "Proにアップグレード"
     },
+    "currentPlan": "現在のプラン",
+    "processing": "処理中...",
     "team": {
       "name": "Team",
       "period": "/ ユーザー / 月",
@@ -485,8 +497,9 @@
       "feature3": "プロジェクトコンテキスト共有",
       "feature4": "管理者ダッシュボード",
       "feature5": "優先サポート",
-      "cta": "近日公開"
-    }
+      "cta": "Teamにアップグレード"
+    },
+    "checkoutSuccess": "サブスクリプションが有効になりました！{plan}プランへようこそ。"
   },
   "gate": {
     "title": "Pro機能",
@@ -512,5 +525,65 @@
     "added": "追加",
     "removed": "削除",
     "changed": "変更"
+  },
+  "team": {
+    "title": "チーム",
+    "desc": "チームの作成と管理",
+    "loading": "チームを読み込み中...",
+    "createTeam": "チーム作成",
+    "teamName": "チーム名",
+    "teamNamePlaceholder": "例: マイチーム",
+    "teamSlug": "スラッグ（URL）",
+    "teamSlugPlaceholder": "例: my-team",
+    "create": "作成",
+    "cancel": "キャンセル",
+    "createSuccess": "チームを作成しました",
+    "createError": "チームの作成に失敗しました",
+    "selectTeam": "チームを選択",
+    "noTeams": "チームはまだありません。作成してコラボレーションしましょう。",
+    "members": "メンバー",
+    "pendingInvitations": "保留中の招待",
+    "inviteMember": "メンバーを招待",
+    "inviteEmailPlaceholder": "member@example.com",
+    "invite": "招待",
+    "inviteSuccess": "招待を作成しました",
+    "inviteError": "招待の作成に失敗しました",
+    "linkCopied": "リンクをクリップボードにコピーしました",
+    "linkCopyError": "リンクのコピーに失敗しました",
+    "copyLink": "コピー",
+    "removeMemberConfirm": "このメンバーを削除してもよろしいですか？",
+    "memberRemoved": "メンバーを削除しました",
+    "removeMemberError": "メンバーの削除に失敗しました",
+    "roleUpdated": "ロールを更新しました",
+    "roleUpdateError": "ロールの更新に失敗しました",
+    "cancelInvitation": "取消",
+    "invitationCanceled": "招待をキャンセルしました",
+    "invitationCancelError": "招待のキャンセルに失敗しました",
+    "billing": "チーム課金",
+    "subscribeTeam": "Teamプランに登録",
+    "manageBilling": "課金を管理",
+    "billingError": "課金ポータルを開けませんでした",
+    "ownerLabel": "所有者",
+    "personal": "個人",
+    "role": {
+      "owner": "オーナー",
+      "admin": "管理者",
+      "member": "メンバー"
+    }
+  },
+  "invite": {
+    "title": "チーム招待",
+    "description": "{org}に招待されています",
+    "invitedAs": "参加ロール",
+    "accept": "承認",
+    "decline": "辞退",
+    "accepting": "承認中...",
+    "acceptSuccess": "招待を承認しました！チームへようこそ。",
+    "acceptError": "招待の承認に失敗しました",
+    "rejectSuccess": "招待を辞退しました",
+    "rejectError": "招待の辞退に失敗しました",
+    "wrongAccount": "別のアカウントでログイン中です",
+    "wrongAccountDesc": "この招待は {invited} 宛ですが、現在 {current} でログインしています。アカウントを切り替えてください。",
+    "switchAccount": "ログアウトしてアカウントを切り替え"
   }
 }

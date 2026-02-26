@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { projects } from '@/lib/schema';
-import { eq, desc } from 'drizzle-orm';
+import { projects, member } from '@/lib/schema';
+import { eq, desc, or, inArray } from 'drizzle-orm';
 import { authenticateRequest } from '../auth';
 
 export async function GET(request: Request) {
@@ -10,10 +10,26 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const userId = session.user.id;
+
+  // Get org IDs user belongs to
+  const memberships = await db
+    .select({ organizationId: member.organizationId })
+    .from(member)
+    .where(eq(member.userId, userId));
+
+  const orgIds = memberships.map((m) => m.organizationId);
+
+  // Fetch personal + team projects
+  const conditions = [eq(projects.ownerId, userId)];
+  if (orgIds.length > 0) {
+    conditions.push(inArray(projects.organizationId, orgIds));
+  }
+
   const data = await db
     .select()
     .from(projects)
-    .where(eq(projects.ownerId, session.user.id))
+    .where(or(...conditions))
     .orderBy(desc(projects.createdAt));
 
   return NextResponse.json({
@@ -22,6 +38,7 @@ export async function GET(request: Request) {
       name: p.name,
       key: p.key,
       owner_id: p.ownerId,
+      organization_id: p.organizationId,
       local_path: p.localPath,
       created_at: p.createdAt?.toISOString() ?? '',
     })),

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { tasks, projects } from '@/lib/schema';
+import { tasks } from '@/lib/schema';
 import { eq, sql } from 'drizzle-orm';
-import { authenticateRequest } from '../../../auth';
+import { authenticateRequest, checkProjectAccess } from '../../../auth';
 
 export async function PATCH(
   request: Request,
@@ -43,13 +43,9 @@ export async function PATCH(
 
   const task = matchingTasks[0];
 
-  // Verify project ownership
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, task.projectId));
-
-  if (!project || project.ownerId !== session.user.id) {
+  // Verify project access (personal or team)
+  const project = await checkProjectAccess(session.user.id, task.projectId);
+  if (!project) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

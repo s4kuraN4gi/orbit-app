@@ -27,11 +27,18 @@ import { ExportContextModal } from './ExportContextModal';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
 import { IdeaBox } from './IdeaBox';
 import { ImportPlanModal } from './ImportPlanModal';
+import { toast } from 'sonner';
 
 interface Project {
   id: string;
   name: string;
   key: string;
+  organizationId?: string | null;
+}
+
+interface OrgOption {
+  id: string;
+  name: string;
 }
 
 interface DashboardViewProps {
@@ -44,6 +51,8 @@ interface DashboardViewProps {
   scanData?: any;
   planTier?: PlanTier;
   currentProjectCount?: number;
+  checkoutSuccess?: boolean;
+  organizations?: OrgOption[];
 }
 
 // Recursive filter function for hierarchical tasks
@@ -88,7 +97,7 @@ function filterTasks(
   }, []);
 }
 
-export function DashboardView({ initialTasks, projectName, projectId, allProjects, defaultView = 'overview', currentUserEmail, scanData, planTier = 'free', currentProjectCount }: DashboardViewProps) {
+export function DashboardView({ initialTasks, projectName, projectId, allProjects, defaultView = 'overview', currentUserEmail, scanData, planTier = 'free', currentProjectCount, checkoutSuccess, organizations = [] }: DashboardViewProps) {
   const router = useRouter();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
@@ -126,6 +135,17 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
     }
   }, [permission, initialTasks, checkOverdueTasks]);
 
+  // Checkout success notification
+  useEffect(() => {
+    if (checkoutSuccess) {
+      toast.success(`Subscription activated! Welcome to ${planTier}.`);
+      // Clean up URL param
+      const url = new URL(window.location.href);
+      url.searchParams.delete('checkout');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [checkoutSuccess, planTier]);
+
   const handleProjectChange = (newProjectId: string) => {
     router.push(`/dashboard?projectId=${newProjectId}`);
   };
@@ -158,6 +178,7 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
             currentProjectId={projectId}
             onProjectChange={handleProjectChange}
             planTier={planTier}
+            organizations={organizations}
           />
         </div>
         <div className="flex items-center gap-2">

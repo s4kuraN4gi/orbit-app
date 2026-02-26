@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createProject } from '@/app/actions/project';
 import { toast } from 'sonner';
 
@@ -19,20 +20,35 @@ import { useTranslations } from 'next-intl';
 import { PricingGate } from './PricingGate';
 import type { PlanTier } from '@/types';
 
+interface OrgOption {
+  id: string;
+  name: string;
+}
+
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onProjectCreated: (projectId: string) => void;
   planTier?: PlanTier;
   currentProjectCount?: number;
+  organizations?: OrgOption[];
 }
 
-export function CreateProjectModal({ isOpen, onClose, onProjectCreated, planTier = 'free', currentProjectCount = 0 }: CreateProjectModalProps) {
+export function CreateProjectModal({
+  isOpen,
+  onClose,
+  onProjectCreated,
+  planTier = 'free',
+  currentProjectCount = 0,
+  organizations = [],
+}: CreateProjectModalProps) {
   const t = useTranslations('project');
+  const tTeam = useTranslations('team');
   const tCommon = useTranslations('common');
   const [isLoading, setIsLoading] = React.useState(false);
   const [name, setName] = React.useState('');
   const [key, setKey] = React.useState('');
+  const [selectedOrgId, setSelectedOrgId] = React.useState<string>('personal');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,10 +63,12 @@ export function CreateProjectModal({ isOpen, onClose, onProjectCreated, planTier
 
     setIsLoading(true);
     try {
-      const project = await createProject(name, key);
+      const orgId = selectedOrgId === 'personal' ? null : selectedOrgId;
+      const project = await createProject(name, key, orgId);
       toast.success(t('createSuccess'));
       setName('');
       setKey('');
+      setSelectedOrgId('personal');
       onClose();
       onProjectCreated(project.id);
     } catch (error) {
@@ -97,6 +115,24 @@ export function CreateProjectModal({ isOpen, onClose, onProjectCreated, planTier
                   {t('keyHelper')}
                 </p>
               </div>
+              {organizations.length > 0 && (
+                <div className="grid gap-2">
+                  <Label>{tTeam('ownerLabel')}</Label>
+                  <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="personal">{tTeam('personal')}</SelectItem>
+                      {organizations.map((org) => (
+                        <SelectItem key={org.id} value={org.id}>
+                          {org.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>

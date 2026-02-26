@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -7,8 +8,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { PricingTable } from '@/components/PricingTable';
+import { auth } from '@/lib/auth';
+import { getUserPlan } from '@/lib/plan';
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const planLimits = session ? await getUserPlan() : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       {/* Navigation */}
@@ -23,12 +29,20 @@ export default function PricingPage() {
           <Link href="/pricing">
             <Button variant="ghost">Pricing</Button>
           </Link>
-          <Link href="/login">
-            <Button variant="ghost">Sign in</Button>
-          </Link>
-          <Link href="/login">
-            <Button>Get Started</Button>
-          </Link>
+          {session ? (
+            <Link href="/dashboard">
+              <Button>Dashboard</Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="ghost">Sign in</Button>
+              </Link>
+              <Link href="/login">
+                <Button>Get Started</Button>
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -43,7 +57,10 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <PricingTable />
+        <PricingTable
+          isLoggedIn={!!session}
+          currentPlan={planLimits?.tier ?? 'free'}
+        />
       </section>
 
       {/* FAQ Section */}
@@ -61,11 +78,11 @@ export default function PricingPage() {
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="pro">
-            <AccordionTrigger>When will Pro and Team plans be available?</AccordionTrigger>
+            <AccordionTrigger>What does the Pro plan include?</AccordionTrigger>
             <AccordionContent>
-              Pro and Team plans are coming soon. We&apos;re building the payment
-              infrastructure now. Sign up for the Free plan to be notified when
-              paid plans launch.
+              Pro unlocks unlimited projects, tasks, and context history.
+              You also get JSON &amp; custom export formats and the Context Diff view
+              to track how your project evolves over time.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="cli">
@@ -80,7 +97,7 @@ export default function PricingPage() {
           <AccordionItem value="cancel">
             <AccordionTrigger>Can I cancel anytime?</AccordionTrigger>
             <AccordionContent>
-              Yes. When paid plans launch, you can cancel anytime and your account
+              Yes. You can cancel anytime from your Settings page and your account
               will revert to the Free plan at the end of the billing cycle.
             </AccordionContent>
           </AccordionItem>
