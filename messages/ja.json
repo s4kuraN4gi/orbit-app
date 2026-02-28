@@ -67,7 +67,9 @@
       "board": "ボード",
       "gantt": "ガント",
       "analytics": "分析",
-      "overview": "概要"
+      "overview": "概要",
+      "tasks": "タスク",
+      "context": "コンテキスト"
     },
     "analytics": {
       "totalTasks": "総タスク数",
@@ -309,10 +311,16 @@
       "muted": "薄いテキスト色",
       "border": "ボーダー色"
     },
+    "themeUpdated": "テーマを更新しました",
+    "defaultViewUpdated": "デフォルトビューを更新しました",
+    "languageUpdated": "言語を更新しました",
+    "updateError": "更新に失敗しました",
     "saveSuccess": "設定を保存しました",
     "saveError": "設定の保存に失敗しました",
     "resetColors": "デフォルトに戻す",
     "resetSuccess": "カラー設定をリセットしました",
+    "colorsSaved": "カラー設定を保存しました",
+    "resetError": "リセットに失敗しました",
     "saveColors": "カラー設定を保存",
     "saving": "保存中...",
     "shortcuts": {
@@ -493,13 +501,35 @@
       "name": "Team",
       "period": "/ ユーザー / 月",
       "feature1": "Proの全機能",
-      "feature2": "チームコラボレーション",
-      "feature3": "プロジェクトコンテキスト共有",
-      "feature4": "管理者ダッシュボード",
-      "feature5": "優先サポート",
+      "feature2": "チームメンバー無制限",
+      "feature3": "ロールベースのプロジェクト共有",
+      "feature4": "シート課金（自動調整）",
+      "feature5": "リンクでメンバー招待",
+      "feature6": "Owner / Admin / Member ロール",
       "cta": "Teamにアップグレード"
     },
-    "checkoutSuccess": "サブスクリプションが有効になりました！{plan}プランへようこそ。"
+    "teamDetails": {
+      "title": "AIで開発するチームのために",
+      "subtitle": "Team プランならメンバー全員が共有 AI コンテキストにアクセス — チーム全体の認識を揃えます。",
+      "roles": {
+        "title": "ロールベースのアクセス制御",
+        "desc": "Owner・Admin・Member の3ロール。プロジェクト管理、メンバー招待、設定変更の権限を制御できます。"
+      },
+      "shared": {
+        "title": "プロジェクトコンテキスト共有",
+        "desc": "チーム全員が同じスキャン結果・コンテキスト履歴・Context Diff を確認 — CLAUDE.md の不整合がなくなります。"
+      },
+      "billing": {
+        "title": "シンプルなシート課金",
+        "desc": "メンバー単位の課金。追加・削除に合わせて Stripe が自動調整 — 手動のインボイス管理は不要です。"
+      },
+      "invite": {
+        "title": "ワンクリック招待",
+        "desc": "共有リンクでチームメイトを招待。承認するだけですぐにコラボレーション開始。"
+      }
+    },
+    "checkoutSuccess": "サブスクリプションが有効になりました！{plan}プランへようこそ。",
+    "checkoutError": "チェックアウトセッションの作成に失敗しました"
   },
   "gate": {
     "title": "Pro機能",
@@ -559,6 +589,7 @@
     "cancelInvitation": "取消",
     "invitationCanceled": "招待をキャンセルしました",
     "invitationCancelError": "招待のキャンセルに失敗しました",
+    "checkoutError": "チェックアウトの作成に失敗しました",
     "billing": "チーム課金",
     "subscribeTeam": "Teamプランに登録",
     "manageBilling": "課金を管理",
@@ -582,6 +613,7 @@
     "acceptError": "招待の承認に失敗しました",
     "rejectSuccess": "招待を辞退しました",
     "rejectError": "招待の辞退に失敗しました",
+    "signOutError": "サインアウトに失敗しました",
     "wrongAccount": "別のアカウントでログイン中です",
     "wrongAccountDesc": "この招待は {invited} 宛ですが、現在 {current} でログインしています。アカウントを切り替えてください。",
     "switchAccount": "ログアウトしてアカウントを切り替え"

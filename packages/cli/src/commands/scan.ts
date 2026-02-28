@@ -19,6 +19,8 @@ export interface ScanOptions {
   output?: string;
   format?: OutputFormat;
   target?: RenderTarget;
+  focus?: boolean;
+  issues?: boolean;
 }
 
 function progressBar(pct: number, width = 20): string {
@@ -49,6 +51,7 @@ async function tryGetProjectLink(): Promise<OrbitProjectLink | null> {
 
 export async function scanCommand(options: ScanOptions = {}): Promise<void> {
   const link = await tryGetProjectLink();
+  const scanStart = performance.now();
 
   const spinner = ora('Scanning project...').start();
 
@@ -215,6 +218,14 @@ export async function scanCommand(options: ScanOptions = {}): Promise<void> {
       const target: RenderTarget = options.target ?? 'claude';
       const outputFile = options.output ?? RENDER_TARGETS[target];
       const ir = buildContextIR(scan, tasks, projectName);
+      if (options.issues) {
+        const { fetchExternalIssues } = await import('../lib/issue-providers/index.js');
+        ir.activeWork.externalIssues = await fetchExternalIssues(process.cwd());
+      }
+      if (options.focus) {
+        const { resolveTaskFocus } = await import('../lib/task-focus.js');
+        ir.focusAreas = resolveTaskFocus(tasks, ir);
+      }
       const content = renderContext(ir, target);
       const outputPath = join(process.cwd(), outputFile);
       await mkdir(dirname(outputPath), { recursive: true });
@@ -235,6 +246,9 @@ export async function scanCommand(options: ScanOptions = {}): Promise<void> {
       }
       console.log('');
     }
+    const scanDuration = ((performance.now() - scanStart) / 1000).toFixed(1);
+    console.log(chalk.dim(`  Scan completed in ${scanDuration}s`));
+    console.log('');
   } catch (err: unknown) {
     spinner.stop();
     const message = err instanceof Error ? err.message : String(err);

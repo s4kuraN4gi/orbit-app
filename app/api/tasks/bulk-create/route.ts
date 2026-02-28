@@ -4,7 +4,10 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { tasks, aiContexts, projects } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
+import { rateLimit } from '@/lib/rate-limit';
 import type { Task } from '@/types';
+
+const limiter = rateLimit({ interval: 60_000, maxRequests: 10 });
 
 async function insertTasks(
   taskList: Task[],
@@ -51,6 +54,11 @@ export async function POST(request: Request) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { success } = limiter.check(session.user.id);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const body: BulkCreateRequestBody = await request.json();

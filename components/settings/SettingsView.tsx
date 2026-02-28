@@ -92,9 +92,9 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
     startTransition(async () => {
       try {
         await updateUserSettings({ theme: value });
-        toast.success('テーマを更新しました');
+        toast.success(t('themeUpdated'));
       } catch {
-        toast.error('更新に失敗しました');
+        toast.error(t('updateError'));
       }
     });
   };
@@ -104,9 +104,9 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
     startTransition(async () => {
       try {
         await updateUserSettings({ default_view: value });
-        toast.success('デフォルトビューを更新しました');
+        toast.success(t('defaultViewUpdated'));
       } catch {
-        toast.error('更新に失敗しました');
+        toast.error(t('updateError'));
       }
     });
   };
@@ -118,11 +118,11 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
     startTransition(async () => {
       try {
         await updateUserSettings({ language: value });
-        toast.success(value === 'ja' ? '言語を更新しました' : 'Language updated');
+        toast.success(t('languageUpdated'));
         // Reload page to apply new locale
         window.location.reload();
       } catch {
-        toast.error(value === 'ja' ? '更新に失敗しました' : 'Update failed');
+        toast.error(t('updateError'));
       }
     });
   };
@@ -142,9 +142,9 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
       try {
         await updateUserSettings({ custom_colors: customColors });
         setContextColors(customColors); // Apply colors immediately via context
-        toast.success('カラー設定を保存しました');
+        toast.success(t('colorsSaved'));
       } catch {
-        toast.error('保存に失敗しました');
+        toast.error(t('saveError'));
       }
     });
   };
@@ -155,9 +155,9 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
       try {
         await updateUserSettings({ custom_colors: null });
         setContextColors(null); // Reset colors via context
-        toast.success('カラー設定をリセットしました');
+        toast.success(t('resetSuccess'));
       } catch {
-        toast.error('リセットに失敗しました');
+        toast.error(t('resetError'));
       }
     });
   };

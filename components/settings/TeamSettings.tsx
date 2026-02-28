@@ -227,10 +227,10 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
         if (data.url) {
           window.location.href = data.url;
         } else {
-          toast.error(data.error || 'Failed to create checkout');
+          toast.error(data.error || t('checkoutError'));
         }
       } catch {
-        toast.error('Failed to create checkout');
+        toast.error(t('checkoutError'));
       }
     });
   };

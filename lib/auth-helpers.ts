@@ -3,8 +3,9 @@
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { projects, tasks, member } from '@/lib/schema';
-import { eq, and } from 'drizzle-orm';
+import { tasks } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
+import { verifyProjectAccess } from '@/lib/project-access';
 
 /**
  * Require authenticated user. Throws if not authenticated.
@@ -16,43 +17,15 @@ export async function requireUser() {
 }
 
 /**
- * Check if user is a member of the given organization.
- */
-async function isOrgMember(userId: string, organizationId: string) {
-  const [m] = await db
-    .select({ id: member.id, role: member.role })
-    .from(member)
-    .where(
-      and(eq(member.organizationId, organizationId), eq(member.userId, userId))
-    );
-  return m ?? null;
-}
-
-/**
  * Require access to a project (read/write for member+).
  * Personal project: ownerId check.
  * Team project: member table membership check.
  */
 export async function requireProjectAccess(projectId: string) {
   const user = await requireUser();
-
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, projectId));
-
-  if (!project) throw new Error('Project not found');
-
-  // Team project
-  if (project.organizationId) {
-    const m = await isOrgMember(user.id, project.organizationId);
-    if (!m) throw new Error('Forbidden');
-    return { user, project, role: m.role };
-  }
-
-  // Personal project
-  if (project.ownerId !== user.id) throw new Error('Forbidden');
-  return { user, project, role: 'owner' as const };
+  const result = await verifyProjectAccess(user.id, projectId);
+  if (!result) throw new Error('Forbidden');
+  return { user, project: result.project, role: result.role };
 }
 
 /**
@@ -84,23 +57,10 @@ export async function requireTaskAccess(taskId: string) {
 
   if (!task) throw new Error('Task not found');
 
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, task.projectId));
+  const result = await verifyProjectAccess(user.id, task.projectId);
+  if (!result) throw new Error('Forbidden');
 
-  if (!project) throw new Error('Project not found');
-
-  // Team project
-  if (project.organizationId) {
-    const m = await isOrgMember(user.id, project.organizationId);
-    if (!m) throw new Error('Forbidden');
-    return { user, project, task, role: m.role };
-  }
-
-  // Personal project
-  if (project.ownerId !== user.id) throw new Error('Forbidden');
-  return { user, project, task, role: 'owner' as const };
+  return { user, project: result.project, task, role: result.role };
 }
 
 // Legacy aliases for backward compatibility

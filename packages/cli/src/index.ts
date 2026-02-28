@@ -97,6 +97,8 @@ program
   .option('-o, --output <file>', 'Output file for context (default: auto by target)')
   .option('-f, --format <format>', 'Output format: json, yaml, or markdown')
   .option('-t, --target <target>', 'Context target: claude, cursor, copilot, windsurf (default: claude)')
+  .option('--focus', 'Include task-linked focus areas in context')
+  .option('--issues', 'Include GitHub issues in context')
   .action((options: ScanOptions) => scanCommand(options));
 
 // --- Watch ---
@@ -107,6 +109,7 @@ program
   .option('-o, --output <file>', 'Output file (default: auto by target)')
   .option('-t, --target <target>', 'Context target: claude, cursor, copilot, windsurf (default: claude)')
   .option('--debounce <ms>', 'Debounce interval in ms (default: 2000)')
+  .option('--focus', 'Include task-linked focus areas in context')
   .action((options: WatchOptions) => watchCommand(options));
 
 // --- MCP ---

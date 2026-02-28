@@ -20,6 +20,7 @@ export interface WatchOptions {
   output?: string;
   target?: RenderTarget;
   debounce?: string;
+  focus?: boolean;
 }
 
 async function tryGetProjectLink(): Promise<OrbitProjectLink | null> {
@@ -61,6 +62,10 @@ export async function watchCommand(options: WatchOptions = {}): Promise<void> {
     currentScan = await scanProject(dir);
     const tasks = await fetchTasks(link);
     const ir = buildContextIR(currentScan, tasks, projectName);
+    if (options.focus) {
+      const { resolveTaskFocus } = await import('../lib/task-focus.js');
+      ir.focusAreas = resolveTaskFocus(tasks, ir);
+    }
     lastContent = renderContext(ir, target);
 
     const outputPath = join(dir, outputFile);
@@ -132,6 +137,10 @@ export async function watchCommand(options: WatchOptions = {}): Promise<void> {
       currentScan = await incrementalScan(dir, currentScan, scope);
       const tasks = await fetchTasks(link);
       const ir = buildContextIR(currentScan, tasks, projectName);
+      if (options.focus) {
+        const { resolveTaskFocus } = await import('../lib/task-focus.js');
+        ir.focusAreas = resolveTaskFocus(tasks, ir);
+      }
       const newContent = renderContext(ir, target);
 
       if (newContent !== lastContent) {

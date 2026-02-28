@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
-import { session, user, projects, member } from '@/lib/schema';
-import { eq, and } from 'drizzle-orm';
+import { session, user } from '@/lib/schema';
+import { eq } from 'drizzle-orm';
+import { verifyProjectAccess } from '@/lib/project-access';
 
 export async function authenticateRequest(request: Request) {
   const token = request.headers.get('Authorization')?.replace('Bearer ', '');
@@ -25,28 +26,6 @@ export async function authenticateRequest(request: Request) {
  * Returns project if user has access, null otherwise.
  */
 export async function checkProjectAccess(userId: string, projectId: string) {
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.id, projectId));
-
-  if (!project) return null;
-
-  // Personal project
-  if (!project.organizationId) {
-    return project.ownerId === userId ? project : null;
-  }
-
-  // Team project — check membership
-  const [m] = await db
-    .select({ id: member.id })
-    .from(member)
-    .where(
-      and(
-        eq(member.organizationId, project.organizationId),
-        eq(member.userId, userId)
-      )
-    );
-
-  return m ? project : null;
+  const result = await verifyProjectAccess(userId, projectId);
+  return result?.project ?? null;
 }

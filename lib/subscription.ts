@@ -1,33 +1,26 @@
 import { db } from '@/lib/db';
-import { subscriptions, orgSubscriptions, usage, userSettings, member } from '@/lib/schema';
+import { subscriptions, orgSubscriptions, usage, member } from '@/lib/schema';
 import { eq, and, sql } from 'drizzle-orm';
+import { alert } from '@/lib/alert';
 import type { PlanTier } from '@/types';
 
 /**
  * Get user's personal subscription plan.
- * Priority: subscriptions table -> userSettings.plan fallback -> 'free'
+ * Checks subscriptions table (managed by Stripe webhooks) -> 'free'
  */
 export async function getSubscriptionPlan(userId: string): Promise<PlanTier> {
-  // Check subscriptions table first
   const [sub] = await db
     .select({ plan: subscriptions.plan, status: subscriptions.status, currentPeriodEnd: subscriptions.currentPeriodEnd })
     .from(subscriptions)
     .where(eq(subscriptions.userId, userId));
 
   if (sub && sub.status === 'active') {
-    // Verify period hasn't expired
     if (!sub.currentPeriodEnd || sub.currentPeriodEnd > new Date()) {
       return sub.plan as PlanTier;
     }
   }
 
-  // Fallback to userSettings.plan (legacy)
-  const [settings] = await db
-    .select({ plan: userSettings.plan })
-    .from(userSettings)
-    .where(eq(userSettings.userId, userId));
-
-  return (settings?.plan as PlanTier) || 'free';
+  return 'free';
 }
 
 /**
@@ -109,7 +102,7 @@ export async function updateOrgSeatCount(orgId: string): Promise<void> {
       await stripe.subscriptionItems.update(item.id, { quantity: count });
     }
   } catch (err) {
-    console.error('Failed to update Stripe seat count:', err);
+    await alert('stripe', 'Failed to update Stripe seat count', { orgId, error: String(err) });
   }
 
   await db

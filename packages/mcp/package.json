@@ -1,0 +1,49 @@
+{
+  "name": "@orbit-cli/mcp",
+  "version": "0.1.0",
+  "description": "MCP Server for Orbit — expose project context to AI assistants via Model Context Protocol",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "orbit-mcp": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/s4kuraN4gi/orbit-app.git",
+    "directory": "packages/mcp"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "orbit",
+    "claude",
+    "cursor"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  },
+  "peerDependencies": {
+    "@orbit-cli/core": ">=0.1.0"
+  },
+  "devDependencies": {
+    "@orbit-cli/core": "workspace:*",
+    "@types/node": "^20",
+    "tsup": "^8.4.0",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}

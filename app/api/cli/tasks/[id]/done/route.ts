@@ -3,6 +3,9 @@ import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { eq, sql } from 'drizzle-orm';
 import { authenticateRequest, checkProjectAccess } from '../../../auth';
+import { rateLimit } from '@/lib/rate-limit';
+
+const limiter = rateLimit({ interval: 60_000, maxRequests: 30 });
 
 export async function PATCH(
   request: Request,
@@ -11,6 +14,11 @@ export async function PATCH(
   const session = await authenticateRequest(request);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { success } = limiter.check(session.user.id);
+  if (!success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   const { id: idPrefix } = await params;

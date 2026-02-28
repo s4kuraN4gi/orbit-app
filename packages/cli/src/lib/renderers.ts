@@ -1,4 +1,5 @@
 import type { ContextIR } from './context-ir.js';
+import type { FocusArea } from './task-focus.js';
 
 export type RenderTarget = 'claude' | 'cursor' | 'copilot' | 'windsurf';
 
@@ -133,6 +134,9 @@ export function renderClaude(ir: ContextIR): string {
     lines.push('');
   }
 
+  // ── Focus Areas ──
+  renderFocusSection(ir, lines);
+
   // ── Active Tasks ──
   const inProgress = ir.activeWork.tasks.filter(t => t.status === 'in_progress');
   const todo = ir.activeWork.tasks.filter(t => t.status === 'todo');
@@ -175,6 +179,9 @@ export function renderClaude(ir: ContextIR): string {
     lines.push('No task data available. Run `orbit login` + `orbit init` to include task context.');
     lines.push('');
   }
+
+  // ── External Issues ──
+  renderExternalIssuesSection(ir, lines);
 
   // ── Environment Variables ──
   if (ir.constraints.envVars.length > 0) {
@@ -225,6 +232,9 @@ export function renderCursor(ir: ContextIR): string {
   // Key modules
   renderKeyModulesSection(ir, lines);
 
+  // Focus areas
+  renderFocusSection(ir, lines);
+
   // Active work
   renderActiveWorkSection(ir, lines);
 
@@ -260,6 +270,9 @@ export function renderCopilot(ir: ContextIR): string {
   // Key modules
   renderKeyModulesSection(ir, lines);
 
+  // Focus areas
+  renderFocusSection(ir, lines);
+
   // Active work
   renderActiveWorkSection(ir, lines);
 
@@ -294,6 +307,9 @@ export function renderWindsurf(ir: ContextIR): string {
 
   // Key modules
   renderKeyModulesSection(ir, lines);
+
+  // Focus areas
+  renderFocusSection(ir, lines);
 
   // Active work
   renderActiveWorkSection(ir, lines);
@@ -382,6 +398,58 @@ function renderActiveWorkSection(ir: ContextIR, lines: string[]): void {
     if (g.uncommittedChanges > 0) {
       lines.push(`${g.uncommittedChanges} uncommitted changes`);
     }
+    lines.push('');
+  }
+
+  renderExternalIssuesSection(ir, lines);
+}
+
+function renderExternalIssuesSection(ir: ContextIR, lines: string[]): void {
+  const issues = ir.activeWork.externalIssues;
+  if (!issues || issues.length === 0) return;
+
+  lines.push('## GitHub Issues');
+  for (const issue of issues.slice(0, 15)) {
+    const labels = issue.labels.length > 0 ? ` [${issue.labels.join(', ')}]` : '';
+    lines.push(`- #${issue.number}: ${issue.title}${labels}`);
+  }
+  if (issues.length > 15) {
+    lines.push(`- ... and ${issues.length - 15} more`);
+  }
+  lines.push('');
+}
+
+function renderFocusSection(ir: ContextIR, lines: string[]): void {
+  if (!ir.focusAreas || ir.focusAreas.length === 0) return;
+
+  lines.push('## Focus Areas');
+  lines.push('*Task-linked context: files and modules relevant to active work*');
+  lines.push('');
+
+  for (const area of ir.focusAreas) {
+    lines.push(`### ${area.taskTitle}`);
+
+    if (area.primaryFiles.length > 0) {
+      lines.push('**Primary files:**');
+      for (const f of area.primaryFiles) {
+        lines.push(`- \`${f}\``);
+      }
+    }
+
+    if (area.relatedModules.length > 0) {
+      lines.push('**Related modules:**');
+      for (const m of area.relatedModules) {
+        lines.push(`- \`${m}\``);
+      }
+    }
+
+    if (area.relevantExports.length > 0) {
+      lines.push('**Key exports:**');
+      for (const exp of area.relevantExports) {
+        lines.push(`- ${exp.kind}: ${exp.name}`);
+      }
+    }
+
     lines.push('');
   }
 }

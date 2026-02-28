@@ -3,6 +3,8 @@ import { stripe, getPlanFromPriceId } from '@/lib/stripe';
 import { db } from '@/lib/db';
 import { subscriptions, orgSubscriptions, webhookEvents } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
+import { alert } from '@/lib/alert';
+import { trackMetric } from '@/lib/monitoring';
 import type Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -17,7 +19,7 @@ export async function POST(request: NextRequest) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+    await alert('webhook', 'Stripe webhook signature verification failed', { error: String(err) });
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
@@ -223,9 +225,11 @@ export async function POST(request: NextRequest) {
       }
     }
   } catch (err) {
-    console.error(`Webhook handler error for ${event.type}:`, err);
+    await alert('stripe', `Webhook handler error for ${event.type}`, { eventId: event.id, error: String(err) });
     return NextResponse.json({ error: 'Handler error' }, { status: 500 });
   }
+
+  trackMetric('webhook_processed', 1, { type: event.type });
 
   return NextResponse.json({ received: true });
 }

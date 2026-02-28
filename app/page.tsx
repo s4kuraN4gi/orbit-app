@@ -7,6 +7,8 @@ import {
   Terminal,
   FileText,
   Zap,
+  Check,
+  X,
 } from 'lucide-react';
 
 export default function Home() {
@@ -130,6 +132,61 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Comparison Section — Orbit vs Repomix */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Orbit vs. Repomix</h2>
+            <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+              Repomix packs your entire codebase into one file for AI.
+              Orbit gives AI <span className="font-semibold text-slate-900 dark:text-white">structured context</span> — architecture, dependencies, and what you&apos;re working on right now.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="text-left p-4 border-b-2 dark:border-slate-700 w-[40%]"></th>
+                  <th className="p-4 border-b-2 border-blue-500 text-center w-[30%]">
+                    <span className="inline-flex items-center gap-2 font-bold text-lg">
+                      <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                        <span className="text-white font-bold text-xs">O</span>
+                      </div>
+                      Orbit
+                    </span>
+                  </th>
+                  <th className="p-4 border-b-2 dark:border-slate-700 text-center text-slate-500 font-medium w-[30%]">
+                    Repomix
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                <ComparisonRow label="Approach" orbit="Structured context" other="Full code dump" />
+                <ComparisonRow label="Output size (100-file project)" orbit="~200 lines" other="~10,000+ lines" />
+                <ComparisonRow label="Route & API detection" orbit={true} other={false} />
+                <ComparisonRow label="DB schema extraction" orbit={true} other={false} />
+                <ComparisonRow label="Import graph analysis" orbit={true} other={false} />
+                <ComparisonRow label="Export signatures" orbit={true} other={false} />
+                <ComparisonRow label="Task-aware context" orbit={true} other={false} />
+                <ComparisonRow label="Watch mode (auto-regen)" orbit={true} other={false} />
+                <ComparisonRow label="Web dashboard & history" orbit={true} other={false} />
+                <ComparisonRow label="MCP Server" orbit="4 tools" other="1 tool" />
+                <ComparisonRow label="Multi-format output" orbit="CLAUDE.md, .cursorrules, copilot, windsurf" other="XML, Markdown" />
+                <ComparisonRow label="Tree-sitter parsing" other={true} orbit="Regex (fast)" />
+                <ComparisonRow label="Full source inclusion" other={true} orbit={false} />
+                <ComparisonRow label="Free & open source" orbit={true} other={true} />
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              <span className="font-semibold">When to use Repomix:</span> You need AI to read specific source code.{' '}
+              <span className="font-semibold">When to use Orbit:</span> You need AI to <em>understand your project</em> — its architecture, what&apos;s connected to what, and what you&apos;re building next.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container mx-auto px-6 py-20">
         <div className="max-w-3xl mx-auto text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12">
@@ -176,6 +233,30 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
       <p className="text-slate-600 dark:text-slate-400">{description}</p>
     </div>
+  );
+}
+
+function ComparisonRow({ label, orbit, other }: { label: string; orbit: boolean | string; other: boolean | string }) {
+  return (
+    <tr className="border-b dark:border-slate-800 last:border-0">
+      <td className="p-4 font-medium">{label}</td>
+      <td className="p-4 text-center">
+        {orbit === true ? (
+          <Check className="h-5 w-5 text-green-500 mx-auto" />
+        ) : (
+          <span className="text-sm text-slate-600 dark:text-slate-400">{orbit}</span>
+        )}
+      </td>
+      <td className="p-4 text-center">
+        {other === true ? (
+          <Check className="h-5 w-5 text-green-500 mx-auto" />
+        ) : other === false ? (
+          <X className="h-5 w-5 text-slate-300 dark:text-slate-600 mx-auto" />
+        ) : (
+          <span className="text-sm text-slate-500">{other}</span>
+        )}
+      </td>
+    </tr>
   );
 }
 

@@ -3,11 +3,19 @@ import { db } from '@/lib/db';
 import { projects, member } from '@/lib/schema';
 import { eq, desc, or, inArray } from 'drizzle-orm';
 import { authenticateRequest } from '../auth';
+import { rateLimit } from '@/lib/rate-limit';
+
+const limiter = rateLimit({ interval: 60_000, maxRequests: 10 });
 
 export async function GET(request: Request) {
   const session = await authenticateRequest(request);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { success } = limiter.check(session.user.id);
+  if (!success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   const userId = session.user.id;

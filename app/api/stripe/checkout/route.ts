@@ -6,12 +6,20 @@ import { subscriptions, orgSubscriptions } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { stripe, getPriceIdFromPlan } from '@/lib/stripe';
 import { getMemberCount } from '@/lib/subscription';
+import { rateLimit } from '@/lib/rate-limit';
 import type { PlanTier } from '@/types';
+
+const limiter = rateLimit({ interval: 60_000, maxRequests: 5 });
 
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { success } = limiter.check(session.user.id);
+  if (!success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   const { plan, organizationId } = (await request.json()) as {

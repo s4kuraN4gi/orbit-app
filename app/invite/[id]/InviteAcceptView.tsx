@@ -73,7 +73,7 @@ export function InviteAcceptView({
       });
       window.location.href = `/login?redirect=/invite/${invitationId}`;
     } catch {
-      toast.error('Failed to sign out');
+      toast.error(t('signOutError'));
       setLoading(false);
     }
   };

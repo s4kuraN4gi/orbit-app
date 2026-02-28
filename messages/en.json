@@ -67,7 +67,9 @@
       "board": "Board",
       "gantt": "Gantt",
       "analytics": "Analytics",
-      "overview": "Overview"
+      "overview": "Overview",
+      "tasks": "Tasks",
+      "context": "Context"
     },
     "analytics": {
       "totalTasks": "Total Tasks",
@@ -308,10 +310,16 @@
       "muted": "Muted Text",
       "border": "Border"
     },
+    "themeUpdated": "Theme updated",
+    "defaultViewUpdated": "Default view updated",
+    "languageUpdated": "Language updated",
+    "updateError": "Update failed",
     "saveSuccess": "Settings saved",
     "saveError": "Failed to save settings",
     "resetColors": "Reset to Default",
     "resetSuccess": "Colors reset to default",
+    "colorsSaved": "Colors saved",
+    "resetError": "Failed to reset",
     "saveColors": "Save Colors",
     "saving": "Saving...",
     "shortcuts": {
@@ -492,13 +500,35 @@
       "name": "Team",
       "period": "/ user / month",
       "feature1": "Everything in Pro",
-      "feature2": "Team collaboration",
-      "feature3": "Shared project contexts",
-      "feature4": "Admin dashboard",
-      "feature5": "Priority support",
+      "feature2": "Unlimited team members",
+      "feature3": "Shared projects with role-based access",
+      "feature4": "Per-seat billing (auto-adjusts)",
+      "feature5": "Member invite via link",
+      "feature6": "Owner / Admin / Member roles",
       "cta": "Upgrade to Team"
     },
-    "checkoutSuccess": "Subscription activated! Welcome to {plan}."
+    "teamDetails": {
+      "title": "Built for teams that ship with AI",
+      "subtitle": "Team plan gives every member access to shared AI context — so everyone is on the same page.",
+      "roles": {
+        "title": "Role-based access control",
+        "desc": "Owner, Admin, and Member roles. Control who can manage projects, invite members, and modify settings."
+      },
+      "shared": {
+        "title": "Shared project contexts",
+        "desc": "Team members see the same scan results, context history, and Context Diff — no more out-of-sync CLAUDE.md files."
+      },
+      "billing": {
+        "title": "Simple per-seat billing",
+        "desc": "Pay per team member. Stripe automatically adjusts when you add or remove members — no manual invoicing."
+      },
+      "invite": {
+        "title": "One-click invitations",
+        "desc": "Invite teammates with a shareable link. They accept, pick their role, and start collaborating immediately."
+      }
+    },
+    "checkoutSuccess": "Subscription activated! Welcome to {plan}.",
+    "checkoutError": "Failed to create checkout session"
   },
   "gate": {
     "title": "Pro Feature",
@@ -558,6 +588,7 @@
     "cancelInvitation": "Cancel",
     "invitationCanceled": "Invitation canceled",
     "invitationCancelError": "Failed to cancel invitation",
+    "checkoutError": "Failed to create checkout",
     "billing": "Team Billing",
     "subscribeTeam": "Subscribe Team Plan",
     "manageBilling": "Manage Billing",
@@ -581,6 +612,7 @@
     "acceptError": "Failed to accept invitation",
     "rejectSuccess": "Invitation declined",
     "rejectError": "Failed to decline invitation",
+    "signOutError": "Failed to sign out",
     "wrongAccount": "Different account signed in",
     "wrongAccountDesc": "This invitation is for {invited}, but you are signed in as {current}. Please switch accounts.",
     "switchAccount": "Sign out and switch account"

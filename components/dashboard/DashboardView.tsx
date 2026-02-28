@@ -3,15 +3,13 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Task, PlanTier } from '@/types';
-import { isToday, isThisWeek, isThisMonth, parseISO } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { TaskList } from './TaskList';
 import { ProjectOverview } from './ProjectOverview';
 import { ContextHistoryView } from './ContextHistoryView';
 import { ContextDiffView } from './ContextDiffView';
-import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, History, GitCompareArrows, Bot } from 'lucide-react';
+import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, Bot, Sparkles } from 'lucide-react';
 import { logout } from '@/app/actions/auth';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -109,13 +107,14 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
   const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
   const [isExportContextOpen, setIsExportContextOpen] = React.useState(false);
   const tImport = useTranslations('import');
+  const tPricing = useTranslations('pricing');
   const tExport = useTranslations('dashboard.export');
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onNewTask: () => projectId && setIsCreateModalOpen(true),
     onSearch: () => searchInputRef.current?.focus(),
-    onViewList: () => setActiveView('list'),
+    onViewList: () => setActiveView('tasks'),
     onCloseModal: () => {
       if (isCreateModalOpen) setIsCreateModalOpen(false);
       if (isShortcutsModalOpen) setIsShortcutsModalOpen(false);
@@ -138,7 +137,7 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
   // Checkout success notification
   useEffect(() => {
     if (checkoutSuccess) {
-      toast.success(`Subscription activated! Welcome to ${planTier}.`);
+      toast.success(tPricing('checkoutSuccess', { plan: planTier.charAt(0).toUpperCase() + planTier.slice(1) }));
       // Clean up URL param
       const url = new URL(window.location.href);
       url.searchParams.delete('checkout');
@@ -233,19 +232,6 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
 
       {projectId ? (
         <>
-          <DashboardStats tasks={filteredTasks} />
-
-          <TaskFilters
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
-            onClearFilters={handleClearFilters}
-            showCompleted={showCompleted}
-            onShowCompletedChange={setShowCompleted}
-            searchInputRef={searchInputRef}
-          />
-
           <div className="flex-1 flex gap-4 min-h-0">
             <Tabs value={activeView} onValueChange={setActiveView} className="flex-1 flex flex-col min-w-0">
               <div className="flex items-center justify-between pb-4">
@@ -254,43 +240,54 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
                     <Monitor className="h-4 w-4" />
                     {t('views.overview')}
                   </TabsTrigger>
-                  <TabsTrigger value="list" className="flex items-center gap-2">
+                  <TabsTrigger value="tasks" className="flex items-center gap-2">
                     <LayoutList className="h-4 w-4" />
-                    {t('views.list')}
+                    {t('views.tasks')}
                   </TabsTrigger>
                   <TabsTrigger value="context" className="flex items-center gap-2">
-                    <History className="h-4 w-4" />
-                    Context History
-                  </TabsTrigger>
-                  <TabsTrigger value="diff" className="flex items-center gap-2">
-                    <GitCompareArrows className="h-4 w-4" />
-                    Context Diff
-                    {planTier === 'free' && <Badge variant="secondary" className="ml-1 text-[10px] px-1 py-0">Pro</Badge>}
+                    <Sparkles className="h-4 w-4" />
+                    {t('views.context')}
                   </TabsTrigger>
                 </TabsList>
 
-                <span className="text-sm text-muted-foreground">
-                  {t('filters.resultsCount', { count: filteredTasks.length })}
-                </span>
+                {activeView === 'tasks' && (
+                  <span className="text-sm text-muted-foreground">
+                    {t('filters.resultsCount', { count: filteredTasks.length })}
+                  </span>
+                )}
               </div>
 
               <TabsContent value="overview" className="flex-1 border-none p-0 outline-none overflow-y-auto">
                 <ProjectOverview scanData={scanData} tasks={initialTasks} />
               </TabsContent>
 
-              <TabsContent value="list" className="flex-1 border-none p-0 outline-none">
-                <TaskList
-                  tasks={filteredTasks}
-                  isModalOpen={isCreateModalOpen || isShortcutsModalOpen}
+              <TabsContent value="tasks" className="flex-1 border-none p-0 outline-none flex flex-col gap-4">
+                <DashboardStats tasks={filteredTasks} />
+                <TaskFilters
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  statusFilter={statusFilter}
+                  onStatusChange={setStatusFilter}
+                  onClearFilters={handleClearFilters}
+                  showCompleted={showCompleted}
+                  onShowCompletedChange={setShowCompleted}
+                  searchInputRef={searchInputRef}
                 />
+                <div className="flex-1">
+                  <TaskList
+                    tasks={filteredTasks}
+                    isModalOpen={isCreateModalOpen || isShortcutsModalOpen}
+                  />
+                </div>
               </TabsContent>
 
               <TabsContent value="context" className="flex-1 border-none p-0 outline-none overflow-y-auto">
-                <ContextHistoryView projectId={projectId} currentPlan={planTier} />
-              </TabsContent>
-
-              <TabsContent value="diff" className="flex-1 border-none p-0 outline-none overflow-y-auto">
-                <ContextDiffView projectId={projectId} currentPlan={planTier} />
+                <div className="space-y-8">
+                  <ContextHistoryView projectId={projectId} currentPlan={planTier} />
+                  <div className="border-t pt-6">
+                    <ContextDiffView projectId={projectId} currentPlan={planTier} />
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
 

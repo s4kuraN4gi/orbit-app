@@ -3,6 +3,10 @@ import { db } from '@/lib/db';
 import { projects, scanSnapshots } from '@/lib/schema';
 import { eq, asc } from 'drizzle-orm';
 import { authenticateRequest, checkProjectAccess } from '../../../auth';
+import { rateLimit } from '@/lib/rate-limit';
+import { measureAsync } from '@/lib/monitoring';
+
+const limiter = rateLimit({ interval: 60_000, maxRequests: 10 });
 
 export async function PUT(
   request: Request,
@@ -11,6 +15,11 @@ export async function PUT(
   const session = await authenticateRequest(request);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { success } = limiter.check(session.user.id);
+  if (!success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   const { id } = await params;
@@ -63,37 +72,41 @@ export async function PUT(
     );
   }
 
-  const [updated] = await db
-    .update(projects)
-    .set({ scanData: scan_data })
-    .where(eq(projects.id, id))
-    .returning();
+  const result = await measureAsync('scan_upload', async () => {
+    const [updated] = await db
+      .update(projects)
+      .set({ scanData: scan_data })
+      .where(eq(projects.id, id))
+      .returning();
 
-  // Save scan snapshot for history
-  await db.insert(scanSnapshots).values({
-    projectId: id,
-    scanData: scan_data,
-  });
+    // Save scan snapshot for history
+    await db.insert(scanSnapshots).values({
+      projectId: id,
+      scanData: scan_data,
+    });
 
-  // Keep only latest 50 snapshots per project
-  const allSnapshots = await db
-    .select({ id: scanSnapshots.id })
-    .from(scanSnapshots)
-    .where(eq(scanSnapshots.projectId, id))
-    .orderBy(asc(scanSnapshots.createdAt));
+    // Keep only latest 50 snapshots per project
+    const allSnapshots = await db
+      .select({ id: scanSnapshots.id })
+      .from(scanSnapshots)
+      .where(eq(scanSnapshots.projectId, id))
+      .orderBy(asc(scanSnapshots.createdAt));
 
-  if (allSnapshots.length > 50) {
-    const toDelete = allSnapshots.slice(0, allSnapshots.length - 50);
-    for (const s of toDelete) {
-      await db.delete(scanSnapshots).where(eq(scanSnapshots.id, s.id));
+    if (allSnapshots.length > 50) {
+      const toDelete = allSnapshots.slice(0, allSnapshots.length - 50);
+      for (const s of toDelete) {
+        await db.delete(scanSnapshots).where(eq(scanSnapshots.id, s.id));
+      }
     }
-  }
+
+    return updated;
+  }, { projectId: id });
 
   return NextResponse.json({
     project: {
-      id: updated.id,
-      name: updated.name,
-      scan_data: updated.scanData,
+      id: result.id,
+      name: result.name,
+      scan_data: result.scanData,
     },
   });
 }

@@ -1,5 +1,7 @@
 import type { ScanResult } from './detector.js';
 import type { Task } from '../types.js';
+import type { FocusArea } from './task-focus.js';
+import type { ExternalIssue } from './issue-providers/types.js';
 
 // ─── Sub-types ───
 
@@ -45,6 +47,7 @@ export interface ContextIR {
   };
   activeWork: {
     tasks: TaskSummary[];
+    externalIssues?: ExternalIssue[];
     git: {
       branch: string;
       uncommittedChanges: number;
@@ -68,6 +71,7 @@ export interface ContextIR {
   aiContext: {
     existingFiles: { name: string; path: string }[];
   };
+  focusAreas?: FocusArea[];
 }
 
 // ─── Builder ───

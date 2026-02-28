@@ -22,61 +22,118 @@ interface ContextDiffViewProps {
 }
 
 interface DiffItem {
+  category: string;
   key: string;
   type: 'added' | 'removed' | 'changed';
   before?: string;
   after?: string;
 }
 
-function computeScanDiff(before: any, after: any): DiffItem[] {
+// ─── Diff helpers ───
+
+function diffArrays(category: string, keyPrefix: string, before: string[], after: string[]): DiffItem[] {
   const diffs: DiffItem[] = [];
-  if (!before || !after) return diffs;
-
-  // Tech stack comparison
-  const beforeStack = before.techStack || {};
-  const afterStack = after.techStack || {};
-  for (const key of new Set([...Object.keys(beforeStack), ...Object.keys(afterStack)])) {
-    const bVal = JSON.stringify(beforeStack[key]);
-    const aVal = JSON.stringify(afterStack[key]);
-    if (bVal === undefined && aVal !== undefined) {
-      diffs.push({ key: `techStack.${key}`, type: 'added', after: aVal });
-    } else if (bVal !== undefined && aVal === undefined) {
-      diffs.push({ key: `techStack.${key}`, type: 'removed', before: bVal });
-    } else if (bVal !== aVal) {
-      diffs.push({ key: `techStack.${key}`, type: 'changed', before: bVal, after: aVal });
-    }
+  const bSet = new Set(before);
+  const aSet = new Set(after);
+  for (const item of after) {
+    if (!bSet.has(item)) diffs.push({ category, key: `${keyPrefix}: ${item}`, type: 'added', after: item });
   }
-
-  // Dependency count comparison
-  const bDeps = before.dependencies?.total ?? 0;
-  const aDeps = after.dependencies?.total ?? 0;
-  if (bDeps !== aDeps) {
-    diffs.push({ key: 'dependencies.total', type: 'changed', before: String(bDeps), after: String(aDeps) });
+  for (const item of before) {
+    if (!aSet.has(item)) diffs.push({ category, key: `${keyPrefix}: ${item}`, type: 'removed', before: item });
   }
+  return diffs;
+}
 
-  // Code metrics comparison
-  const bMetrics = before.codeMetrics || {};
-  const aMetrics = after.codeMetrics || {};
-  for (const key of ['totalFiles', 'totalLines']) {
-    if (bMetrics[key] !== aMetrics[key]) {
-      diffs.push({
-        key: `codeMetrics.${key}`,
-        type: 'changed',
-        before: String(bMetrics[key] ?? 0),
-        after: String(aMetrics[key] ?? 0),
-      });
-    }
-  }
+function diffScalar(category: string, key: string, before: any, after: any): DiffItem | null {
+  const b = before ?? null;
+  const a = after ?? null;
+  if (b === a) return null;
+  if (b === null && a !== null) return { category, key, type: 'added', after: String(a) };
+  if (b !== null && a === null) return { category, key, type: 'removed', before: String(b) };
+  return { category, key, type: 'changed', before: String(b), after: String(a) };
+}
 
-  // Git branch comparison
-  const bBranch = before.git?.branch;
-  const aBranch = after.git?.branch;
-  if (bBranch !== aBranch) {
-    diffs.push({ key: 'git.branch', type: 'changed', before: bBranch || '—', after: aBranch || '—' });
-  }
+function computeScanDiff(before: any, after: any): DiffItem[] {
+  if (!before || !after) return [];
+  const diffs: DiffItem[] = [];
+
+  // Tech Stack (string[])
+  diffs.push(...diffArrays('Tech Stack', 'Tech', before.techStack || [], after.techStack || []));
+
+  // Package Manager / Node Version
+  const pm = diffScalar('Tech Stack', 'Package Manager', before.packageManager, after.packageManager);
+  if (pm) diffs.push(pm);
+  const nv = diffScalar('Tech Stack', 'Node Version', before.nodeVersion, after.nodeVersion);
+  if (nv) diffs.push(nv);
+
+  // Dependencies
+  const bDepPkgs = (before.dependencies || []).flatMap((d: any) => d.packages || []);
+  const aDepPkgs = (after.dependencies || []).flatMap((d: any) => d.packages || []);
+  diffs.push(...diffArrays('Dependencies', 'Package', bDepPkgs, aDepPkgs));
+  const depTotal = diffScalar('Dependencies', 'Total count', before.depCount?.total, after.depCount?.total);
+  if (depTotal) diffs.push(depTotal);
+
+  // Pages
+  const bPages = before.structure?.pages || [];
+  const aPages = after.structure?.pages || [];
+  diffs.push(...diffArrays('Routes', 'Page', bPages, aPages));
+
+  // API Routes
+  const bApi = (before.structure?.apiRoutes || []).map((r: any) => `${r.method} ${r.path}`);
+  const aApi = (after.structure?.apiRoutes || []).map((r: any) => `${r.method} ${r.path}`);
+  diffs.push(...diffArrays('Routes', 'API', bApi, aApi));
+
+  // DB Tables
+  const bTables = (before.structure?.dbTables || []).map((t: any) => `${t.name} (${t.columns} cols)`);
+  const aTables = (after.structure?.dbTables || []).map((t: any) => `${t.name} (${t.columns} cols)`);
+  diffs.push(...diffArrays('Database', 'Table', bTables, aTables));
+
+  // Code Metrics
+  const bm = before.codeMetrics || {};
+  const am = after.codeMetrics || {};
+  const files = diffScalar('Code Metrics', 'Total files', bm.totalFiles, am.totalFiles);
+  if (files) diffs.push(files);
+  const lines = diffScalar('Code Metrics', 'Total lines', bm.totalLines, am.totalLines);
+  if (lines) diffs.push(lines);
+
+  // Exports count
+  const bExports = (before.exports || []).length;
+  const aExports = (after.exports || []).length;
+  const exp = diffScalar('Code Metrics', 'Exports', bExports, aExports);
+  if (exp) diffs.push(exp);
+
+  // Import graph file count
+  const bGraph = (before.importGraph || []).length;
+  const aGraph = (after.importGraph || []).length;
+  const graph = diffScalar('Code Metrics', 'Files with imports', bGraph, aGraph);
+  if (graph) diffs.push(graph);
+
+  // Environment Variables
+  diffs.push(...diffArrays('Environment', 'Env var', before.envVars || [], after.envVars || []));
+
+  // Git
+  const bg = before.git || {};
+  const ag = after.git || {};
+  const branch = diffScalar('Git', 'Branch', bg.branch, ag.branch);
+  if (branch) diffs.push(branch);
+  const commits = diffScalar('Git', 'Total commits', bg.totalCommits, ag.totalCommits);
+  if (commits) diffs.push(commits);
+
+  // Deployment
+  const dp = diffScalar('Deployment', 'Platform', before.deployment?.platform, after.deployment?.platform);
+  if (dp) diffs.push(dp);
+  const ci = diffScalar('Deployment', 'CI', before.deployment?.ci, after.deployment?.ci);
+  if (ci) diffs.push(ci);
+
+  // Scripts
+  const bScripts = Object.keys(before.scripts || {});
+  const aScripts = Object.keys(after.scripts || {});
+  diffs.push(...diffArrays('Scripts', 'Script', bScripts, aScripts));
 
   return diffs;
 }
+
+// ─── Formatting helpers ───
 
 function formatSnapshotDate(iso: string) {
   if (!iso) return '';
@@ -90,9 +147,54 @@ function formatSnapshotDate(iso: string) {
 
 function DiffBadge({ type, t }: { type: DiffItem['type']; t: (key: string) => string }) {
   const variant = type === 'added' ? 'default' : type === 'removed' ? 'destructive' : 'secondary';
-  const label = t(type);
-  return <Badge variant={variant} className="text-xs">{label}</Badge>;
+  return <Badge variant={variant} className="text-xs shrink-0">{t(type)}</Badge>;
 }
+
+// ─── Grouped diff display ───
+
+function DiffCategory({ category, items, t }: { category: string; items: DiffItem[]; t: (key: string) => string }) {
+  return (
+    <div className="space-y-1.5">
+      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{category}</h4>
+      {items.map((diff) => (
+        <div key={`${diff.category}-${diff.key}-${diff.type}`} className="flex items-center gap-2 p-2 rounded border text-sm">
+          <DiffBadge type={diff.type} t={t} />
+          <span className="font-mono text-xs truncate">{diff.key}</span>
+          {diff.type === 'changed' && (
+            <span className="text-muted-foreground ml-auto text-xs shrink-0">
+              {diff.before} → {diff.after}
+            </span>
+          )}
+          {diff.type === 'added' && (
+            <span className="text-green-600 dark:text-green-400 ml-auto text-xs shrink-0">+ {diff.after}</span>
+          )}
+          {diff.type === 'removed' && (
+            <span className="text-red-600 dark:text-red-400 ml-auto text-xs shrink-0 line-through">{diff.before}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Summary bar ───
+
+function DiffSummary({ diffs }: { diffs: DiffItem[] }) {
+  const added = diffs.filter(d => d.type === 'added').length;
+  const removed = diffs.filter(d => d.type === 'removed').length;
+  const changed = diffs.filter(d => d.type === 'changed').length;
+
+  return (
+    <div className="flex items-center gap-4 text-xs text-muted-foreground py-2 px-1">
+      <span className="font-medium">{diffs.length} changes</span>
+      {added > 0 && <span className="text-green-600 dark:text-green-400">+{added} added</span>}
+      {removed > 0 && <span className="text-red-600 dark:text-red-400">-{removed} removed</span>}
+      {changed > 0 && <span className="text-amber-600 dark:text-amber-400">~{changed} changed</span>}
+    </div>
+  );
+}
+
+// ─── Main component ───
 
 export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps) {
   const t = useTranslations('contextDiff');
@@ -125,6 +227,21 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
     if (!before || !after) return [];
     return computeScanDiff(before.scan_data, after.scan_data);
   }, [snapshots, beforeId, afterId]);
+
+  // Group diffs by category, preserving order of first appearance
+  const groupedDiffs = useMemo(() => {
+    const groups: { category: string; items: DiffItem[] }[] = [];
+    const seen = new Map<string, DiffItem[]>();
+    for (const diff of diffs) {
+      if (!seen.has(diff.category)) {
+        const items: DiffItem[] = [];
+        seen.set(diff.category, items);
+        groups.push({ category: diff.category, items });
+      }
+      seen.get(diff.category)!.push(diff);
+    }
+    return groups;
+  }, [diffs]);
 
   const inner = (
     <div className="space-y-4 p-2">
@@ -177,25 +294,14 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
               {t('noDifferences')}
             </div>
           ) : (
-            <div className="space-y-2">
-              {diffs.map((diff) => (
-                <div key={diff.key} className="flex items-center gap-2 p-2 rounded border text-sm">
-                  <DiffBadge type={diff.type} t={t} />
-                  <span className="font-mono text-xs">{diff.key}</span>
-                  {diff.type === 'changed' && (
-                    <span className="text-muted-foreground ml-auto text-xs">
-                      {diff.before} → {diff.after}
-                    </span>
-                  )}
-                  {diff.type === 'added' && (
-                    <span className="text-green-600 ml-auto text-xs">{diff.after}</span>
-                  )}
-                  {diff.type === 'removed' && (
-                    <span className="text-red-600 ml-auto text-xs line-through">{diff.before}</span>
-                  )}
-                </div>
-              ))}
-            </div>
+            <>
+              <DiffSummary diffs={diffs} />
+              <div className="space-y-6">
+                {groupedDiffs.map(({ category, items }) => (
+                  <DiffCategory key={category} category={category} items={items} t={t} />
+                ))}
+              </div>
+            </>
           )}
         </>
       )}
