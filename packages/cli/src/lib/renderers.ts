@@ -1,11 +1,12 @@
 import type { ContextIR } from './context-ir.js';
 import type { FocusArea } from './task-focus.js';
 
-export type RenderTarget = 'claude' | 'cursor' | 'copilot' | 'windsurf';
+export type RenderTarget = 'claude' | 'cursor' | 'cursor-mdc' | 'copilot' | 'windsurf';
 
 export const RENDER_TARGETS: Record<RenderTarget, string> = {
   claude: 'CLAUDE.md',
   cursor: '.cursorrules',
+  'cursor-mdc': '.cursor/rules/',
   copilot: '.github/copilot-instructions.md',
   windsurf: '.windsurfrules',
 };
@@ -16,11 +17,69 @@ export function renderContext(ir: ContextIR, target: RenderTarget): string {
       return renderClaude(ir);
     case 'cursor':
       return renderCursor(ir);
+    case 'cursor-mdc':
+      // For MDC, renderContext returns the project overview as default.
+      // Use renderCursorMdc() for multi-file output.
+      return renderCursor(ir);
     case 'copilot':
       return renderCopilot(ir);
     case 'windsurf':
       return renderWindsurf(ir);
   }
+}
+
+/**
+ * Render Cursor MDC format: returns a Map of filename → content
+ * for writing to .cursor/rules/ directory.
+ */
+export function renderCursorMdc(ir: ContextIR): Map<string, string> {
+  const files = new Map<string, string>();
+
+  // project.mdc — Project overview + tech stack
+  const projectLines: string[] = [];
+  projectLines.push(`# Project: ${ir.project.name}`);
+  projectLines.push('');
+  if (ir.project.techStack.length > 0) {
+    projectLines.push('## Tech Stack');
+    projectLines.push(ir.project.techStack.join(' / '));
+    const meta: string[] = [];
+    if (ir.project.packageManager) meta.push(`Package manager: ${ir.project.packageManager}`);
+    if (ir.constraints.deployTarget) meta.push(`Platform: ${ir.constraints.deployTarget}`);
+    if (ir.constraints.ci) meta.push(`CI: ${ir.constraints.ci}`);
+    if (meta.length > 0) projectLines.push(meta.join(' | '));
+    projectLines.push('');
+  }
+  renderStructureSection(ir, projectLines);
+  renderKeyModulesSection(ir, projectLines);
+  renderConstraintsSection(ir, projectLines);
+  files.set('project.mdc', renderMdcFile('Project overview, tech stack, and structure', projectLines.join('\n')));
+
+  // tasks.mdc — Active tasks
+  if (ir.activeWork.tasks.length > 0) {
+    const taskLines: string[] = [];
+    renderActiveWorkSection(ir, taskLines);
+    files.set('tasks.mdc', renderMdcFile('Active tasks and current work', taskLines.join('\n')));
+  }
+
+  // focus.mdc — Focus areas (if present)
+  if (ir.focusAreas && ir.focusAreas.length > 0) {
+    const focusLines: string[] = [];
+    renderFocusSection(ir, focusLines);
+    files.set('focus.mdc', renderMdcFile('Task-linked focus areas', focusLines.join('\n')));
+  }
+
+  // smart.mdc — Smart context recommendations (if present)
+  if (ir.smartRecommendation) {
+    const smartLines: string[] = [];
+    renderSmartSection(ir, smartLines);
+    files.set('smart.mdc', renderMdcFile('AI-powered context recommendations', smartLines.join('\n')));
+  }
+
+  return files;
+}
+
+function renderMdcFile(description: string, content: string): string {
+  return `---\ndescription: ${description}\nglobs: \nalwaysApply: true\n---\n\n${content}`;
 }
 
 // ─── CLAUDE.md ───
@@ -137,6 +196,9 @@ export function renderClaude(ir: ContextIR): string {
   // ── Focus Areas ──
   renderFocusSection(ir, lines);
 
+  // ── Smart Context ──
+  renderSmartSection(ir, lines);
+
   // ── Active Tasks ──
   const inProgress = ir.activeWork.tasks.filter(t => t.status === 'in_progress');
   const todo = ir.activeWork.tasks.filter(t => t.status === 'todo');
@@ -235,6 +297,9 @@ export function renderCursor(ir: ContextIR): string {
   // Focus areas
   renderFocusSection(ir, lines);
 
+  // Smart context
+  renderSmartSection(ir, lines);
+
   // Active work
   renderActiveWorkSection(ir, lines);
 
@@ -273,6 +338,9 @@ export function renderCopilot(ir: ContextIR): string {
   // Focus areas
   renderFocusSection(ir, lines);
 
+  // Smart context
+  renderSmartSection(ir, lines);
+
   // Active work
   renderActiveWorkSection(ir, lines);
 
@@ -310,6 +378,9 @@ export function renderWindsurf(ir: ContextIR): string {
 
   // Focus areas
   renderFocusSection(ir, lines);
+
+  // Smart context
+  renderSmartSection(ir, lines);
 
   // Active work
   renderActiveWorkSection(ir, lines);
@@ -450,6 +521,40 @@ function renderFocusSection(ir: ContextIR, lines: string[]): void {
       }
     }
 
+    lines.push('');
+  }
+}
+
+function renderSmartSection(ir: ContextIR, lines: string[]): void {
+  if (!ir.smartRecommendation) return;
+
+  const rec = ir.smartRecommendation;
+  lines.push('## Recommended Focus (Smart Context)');
+  lines.push(`*${rec.workContext}*`);
+  lines.push('');
+
+  if (rec.activeFiles.length > 0) {
+    lines.push('**Active files** (by relevance):');
+    for (const file of rec.activeFiles) {
+      const score = rec.relevanceScores.get(file) ?? 0;
+      lines.push(`- \`${file}\` (score: ${score})`);
+    }
+    lines.push('');
+  }
+
+  if (rec.relatedModules.length > 0) {
+    lines.push('**Related modules:**');
+    for (const mod of rec.relatedModules) {
+      lines.push(`- \`${mod}\``);
+    }
+    lines.push('');
+  }
+
+  if (rec.suggestedExports.length > 0) {
+    lines.push('**Key exports in scope:**');
+    for (const exp of rec.suggestedExports.slice(0, 15)) {
+      lines.push(`- ${exp.kind}: \`${exp.name}\` in \`${exp.file}\``);
+    }
     lines.push('');
   }
 }

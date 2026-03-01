@@ -73,7 +73,6 @@ export function CreateProjectModal({
       onProjectCreated(project.id);
     } catch (error) {
       toast.error(t('createError'));
-      console.error(error);
     } finally {
       setIsLoading(false);
     }

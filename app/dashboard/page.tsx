@@ -166,7 +166,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         allProjects={allProjects}
         defaultView="overview"
         currentUserEmail={user.email || ''}
-        scanData={currentProject.scanData}
+        scanData={currentProject.scanData as Record<string, unknown> | null}
         planTier={planLimits.tier}
         currentProjectCount={allProjects.length}
         checkoutSuccess={params.checkout === 'success'}

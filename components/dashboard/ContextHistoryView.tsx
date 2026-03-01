@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Bot, Terminal, PenLine, ChevronDown, ChevronRight, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import { PricingGate } from './PricingGate';
 import { getContextHistory } from '@/app/actions/context';
 import type { PlanTier } from '@/types';
@@ -107,7 +108,7 @@ export function ContextHistoryView({ projectId, currentPlan }: ContextHistoryVie
       .then((data) => {
         if (!cancelled) setContexts(data);
       })
-      .catch(console.error)
+      .catch(() => toast.error('Failed to load context history'))
       .finally(() => {
         if (!cancelled) setLoading(false);
       });

@@ -1,3 +1,5 @@
+import { after } from 'next/server';
+
 interface Metric {
   name: string;
   value: number;
@@ -80,5 +82,11 @@ function flush(): void {
     for (const e of events) {
       console.log(`[metric] ${e.name}=${e.value}`, e.tags);
     }
+  }
+}
+
+export function flushAfterRequest(): void {
+  if (buffer.length > 0) {
+    after(() => flush());
   }
 }

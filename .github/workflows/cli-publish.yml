@@ -26,6 +26,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm tsc --noEmit
+      - run: pnpm test
+
       - run: pnpm --filter @orbit-cli/core build
 
       - run: pnpm --filter @orbit-cli/core publish --no-git-checks --access public

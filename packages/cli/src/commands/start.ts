@@ -17,7 +17,7 @@ export async function startCommand(idPrefix: string): Promise<void> {
   const spinner = ora('Starting task...').start();
 
   try {
-    const data = await apiRequest('PATCH', `/api/cli/tasks/${idPrefix}/start`);
+    const data = await apiRequest<{ task: Task }>('PATCH', `/api/cli/tasks/${idPrefix}/start`);
     spinner.stop();
 
     const task: Task = data.task;

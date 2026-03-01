@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { success } = limiter.check(session.user.id);
+  const { success } = await limiter.check(session.user.id);
   if (!success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }

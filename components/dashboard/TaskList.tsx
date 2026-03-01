@@ -20,6 +20,7 @@ import {
   verticalListSortingStrategy, 
 } from '@dnd-kit/sortable';
 import { updateTaskPosition, updateTask } from '@/app/actions/task';
+import { toast } from 'sonner';
 import { GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
 import { 
   isToday, 
@@ -385,8 +386,8 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
       } else {
            await updateTaskPosition(activeTask.id, newPosition);
       }
-    } catch (error) {
-      console.error('Failed to update task', error);
+    } catch {
+      toast.error('Failed to update task');
     }
   };
 

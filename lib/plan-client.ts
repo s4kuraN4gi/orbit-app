@@ -3,10 +3,10 @@ import type { PlanTier, PlanLimits } from '@/types';
 const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
   free: {
     tier: 'free',
-    maxProjects: 3,
-    maxTasksPerProject: 50,
-    maxContextHistory: 5,
-    maxImportsPerMonth: 3,
+    maxProjects: 1,
+    maxTasksPerProject: 20,
+    maxContextHistory: 3,
+    maxImportsPerMonth: 1,
     exportFormats: ['markdown'],
     contextDiff: false,
   },

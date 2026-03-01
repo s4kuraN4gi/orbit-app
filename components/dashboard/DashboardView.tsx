@@ -46,7 +46,7 @@ interface DashboardViewProps {
   allProjects: Project[];
   defaultView?: 'list' | 'overview';
   currentUserEmail?: string;
-  scanData?: any;
+  scanData?: Record<string, unknown> | null;
   planTier?: PlanTier;
   currentProjectCount?: number;
   checkoutSuccess?: boolean;
@@ -258,7 +258,7 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
               </div>
 
               <TabsContent value="overview" className="flex-1 border-none p-0 outline-none overflow-y-auto">
-                <ProjectOverview scanData={scanData} tasks={initialTasks} />
+                <ProjectOverview scanData={scanData as never} tasks={initialTasks} />
               </TabsContent>
 
               <TabsContent value="tasks" className="flex-1 border-none p-0 outline-none flex flex-col gap-4">

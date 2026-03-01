@@ -10,7 +10,7 @@ import { requireProjectOwner, requireTaskOwner } from '@/lib/auth-helpers';
 export async function updateTaskStatus(taskId: string, newStatus: TaskStatus) {
   await requireTaskOwner(taskId);
 
-  const updates: Record<string, any> = { status: newStatus };
+  const updates: Partial<typeof tasks.$inferInsert> = { status: newStatus };
   if (newStatus === 'done') {
     updates.completedAt = new Date();
   } else {
@@ -139,7 +139,7 @@ export async function updateTask(
   }
 
   // Map snake_case input to camelCase schema
-  const setValues: Record<string, any> = {};
+  const setValues: Partial<typeof tasks.$inferInsert> = {};
   if (updates.title !== undefined) setValues.title = updates.title;
   if (updates.description !== undefined) setValues.description = updates.description;
   if (updates.priority !== undefined) setValues.priority = updates.priority;

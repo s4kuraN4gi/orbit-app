@@ -10,8 +10,12 @@ import {
   Check,
   X,
 } from 'lucide-react';
+import { CopyCommandButton } from '@/components/landing/CopyCommandButton';
+import { getTranslations } from 'next-intl/server';
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations('landing');
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       {/* Navigation */}
@@ -24,13 +28,13 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-4">
           <Link href="/pricing">
-            <Button variant="ghost">Pricing</Button>
+            <Button variant="ghost">{t('nav.pricing')}</Button>
           </Link>
           <Link href="/login">
-            <Button variant="ghost">Sign in</Button>
+            <Button variant="ghost">{t('nav.signIn')}</Button>
           </Link>
           <Link href="/login">
-            <Button>Get Started</Button>
+            <Button>{t('nav.getStarted')}</Button>
           </Link>
         </div>
       </nav>
@@ -40,21 +44,18 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-6">
             <Sparkles className="h-4 w-4" />
-            AI Context Engine for Developers
+            {t('badge')}
           </div>
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-white dark:via-slate-300 dark:to-white bg-clip-text text-transparent">
-            Give your AI the context
-            <br />
-            it actually needs
+            {t('hero.title')}
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto">
-            Orbit scans your codebase structure, tech stack, and task status
-            to generate focused context files for Claude, Cursor, and other AI assistants.
+            {t('hero.subtitle')}
           </p>
           <div className="max-w-lg mx-auto bg-slate-900 dark:bg-slate-800 rounded-xl p-6 mb-8 text-left">
             <div className="flex items-center gap-2 mb-3 text-sm text-slate-400">
               <Terminal className="h-4 w-4" />
-              <span>Terminal</span>
+              <span>{t('terminal')}</span>
             </div>
             <code className="text-green-400 text-sm block">
               <span className="text-slate-500">$</span> npx @orbit-cli/core scan -g
@@ -69,10 +70,11 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/login">
               <Button size="lg" className="px-8 h-12 text-base">
-                Try the Dashboard
+                {t('cta.openDashboard')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
+            <CopyCommandButton />
           </div>
         </div>
       </section>
@@ -80,27 +82,26 @@ export default function Home() {
       {/* Features Section */}
       <section className="container mx-auto px-6 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Not just code. Structure.</h2>
+          <h2 className="text-3xl font-bold mb-4">{t('features.title')}</h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            Unlike code-dump tools, Orbit understands your project&apos;s architecture
-            and what you&apos;re working on right now.
+            {t('features.subtitle')}
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <FeatureCard
             icon={<Terminal className="h-8 w-8" />}
-            title="Zero-config Scan"
-            description="Run one command. Orbit auto-detects your tech stack, routes, DB schema, and dependencies."
+            title={t('features.scan')}
+            description={t('features.scanDesc')}
           />
           <FeatureCard
             icon={<FileText className="h-8 w-8" />}
-            title="Context Generation"
-            description="Generate CLAUDE.md, .cursorrules, or any format your AI assistant needs."
+            title={t('features.context')}
+            description={t('features.contextDesc')}
           />
           <FeatureCard
             icon={<Zap className="h-8 w-8" />}
-            title="Task-Aware Context"
-            description="Include your current tasks so AI knows what you're building, not just what exists."
+            title={t('features.taskAware')}
+            description={t('features.taskAwareDesc')}
           />
         </div>
       </section>
@@ -109,24 +110,23 @@ export default function Home() {
       <section className="container mx-auto px-6 py-20">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div>
-            <h2 className="text-3xl font-bold mb-6">What Orbit scans</h2>
+            <h2 className="text-3xl font-bold mb-6">{t('whatScans.title')}</h2>
             <p className="text-slate-600 dark:text-slate-400 mb-8">
-              One command gives your AI assistant everything it needs
-              to write better code for your specific project.
+              {t('whatScans.subtitle')}
             </p>
             <ul className="space-y-4">
-              <BenefitItem text="Tech stack, frameworks, and package manager" />
-              <BenefitItem text="Pages, API routes, and database tables" />
-              <BenefitItem text="Git branch, recent activity, uncommitted changes" />
-              <BenefitItem text="File count, largest files, and code metrics" />
-              <BenefitItem text="Active tasks and completion progress" />
-              <BenefitItem text="Environment variable names (never values)" />
+              <BenefitItem text={t('whatScans.item1')} />
+              <BenefitItem text={t('whatScans.item2')} />
+              <BenefitItem text={t('whatScans.item3')} />
+              <BenefitItem text={t('whatScans.item4')} />
+              <BenefitItem text={t('whatScans.item5')} />
+              <BenefitItem text={t('whatScans.item6')} />
             </ul>
           </div>
           <div className="bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-8 aspect-square flex items-center justify-center">
             <div className="text-center">
               <Sparkles className="h-16 w-16 mx-auto mb-4 text-blue-500" />
-              <p className="text-lg font-medium">Structure + Tasks = Better AI</p>
+              <p className="text-lg font-medium">{t('whatScans.tagline')}</p>
             </div>
           </div>
         </div>
@@ -136,10 +136,9 @@ export default function Home() {
       <section className="container mx-auto px-6 py-20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Orbit vs. Repomix</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('comparison.title')}</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-              Repomix packs your entire codebase into one file for AI.
-              Orbit gives AI <span className="font-semibold text-slate-900 dark:text-white">structured context</span> — architecture, dependencies, and what you&apos;re working on right now.
+              {t('comparison.subtitle')}
             </p>
           </div>
           <div className="overflow-x-auto">
@@ -168,20 +167,22 @@ export default function Home() {
                 <ComparisonRow label="Import graph analysis" orbit={true} other={false} />
                 <ComparisonRow label="Export signatures" orbit={true} other={false} />
                 <ComparisonRow label="Task-aware context" orbit={true} other={false} />
+                <ComparisonRow label="Smart Context scoring" orbit="Pro" other={false} />
+                <ComparisonRow label="Implementation Plans" orbit={true} other={false} />
                 <ComparisonRow label="Watch mode (auto-regen)" orbit={true} other={false} />
                 <ComparisonRow label="Web dashboard & history" orbit={true} other={false} />
                 <ComparisonRow label="MCP Server" orbit="4 tools" other="1 tool" />
                 <ComparisonRow label="Multi-format output" orbit="CLAUDE.md, .cursorrules, copilot, windsurf" other="XML, Markdown" />
                 <ComparisonRow label="Tree-sitter parsing" other={true} orbit="Regex (fast)" />
                 <ComparisonRow label="Full source inclusion" other={true} orbit={false} />
-                <ComparisonRow label="Free & open source" orbit={true} other={true} />
+                <ComparisonRow label="Free & open source" orbit="CLI is OSS" other={true} />
               </tbody>
             </table>
           </div>
           <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900">
             <p className="text-sm text-slate-700 dark:text-slate-300">
-              <span className="font-semibold">When to use Repomix:</span> You need AI to read specific source code.{' '}
-              <span className="font-semibold">When to use Orbit:</span> You need AI to <em>understand your project</em> — its architecture, what&apos;s connected to what, and what you&apos;re building next.
+              <span className="font-semibold">{t('comparison.whenRepomix')}</span> {t('comparison.whenRepomixDesc')}{' '}
+              <span className="font-semibold">{t('comparison.whenOrbit')}</span> {t('comparison.whenOrbitDesc')}
             </p>
           </div>
         </div>
@@ -191,20 +192,22 @@ export default function Home() {
       <section className="container mx-auto px-6 py-20">
         <div className="max-w-3xl mx-auto text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Try it in 10 seconds
+            {t('ctaSection.title')}
           </h2>
-          <div className="bg-white/10 rounded-lg p-4 mb-8 inline-block">
-            <code className="text-white text-lg">npx @orbit-cli/core scan -g</code>
-          </div>
           <p className="text-blue-100 mb-8">
-            No sign-up required. Free and open source.
+            {t('ctaSection.subtitle')}
           </p>
-          <Link href="/login">
-            <Button size="lg" variant="secondary" className="px-8 h-12 text-base">
-              Open Dashboard
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/login">
+              <Button size="lg" variant="secondary" className="px-8 h-12 text-base">
+                {t('cta.getStartedFree')}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <div className="bg-white/10 rounded-lg px-4 py-2 text-sm">
+              <code className="text-white">npx @orbit-cli/core scan -g</code>
+            </div>
+          </div>
         </div>
       </section>
 

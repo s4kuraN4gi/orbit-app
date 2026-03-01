@@ -66,7 +66,7 @@ export async function loginCommand(): Promise<void> {
     });
 
     const resText = await res.text();
-    let data: any;
+    let data: { token?: string; session?: { token?: string }; user?: { id: string; email?: string }; message?: string; [key: string]: unknown };
     try {
       data = JSON.parse(resText);
     } catch {

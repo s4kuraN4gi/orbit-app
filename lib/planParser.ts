@@ -192,7 +192,15 @@ export function convertToApiFormat(
   sourceTool: 'Cursor' | 'Antigravity' | 'Manual' = 'Manual',
   originalPrompt: string = ''
 ) {
-  const convertTask = (task: ParsedTask): any => ({
+  interface ConvertedTask {
+    title: string;
+    description: string | null;
+    status: string;
+    priority: string;
+    children: ConvertedTask[];
+  }
+
+  const convertTask = (task: ParsedTask): ConvertedTask => ({
     title: task.title,
     description: task.description || null,
     status: 'todo',

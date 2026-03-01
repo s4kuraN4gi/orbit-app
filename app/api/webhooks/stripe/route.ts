@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { subscriptions, orgSubscriptions, webhookEvents } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { alert } from '@/lib/alert';
-import { trackMetric } from '@/lib/monitoring';
+import { trackMetric, flushAfterRequest } from '@/lib/monitoring';
 import type Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -230,6 +230,7 @@ export async function POST(request: NextRequest) {
   }
 
   trackMetric('webhook_processed', 1, { type: event.type });
+  flushAfterRequest();
 
   return NextResponse.json({ received: true });
 }

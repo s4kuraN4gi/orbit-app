@@ -6,13 +6,14 @@ import { watch as chokidarWatch } from 'chokidar';
 import { scanProject, IGNORE_DIRS } from '../lib/detector.js';
 import type { ScanResult } from '../lib/detector.js';
 import { buildContextIR } from '../lib/context-ir.js';
-import { renderContext, RENDER_TARGETS } from '../lib/renderers.js';
+import { renderContext, renderCursorMdc, RENDER_TARGETS } from '../lib/renderers.js';
 import type { RenderTarget } from '../lib/renderers.js';
 import { ScanCache } from '../lib/cache.js';
 import { computeRescanScope, incrementalScan } from '../lib/incremental.js';
 import type { ChangeEvent } from '../lib/incremental.js';
 import { apiRequest } from '../lib/api.js';
 import { sessionExists } from '../lib/config.js';
+import { checkFeatureAccess, recordFeatureUsage } from '../lib/plan-check.js';
 import { getProjectLink } from '../lib/project.js';
 import type { Task, OrbitProjectLink } from '../types.js';
 
@@ -35,7 +36,7 @@ async function tryGetProjectLink(): Promise<OrbitProjectLink | null> {
 async function fetchTasks(link: OrbitProjectLink | null): Promise<Task[]> {
   if (!link) return [];
   try {
-    const data = await apiRequest('GET', `/api/cli/projects/${link.project_id}/tasks`);
+    const data = await apiRequest<{ tasks: Task[] }>('GET', `/api/cli/projects/${link.project_id}/tasks`);
     return data?.tasks ?? [];
   } catch {
     return [];
@@ -43,6 +44,13 @@ async function fetchTasks(link: OrbitProjectLink | null): Promise<Task[]> {
 }
 
 export async function watchCommand(options: WatchOptions = {}): Promise<void> {
+  const access = await checkFeatureAccess('cliWatch');
+  if (!access.allowed) {
+    console.error(access.message);
+    process.exit(1);
+  }
+  await recordFeatureUsage('cliWatch');
+
   const dir = process.cwd();
   const target: RenderTarget = options.target ?? 'claude';
   const outputFile = options.output ?? RENDER_TARGETS[target];
@@ -68,12 +76,21 @@ export async function watchCommand(options: WatchOptions = {}): Promise<void> {
     }
     lastContent = renderContext(ir, target);
 
-    const outputPath = join(dir, outputFile);
-    await mkdir(dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, lastContent, 'utf-8');
+    if (target === 'cursor-mdc') {
+      const mdcFiles = renderCursorMdc(ir);
+      const mdcDir = join(dir, '.cursor', 'rules');
+      await mkdir(mdcDir, { recursive: true });
+      for (const [filename, content] of mdcFiles) {
+        await writeFile(join(mdcDir, filename), content, 'utf-8');
+      }
+      spinner.succeed(chalk.green(`Initial scan complete. Generated .cursor/rules/ (${mdcFiles.size} files)`));
+    } else {
+      const outputPath = join(dir, outputFile);
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, lastContent, 'utf-8');
+      spinner.succeed(chalk.green(`Initial scan complete. Generated ${outputFile}`));
+    }
     await cache.set(dir, currentScan, ir);
-
-    spinner.succeed(chalk.green(`Initial scan complete. Generated ${outputFile}`));
   } catch (err: unknown) {
     spinner.fail('Initial scan failed');
     const message = err instanceof Error ? err.message : String(err);
@@ -145,11 +162,21 @@ export async function watchCommand(options: WatchOptions = {}): Promise<void> {
 
       if (newContent !== lastContent) {
         lastContent = newContent;
-        const outputPath = join(dir, outputFile);
-        await mkdir(dirname(outputPath), { recursive: true });
-        await writeFile(outputPath, newContent, 'utf-8');
+        if (target === 'cursor-mdc') {
+          const mdcFiles = renderCursorMdc(ir);
+          const mdcDir = join(dir, '.cursor', 'rules');
+          await mkdir(mdcDir, { recursive: true });
+          for (const [filename, content] of mdcFiles) {
+            await writeFile(join(mdcDir, filename), content, 'utf-8');
+          }
+          console.log(chalk.green(`  Updated .cursor/rules/ (${mdcFiles.size} files)`));
+        } else {
+          const outputPath = join(dir, outputFile);
+          await mkdir(dirname(outputPath), { recursive: true });
+          await writeFile(outputPath, newContent, 'utf-8');
+          console.log(chalk.green(`  Updated ${outputFile}`));
+        }
         await cache.set(dir, currentScan, ir);
-        console.log(chalk.green(`  Updated ${outputFile}`));
       } else {
         console.log(chalk.dim('  No content change, skipping write'));
       }

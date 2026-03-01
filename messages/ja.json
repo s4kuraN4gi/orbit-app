@@ -40,7 +40,8 @@
     "deleteError": "プロジェクトの削除に失敗しました",
     "selectPlaceholder": "プロジェクトを選択",
     "createTooltip": "新しいプロジェクトを作成",
-    "deleteTooltip": "プロジェクトを削除"
+    "deleteTooltip": "プロジェクトを削除",
+    "cancel": "キャンセル"
   },
   "auth": {
     "login": "ログイン",
@@ -244,36 +245,6 @@
       "blocking": "ブロック先: {task}"
     }
   },
-  "comments": {
-    "title": "コメント",
-    "count": "コメント ({count})",
-    "noComments": "まだコメントはありません",
-    "placeholder": "コメントを入力... (Cmd+Enter で送信)",
-    "submit": "コメント",
-    "submitting": "送信中...",
-    "edited": "編集済み",
-    "showOlder": "古いコメントを表示 ({count}件)",
-    "showRecent": "最新{count}件のみ表示",
-    "addSuccess": "コメントを追加しました",
-    "addError": "コメントの追加に失敗しました",
-    "updateSuccess": "コメントを更新しました",
-    "updateError": "更新に失敗しました",
-    "deleteSuccess": "コメントを削除しました",
-    "deleteError": "削除に失敗しました"
-  },
-  "labels": {
-    "title": "ラベル",
-    "noLabels": "ラベルなし",
-    "selectLabel": "ラベルを選択",
-    "noLabelsInProject": "ラベルがありません",
-    "createNew": "新しいラベルを作成",
-    "newLabel": "新しいラベル",
-    "labelName": "ラベル名",
-    "createSuccess": "ラベルを作成しました",
-    "createError": "ラベルの作成に失敗しました",
-    "updateError": "ラベルの更新に失敗しました",
-    "loadError": "ラベルの読み込みに失敗しました"
-  },
   "settings": {
     "title": "設定",
     "general": "一般設定",
@@ -374,71 +345,54 @@
     "permissionDenied": "通知が拒否されました"
   },
   "landing": {
+    "badge": "タスク駆動AIワークフローエンジン",
     "hero": {
-      "title": "シンプルで強力なタスク管理",
-      "subtitle": "Orbitで仕事を整理し、チームの生産性を最大化"
+      "title": "タスクからコードへ、適切なコンテキストと共に",
+      "subtitle": "Orbitはタスクとコードベースを接続 — 構造をスキャンし、重要なものにフォーカスし、実装計画を生成します。Claude、Cursor、Copilot対応。"
+    },
+    "terminal": "ターミナル",
+    "cta": {
+      "openDashboard": "ダッシュボードを開く",
+      "getStartedFree": "無料で始める"
     },
     "features": {
-      "views": "3つのビュー",
-      "viewsDesc": "リスト、ボード、ガントチャートで自由に表示",
-      "collaboration": "チームコラボ",
-      "collaborationDesc": "コメントとラベルでスムーズな連携"
+      "title": "タスクがすべてを駆動する",
+      "subtitle": "コードダンプツールとは違い、Orbitは今何を作っているかを理解し、AIに必要なコンテキストだけを提供します。",
+      "scan": "ゼロコンフィグスキャン",
+      "scanDesc": "1コマンドで実行。技術スタック、ルート、DBスキーマ、依存関係を自動検出。",
+      "context": "スマートコンテキスト",
+      "contextDesc": "Git連携のコンテキスト関連性スコアリング。現在のタスクに重要なものにフォーカス。",
+      "taskAware": "実装計画",
+      "taskAwareDesc": "orbit plan でタスクからステップバイステップの実装計画を生成。"
     },
-    "cta": {
-      "start": "無料で始める",
-      "login": "ログイン"
+    "whatScans": {
+      "title": "Orbitがスキャンするもの",
+      "subtitle": "1コマンドで、AIアシスタントがより良いコードを書くために必要なすべてを提供します。",
+      "item1": "技術スタック、フレームワーク、パッケージマネージャー",
+      "item2": "ページ、APIルート、データベーステーブル",
+      "item3": "Gitブランチ、最近のアクティビティ、未コミットの変更",
+      "item4": "ファイル数、最大ファイル、コードメトリクス",
+      "item5": "アクティブなタスクと進捗状況",
+      "item6": "環境変数名（値は含まない）",
+      "tagline": "タスク + 構造 = より良いAI"
+    },
+    "comparison": {
+      "title": "Orbit vs. Repomix",
+      "subtitle": "Repomixはコードベース全体を1ファイルにまとめてAIに渡します。Orbitは構造化されたコンテキスト — アーキテクチャ、依存関係、今取り組んでいることをAIに提供します。",
+      "whenRepomix": "Repomixが適している場合:",
+      "whenRepomixDesc": "AIに特定のソースコードを読ませたいとき。",
+      "whenOrbit": "Orbitが適している場合:",
+      "whenOrbitDesc": "AIにプロジェクトを理解させたいとき — アーキテクチャ、何がどう繋がっているか、次に何を作るか。"
+    },
+    "ctaSection": {
+      "title": "10秒で試せます",
+      "subtitle": "Freeプランあり。今すぐAIワークフローを始めましょう。"
+    },
+    "nav": {
+      "pricing": "料金",
+      "signIn": "ログイン",
+      "getStarted": "始める"
     }
-  },
-  "templates": {
-    "title": "テンプレート管理",
-    "manage": "テンプレートを管理",
-    "select": "テンプレートを選択",
-    "saveAs": "テンプレートとして保存",
-    "create": "テンプレートを作成",
-    "namePlaceholder": "テンプレート名",
-    "noTemplates": "テンプレートがありません",
-    "confirmDelete": "このテンプレートを削除してもよろしいですか？",
-    "saved": "テンプレートを保存しました",
-    "deleted": "テンプレートを削除しました",
-    "loaded": "テンプレートを読み込みました",
-    "manageDesc": "タスクテンプレートの確認と削除"
-  },
-  "dateGroups": {
-    "overdue": "期限切れ",
-    "today": "今日",
-    "tomorrow": "明日",
-    "thisWeek": "今週",
-    "nextWeek": "来週",
-    "later": "以降",
-    "noDate": "期限なし"
-  },
-  "recurrence": {
-    "title": "繰り返し設定",
-    "select": "繰り返し頻度",
-    "none": "繰り返さない",
-    "daily": "毎日",
-    "weekly": "毎週",
-    "monthly": "毎月",
-    "yearly": "毎年",
-    "every": "間隔:",
-    "units": {
-      "daily": "日ごと",
-      "weekly": "週ごと",
-      "monthly": "ヶ月ごと",
-      "yearly": "年ごと"
-    },
-    "repeatOn": "曜日指定",
-    "days": {
-      "su": "日",
-      "mo": "月",
-      "tu": "火",
-      "we": "水",
-      "th": "木",
-      "fr": "金",
-      "sa": "土"
-    },
-    "endDate": "終了日",
-    "noEndDate": "終了日なし"
   },
   "ideas": {
     "title": "アイデアボックス",
@@ -471,7 +425,7 @@
     "importing": "インポート中...",
     "sourceManual": "手動",
     "button": "インポート",
-    "freeLimit": "Freeプラン: 月3回まで",
+    "freeLimit": "Freeプラン: 月1回まで",
     "freeBadge": "Free"
   },
   "pricing": {
@@ -479,9 +433,9 @@
     "free": {
       "name": "Free",
       "period": "/ 永久無料",
-      "feature1": "最大3プロジェクト",
-      "feature2": "プロジェクトあたり50タスク",
-      "feature3": "コンテキスト履歴5件",
+      "feature1": "1プロジェクト",
+      "feature2": "プロジェクトあたり20タスク",
+      "feature3": "コンテキスト履歴3件",
       "feature4": "Markdownエクスポート",
       "cta": "無料で始める"
     },
@@ -493,6 +447,8 @@
       "feature3": "コンテキスト履歴無制限",
       "feature4": "JSON・カスタムエクスポート",
       "feature5": "Context Diff ビュー",
+      "feature6": "スマートコンテキスト（Git連携）",
+      "feature7": "実装計画生成",
       "cta": "Proにアップグレード"
     },
     "currentPlan": "現在のプラン",
@@ -581,6 +537,7 @@
     "linkCopied": "リンクをクリップボードにコピーしました",
     "linkCopyError": "リンクのコピーに失敗しました",
     "copyLink": "コピー",
+    "removeMember": "メンバーを削除",
     "removeMemberConfirm": "このメンバーを削除してもよろしいですか？",
     "memberRemoved": "メンバーを削除しました",
     "removeMemberError": "メンバーの削除に失敗しました",

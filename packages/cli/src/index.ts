@@ -14,6 +14,8 @@ import { scanCommand } from './commands/scan.js';
 import type { ScanOptions } from './commands/scan.js';
 import { watchCommand } from './commands/watch.js';
 import type { WatchOptions } from './commands/watch.js';
+import { planCommand } from './commands/plan.js';
+import type { PlanOptions } from './commands/plan.js';
 import { mcpServeCommand } from './commands/mcp-serve.js';
 import { OrbitError } from './lib/errors.js';
 import type { TaskPriority, TaskStatus } from './types.js';
@@ -96,10 +98,22 @@ program
   .option('-g, --generate-context', 'Generate AI context file from scan results')
   .option('-o, --output <file>', 'Output file for context (default: auto by target)')
   .option('-f, --format <format>', 'Output format: json, yaml, or markdown')
-  .option('-t, --target <target>', 'Context target: claude, cursor, copilot, windsurf (default: claude)')
+  .option('-t, --target <target>', 'Context target: claude, cursor, cursor-mdc, copilot, windsurf (default: claude)')
   .option('--focus', 'Include task-linked focus areas in context')
   .option('--issues', 'Include GitHub issues in context')
+  .option('--smart', 'AI-powered context recommendations (Pro)')
+  .option('-q, --quiet', 'Minimal output (file generation only)')
+  .option('--verbose', 'Show detailed scan output')
   .action((options: ScanOptions) => scanCommand(options));
+
+// --- Plan ---
+
+program
+  .command('plan <task-id>')
+  .description('Generate implementation plan for a task (Pro)')
+  .option('-o, --output <file>', 'Write plan to file')
+  .option('--format <format>', 'Output format: markdown (default) or json')
+  .action((taskId: string, options: PlanOptions) => planCommand(taskId, options));
 
 // --- Watch ---
 
@@ -107,7 +121,7 @@ program
   .command('watch')
   .description('Watch for file changes and auto-regenerate context')
   .option('-o, --output <file>', 'Output file (default: auto by target)')
-  .option('-t, --target <target>', 'Context target: claude, cursor, copilot, windsurf (default: claude)')
+  .option('-t, --target <target>', 'Context target: claude, cursor, cursor-mdc, copilot, windsurf (default: claude)')
   .option('--debounce <ms>', 'Debounce interval in ms (default: 2000)')
   .option('--focus', 'Include task-linked focus areas in context')
   .action((options: WatchOptions) => watchCommand(options));

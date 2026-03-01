@@ -2,6 +2,7 @@ import type { ScanResult } from './detector.js';
 import type { Task } from '../types.js';
 import type { FocusArea } from './task-focus.js';
 import type { ExternalIssue } from './issue-providers/types.js';
+import type { SmartRecommendation } from './smart-context.js';
 
 // ─── Sub-types ───
 
@@ -72,6 +73,7 @@ export interface ContextIR {
     existingFiles: { name: string; path: string }[];
   };
   focusAreas?: FocusArea[];
+  smartRecommendation?: SmartRecommendation;
 }
 
 // ─── Builder ───

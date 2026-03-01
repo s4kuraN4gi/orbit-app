@@ -36,10 +36,23 @@ export interface PlanLimits {
   contextDiff: boolean;
 }
 
+export interface ScanData {
+  techStack?: Record<string, unknown>;
+  pages?: unknown[];
+  apiRoutes?: unknown[];
+  dbTables?: unknown[];
+  exports?: unknown[];
+  imports?: unknown[];
+  files?: unknown[];
+  git?: Record<string, unknown>;
+  envVars?: string[];
+  [key: string]: unknown;
+}
+
 export interface ScanSnapshot {
   id: string;
   project_id: string;
-  scan_data: any;
+  scan_data: ScanData;
   created_at: string;
 }
 

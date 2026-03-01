@@ -59,7 +59,7 @@ export async function updateUserSettings(
 ): Promise<UserSettings | null> {
   const user = await requireUser();
 
-  const setValues: Record<string, any> = { updatedAt: new Date() };
+  const setValues: Partial<typeof userSettings.$inferInsert> = { updatedAt: new Date() };
   if (updates.theme !== undefined) setValues.theme = updates.theme;
   if (updates.default_view !== undefined) setValues.defaultView = updates.default_view;
   if (updates.language !== undefined) setValues.language = updates.language;

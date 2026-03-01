@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { subscriptions, orgSubscriptions } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { subscriptions, orgSubscriptions, member } from '@/lib/schema';
+import { eq, and } from 'drizzle-orm';
 import { stripe, getPriceIdFromPlan } from '@/lib/stripe';
 import { getMemberCount } from '@/lib/subscription';
 import { rateLimit } from '@/lib/rate-limit';
+import { checkoutSchema } from '@/lib/validations';
+import { ZodError } from 'zod';
 import type { PlanTier } from '@/types';
 
 const limiter = rateLimit({ interval: 60_000, maxRequests: 5 });
@@ -17,25 +19,45 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { success } = limiter.check(session.user.id);
+  const { success } = await limiter.check(session.user.id);
   if (!success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
-  const { plan, organizationId } = (await request.json()) as {
-    plan: PlanTier;
-    organizationId?: string;
-  };
-  const priceId = getPriceIdFromPlan(plan);
+  let body;
+  try {
+    const raw = await request.json();
+    body = checkoutSchema.parse(raw);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Invalid request', details: error.errors }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  const { plan, organizationId } = body;
+  const priceId = getPriceIdFromPlan(plan as PlanTier);
   if (!priceId) {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
   }
 
   const userId = session.user.id;
-  const origin = request.headers.get('origin') || process.env.BETTER_AUTH_URL || '';
+  const origin = process.env.BETTER_AUTH_URL || '';
 
   // Team plan checkout
   if (plan === 'team' && organizationId) {
+    // Verify caller is owner/admin of the org
+    const [orgMember] = await db
+      .select({ role: member.role })
+      .from(member)
+      .where(and(
+        eq(member.organizationId, organizationId),
+        eq(member.userId, userId)
+      ));
+    if (!orgMember || (orgMember.role !== 'owner' && orgMember.role !== 'admin')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     let customerId: string | undefined;
     const [orgSub] = await db
       .select({ stripeCustomerId: orgSubscriptions.stripeCustomerId })

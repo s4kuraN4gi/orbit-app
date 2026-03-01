@@ -12,7 +12,7 @@ export async function initCommand(): Promise<void> {
   const spinner = ora('Loading projects...').start();
 
   try {
-    const data = await apiRequest('GET', '/api/cli/projects');
+    const data = await apiRequest<{ projects: Project[] }>('GET', '/api/cli/projects');
     spinner.stop();
 
     const projectList: Project[] = data.projects;

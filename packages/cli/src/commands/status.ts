@@ -12,7 +12,7 @@ export async function statusCommand(): Promise<void> {
   const spinner = ora('Loading status...').start();
 
   try {
-    const data = await apiRequest('GET', `/api/cli/projects/${link.project_id}/tasks`);
+    const data = await apiRequest<{ tasks: Task[] }>('GET', `/api/cli/projects/${link.project_id}/tasks`);
     spinner.stop();
 
     const taskList: Task[] = data.tasks;

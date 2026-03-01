@@ -163,7 +163,16 @@ function generateJson(tasks: Task[], options: ContextOptions): string {
   const stats = calculateStats(tasks);
   const filteredTasks = filterTasks(tasks, options);
 
-  const simplifyTask = (task: Task): any => ({
+  interface SimplifiedTask {
+    title: string;
+    status: string;
+    priority: string;
+    description?: string;
+    due_date?: string;
+    children?: SimplifiedTask[];
+  }
+
+  const simplifyTask = (task: Task): SimplifiedTask => ({
     title: task.title,
     status: task.status,
     priority: task.priority,

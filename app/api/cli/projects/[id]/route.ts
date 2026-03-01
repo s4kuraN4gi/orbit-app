@@ -3,6 +3,8 @@ import { db } from '@/lib/db';
 import { projects } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { authenticateRequest, checkProjectAccess } from '../../auth';
+import { patchProjectSchema } from '@/lib/validations';
+import { ZodError } from 'zod';
 
 export async function PATCH(
   request: Request,
@@ -20,12 +22,20 @@ export async function PATCH(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const body = await request.json();
-  const { local_path } = body;
+  let body;
+  try {
+    const raw = await request.json();
+    body = patchProjectSchema.parse(raw);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Invalid request', details: error.errors }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
 
   const [updated] = await db
     .update(projects)
-    .set({ localPath: local_path })
+    .set({ localPath: body.local_path })
     .where(eq(projects.id, id))
     .returning();
 

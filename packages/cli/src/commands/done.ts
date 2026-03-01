@@ -18,7 +18,7 @@ export async function doneCommand(idPrefix: string): Promise<void> {
   const spinner = ora('Marking task as done...').start();
 
   try {
-    const data = await apiRequest('PATCH', `/api/cli/tasks/${idPrefix}/done`);
+    const data = await apiRequest<{ task: Task }>('PATCH', `/api/cli/tasks/${idPrefix}/done`);
     spinner.stop();
 
     const task: Task = data.task;

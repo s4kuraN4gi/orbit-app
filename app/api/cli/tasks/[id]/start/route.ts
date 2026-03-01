@@ -16,7 +16,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { success } = limiter.check(session.user.id);
+  const { success } = await limiter.check(session.user.id);
   if (!success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
@@ -72,7 +72,9 @@ export async function PATCH(
   return NextResponse.json({ task: formatTask(updated) });
 }
 
-function formatTask(t: any) {
+type TaskRow = typeof import('@/lib/schema').tasks.$inferSelect;
+
+function formatTask(t: TaskRow) {
   return {
     id: t.id,
     title: t.title,

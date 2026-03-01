@@ -4,7 +4,7 @@ import { projects, scanSnapshots } from '@/lib/schema';
 import { eq, asc } from 'drizzle-orm';
 import { authenticateRequest, checkProjectAccess } from '../../../auth';
 import { rateLimit } from '@/lib/rate-limit';
-import { measureAsync } from '@/lib/monitoring';
+import { measureAsync, flushAfterRequest } from '@/lib/monitoring';
 
 const limiter = rateLimit({ interval: 60_000, maxRequests: 10 });
 
@@ -17,7 +17,7 @@ export async function PUT(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { success } = limiter.check(session.user.id);
+  const { success } = await limiter.check(session.user.id);
   if (!success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
@@ -101,6 +101,8 @@ export async function PUT(
 
     return updated;
   }, { projectId: id });
+
+  flushAfterRequest();
 
   return NextResponse.json({
     project: {

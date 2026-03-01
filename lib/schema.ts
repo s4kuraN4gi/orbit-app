@@ -7,6 +7,7 @@ import {
   jsonb,
   unique,
   boolean,
+  index,
 } from 'drizzle-orm/pg-core';
 
 // --------------------------------------------------------
@@ -88,7 +89,10 @@ export const member = pgTable('member', {
     .references(() => user.id, { onDelete: 'cascade' }),
   role: text('role').notNull().default('member'),
   createdAt: timestamp('created_at').notNull(),
-});
+}, (t) => [
+  index('member_user_id_idx').on(t.userId),
+  index('member_organization_id_idx').on(t.organizationId),
+]);
 
 export const invitation = pgTable('invitation', {
   id: text('id').primaryKey(),
@@ -122,7 +126,10 @@ export const projects = pgTable('projects', {
   localPath: text('local_path'),
   scanData: jsonb('scan_data'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+  index('projects_owner_id_idx').on(t.ownerId),
+  index('projects_organization_id_idx').on(t.organizationId),
+]);
 
 export const aiContexts = pgTable('ai_contexts', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -140,7 +147,8 @@ export const tasks = pgTable('tasks', {
   projectId: uuid('project_id')
     .notNull()
     .references(() => projects.id, { onDelete: 'cascade' }),
-  parentId: uuid('parent_id'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Drizzle self-reference requires any
+  parentId: uuid('parent_id').references((): any => tasks.id, { onDelete: 'set null' }),
   aiContextId: uuid('ai_context_id').references(() => aiContexts.id, {
     onDelete: 'set null',
   }),
@@ -153,7 +161,10 @@ export const tasks = pgTable('tasks', {
   completedAt: timestamp('completed_at', { withTimezone: true }),
   position: integer('position').default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+  index('tasks_project_id_idx').on(t.projectId),
+  index('tasks_parent_id_idx').on(t.parentId),
+]);
 
 export const ideas = pgTable('ideas', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -190,7 +201,9 @@ export const scanSnapshots = pgTable('scan_snapshots', {
     .references(() => projects.id, { onDelete: 'cascade' }),
   scanData: jsonb('scan_data').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+  index('scan_snapshots_project_id_idx').on(t.projectId),
+]);
 
 // --------------------------------------------------------
 // Stripe billing tables

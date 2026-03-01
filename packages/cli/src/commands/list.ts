@@ -24,7 +24,7 @@ export async function listCommand(options: ListOptions): Promise<void> {
       path += '?status=todo,in_progress';
     }
 
-    const data = await apiRequest('GET', path);
+    const data = await apiRequest<{ tasks: Task[] }>('GET', path);
     spinner.stop();
 
     const taskList: Task[] = data.tasks;

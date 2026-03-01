@@ -2,19 +2,28 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { tasks, aiContexts, projects } from '@/lib/schema';
-import { eq } from 'drizzle-orm';
+import { tasks, aiContexts } from '@/lib/schema';
 import { rateLimit } from '@/lib/rate-limit';
+import { verifyProjectAccess } from '@/lib/project-access';
+import { bulkCreateSchema } from '@/lib/validations';
+import { ZodError } from 'zod';
 import type { Task } from '@/types';
 
 const limiter = rateLimit({ interval: 60_000, maxRequests: 10 });
+
+const MAX_RECURSION_DEPTH = 5;
 
 async function insertTasks(
   taskList: Task[],
   projectId: string,
   aiContextId: string,
-  parentId: string | null = null
+  parentId: string | null = null,
+  depth: number = 0
 ) {
+  if (depth > MAX_RECURSION_DEPTH) {
+    throw new Error(`Maximum nesting depth (${MAX_RECURSION_DEPTH}) exceeded`);
+  }
+
   for (const task of taskList) {
     const [insertedTask] = await db
       .insert(tasks)
@@ -36,7 +45,7 @@ async function insertTasks(
     }
 
     if (task.children && task.children.length > 0) {
-      await insertTasks(task.children, projectId, aiContextId, insertedTask.id);
+      await insertTasks(task.children, projectId, aiContextId, insertedTask.id, depth + 1);
     }
   }
 }
@@ -56,33 +65,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { success } = limiter.check(session.user.id);
+    const { success } = await limiter.check(session.user.id);
     if (!success) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
-    const body: BulkCreateRequestBody = await request.json();
+    const raw = await request.json();
+    const body = bulkCreateSchema.parse(raw) as BulkCreateRequestBody;
 
-    if (!body.project_id || !body.tasks || !Array.isArray(body.tasks)) {
-      return NextResponse.json(
-        { error: 'Invalid request body. project_id and tasks array are required.' },
-        { status: 400 }
-      );
-    }
-
-    // Authorization: verify project ownership
-    const [project] = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.id, body.project_id));
-
-    if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
-    }
-
-    if (project.ownerId !== session.user.id) {
+    // Authorization: verify project access (personal + org)
+    const access = await verifyProjectAccess(session.user.id, body.project_id);
+    if (!access) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+    const project = access.project;
 
     // 1. Create AI Context
     const [aiContext] = await db
@@ -111,6 +107,9 @@ export async function POST(request: Request) {
       ai_context_id: aiContext.id,
     });
   } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Invalid request', details: error.errors }, { status: 400 });
+    }
     console.error('Unexpected error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },

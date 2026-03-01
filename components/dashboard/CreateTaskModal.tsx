@@ -76,7 +76,6 @@ export function CreateTaskModal({ isOpen, onClose, projectId }: CreateTaskModalP
       onClose();
     } catch (error) {
       toast.error(t('create.error'));
-      console.error(error);
     } finally {
       setIsLoading(false);
     }

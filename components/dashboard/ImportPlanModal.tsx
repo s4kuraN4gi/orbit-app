@@ -88,8 +88,7 @@ export function ImportPlanModal({ isOpen, onClose, projectId, planTier = 'free' 
     if (!markdown.trim()) return [];
     try {
       return parsePlanMarkdown(markdown);
-    } catch (e) {
-      console.error('Parse error:', e);
+    } catch {
       return [];
     }
   }, [markdown]);
@@ -116,9 +115,9 @@ export function ImportPlanModal({ isOpen, onClose, projectId, planTier = 'free' 
       setMarkdown('');
       onClose();
       router.refresh();
-    } catch (error: any) {
-      console.error('Import error:', error);
-      toast.error(t('error') + ': ' + error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast.error(t('error') + ': ' + message);
     } finally {
       setIsImporting(false);
     }
@@ -155,7 +154,7 @@ export function ImportPlanModal({ isOpen, onClose, projectId, planTier = 'free' 
           <div className="flex flex-col gap-2 min-h-0">
             <div className="flex items-center justify-between shrink-0">
               <Label>{t('markdownLabel')}</Label>
-              <Select value={sourceTool} onValueChange={(v: any) => setSourceTool(v)}>
+              <Select value={sourceTool} onValueChange={(v: string) => setSourceTool(v as 'Cursor' | 'Antigravity' | 'Manual')}>
                 <SelectTrigger className="w-[140px] h-8">
                   <SelectValue />
                 </SelectTrigger>

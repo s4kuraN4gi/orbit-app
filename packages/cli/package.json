@@ -13,7 +13,8 @@
     "./detector": "./dist/lib/detector.js",
     "./context-ir": "./dist/lib/context-ir.js",
     "./cache": "./dist/lib/cache.js",
-    "./task-focus": "./dist/lib/task-focus.js"
+    "./task-focus": "./dist/lib/task-focus.js",
+    "./mcp-tools": "./dist/lib/mcp-tools.js"
   },
   "repository": {
     "type": "git",
@@ -46,8 +47,8 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@types/prompts": "^2.4.9",
     "@types/node": "^20",
+    "@types/prompts": "^2.4.9",
     "tsup": "^8.4.0",
     "tsx": "^4.21.0",
     "typescript": "^5"

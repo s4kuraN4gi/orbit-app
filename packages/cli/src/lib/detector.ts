@@ -65,7 +65,7 @@ function categorize(pkg: string): string {
   return 'Other';
 }
 
-export async function readJson(path: string): Promise<any> {
+export async function readJson(path: string): Promise<unknown> {
   try {
     const raw = await readFile(path, 'utf-8');
     return JSON.parse(raw);
@@ -396,7 +396,12 @@ export interface TechAndDeps {
 }
 
 export async function scanTechAndDeps(dir: string): Promise<TechAndDeps> {
-  const pkg = await readJson(join(dir, 'package.json'));
+  const pkg = await readJson(join(dir, 'package.json')) as {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    engines?: { node?: string };
+    scripts?: Record<string, string>;
+  } | null;
 
   const techStack: string[] = [];
   const allDeps = { ...pkg?.dependencies, ...pkg?.devDependencies };

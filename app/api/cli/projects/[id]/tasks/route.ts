@@ -3,6 +3,11 @@ import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { eq, asc, and, inArray, desc } from 'drizzle-orm';
 import { authenticateRequest, checkProjectAccess } from '../../../auth';
+import { createTaskSchema } from '@/lib/validations';
+import { ZodError } from 'zod';
+import { rateLimit } from '@/lib/rate-limit';
+
+const limiter = rateLimit({ interval: 60_000, maxRequests: 30 });
 
 export async function GET(
   request: Request,
@@ -11,6 +16,11 @@ export async function GET(
   const session = await authenticateRequest(request);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { success } = await limiter.check(session.user.id);
+  if (!success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   const { id } = await params;
@@ -62,6 +72,11 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const { success: rateLimitOk } = await limiter.check(session.user.id);
+  if (!rateLimitOk) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   const { id } = await params;
 
   const project = await checkProjectAccess(session.user.id, id);
@@ -69,12 +84,18 @@ export async function POST(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const body = await request.json();
-  const { title, description, priority, status } = body;
-
-  if (!title) {
-    return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+  let body;
+  try {
+    const raw = await request.json();
+    body = createTaskSchema.parse(raw);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Invalid request', details: error.errors }, { status: 400 });
+    }
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
+
+  const { title, description, priority, status } = body;
 
   // Calculate position
   const [maxPosData] = await db

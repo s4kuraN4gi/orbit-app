@@ -26,6 +26,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm tsc --noEmit
+      - run: pnpm test
+
       # Build @orbit-cli/core first (peer dependency)
       - run: pnpm --filter @orbit-cli/core build
 

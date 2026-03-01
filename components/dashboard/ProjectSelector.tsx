@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Select,
@@ -10,6 +10,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Plus, FolderKanban, Trash2, Users } from 'lucide-react';
 import { CreateProjectModal } from './CreateProjectModal';
 import { deleteProject } from '@/app/actions/project';
@@ -41,38 +49,36 @@ interface ProjectSelectorProps {
 export function ProjectSelector({ projects, currentProjectId, onProjectChange, planTier, organizations }: ProjectSelectorProps) {
   const router = useRouter();
   const t = useTranslations('project');
-  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const handleProjectCreated = (projectId: string) => {
     onProjectChange(projectId);
   };
 
-  const handleDeleteProject = async () => {
+  const handleDeleteClick = () => {
     if (!currentProjectId) return;
-
     const currentProject = projects.find(p => p.id === currentProjectId);
     if (!currentProject) return;
+    setConfirmDeleteOpen(true);
+  };
 
-    const confirmed = confirm(
-      t('deleteConfirm', { name: currentProject.name })
-    );
-
-    if (!confirmed) return;
-
+  const handleConfirmDelete = async () => {
+    setConfirmDeleteOpen(false);
     setIsDeleting(true);
     try {
       await deleteProject(currentProjectId);
       toast.success(t('deleteSuccess'));
-      // Navigate to dashboard without specific project
       router.push('/dashboard');
-    } catch (error) {
+    } catch {
       toast.error(t('deleteError'));
-      console.error(error);
     } finally {
       setIsDeleting(false);
     }
   };
+
+  const currentProject = projects.find(p => p.id === currentProjectId);
 
   return (
     <div className="flex items-center gap-2">
@@ -106,7 +112,7 @@ export function ProjectSelector({ projects, currentProjectId, onProjectChange, p
         <Button
           variant="outline"
           size="icon"
-          onClick={handleDeleteProject}
+          onClick={handleDeleteClick}
           disabled={isDeleting}
           title={t('deleteTooltip')}
           className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
@@ -123,6 +129,25 @@ export function ProjectSelector({ projects, currentProjectId, onProjectChange, p
         currentProjectCount={projects.length}
         organizations={organizations}
       />
+
+      <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('deleteTooltip')}</DialogTitle>
+            <DialogDescription>
+              {t('deleteConfirm', { name: currentProject?.name ?? '' })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)}>
+              {t('cancel')}
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              {t('deleteTooltip')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

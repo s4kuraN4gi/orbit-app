@@ -58,3 +58,12 @@ export async function clearSession(): Promise<void> {
 export function sessionExists(): boolean {
   return existsSync(SESSION_PATH);
 }
+
+export async function isLoggedIn(): Promise<boolean> {
+  try {
+    const session = await loadSession();
+    return !!session?.token;
+  } catch {
+    return false;
+  }
+}

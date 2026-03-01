@@ -6,13 +6,15 @@ import { useRouter } from 'next/navigation';
 import { Check, Users, Shield, CreditCard, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import type { PlanTier } from '@/types';
+import type { PlanTier, Organization } from '@/types';
 
 interface PricingTableProps {
   isLoggedIn?: boolean;
   currentPlan?: PlanTier;
+  userOrganization?: Organization | null;
 }
 
 interface PlanCard {
@@ -24,11 +26,13 @@ interface PlanCard {
   highlighted?: boolean;
 }
 
-export function PricingTable({ isLoggedIn = false, currentPlan = 'free' }: PricingTableProps) {
+export function PricingTable({ isLoggedIn = false, currentPlan = 'free', userOrganization }: PricingTableProps) {
   const t = useTranslations('pricing');
   const tTeam = useTranslations('pricing.teamDetails');
   const router = useRouter();
   const [loading, setLoading] = useState<PlanTier | null>(null);
+  const [showOrgDialog, setShowOrgDialog] = useState(false);
+  const [orgName, setOrgName] = useState('');
 
   const plans: PlanCard[] = [
     {
@@ -46,7 +50,7 @@ export function PricingTable({ isLoggedIn = false, currentPlan = 'free' }: Prici
     {
       tier: 'pro',
       label: t('pro.name'),
-      price: '$9',
+      price: '$12',
       period: t('pro.period'),
       features: [
         t('pro.feature1'),
@@ -54,13 +58,15 @@ export function PricingTable({ isLoggedIn = false, currentPlan = 'free' }: Prici
         t('pro.feature3'),
         t('pro.feature4'),
         t('pro.feature5'),
+        t('pro.feature6'),
+        t('pro.feature7'),
       ],
       highlighted: true,
     },
     {
       tier: 'team',
       label: t('team.name'),
-      price: '$19',
+      price: '$20',
       period: t('team.period'),
       features: [
         t('team.feature1'),
@@ -73,26 +79,13 @@ export function PricingTable({ isLoggedIn = false, currentPlan = 'free' }: Prici
     },
   ];
 
-  const handleUpgrade = async (plan: PlanTier) => {
-    if (!isLoggedIn) {
-      router.push('/login');
-      return;
-    }
-
-    if (plan === 'free' || plan === currentPlan) return;
-
-    // Team plan: redirect to settings to create/select team first
-    if (plan === 'team') {
-      router.push('/settings');
-      return;
-    }
-
+  const proceedToCheckout = async (plan: PlanTier, organizationId?: string) => {
     setLoading(plan);
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, organizationId }),
       });
 
       const data = await res.json();
@@ -104,6 +97,55 @@ export function PricingTable({ isLoggedIn = false, currentPlan = 'free' }: Prici
     } catch {
       toast.error(t('checkoutError'));
     } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleUpgrade = async (plan: PlanTier) => {
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+
+    if (plan === 'free' || plan === currentPlan) return;
+
+    if (plan === 'team') {
+      if (userOrganization) {
+        await proceedToCheckout('team', userOrganization.id);
+      } else {
+        setShowOrgDialog(true);
+      }
+      return;
+    }
+
+    await proceedToCheckout(plan);
+  };
+
+  const handleCreateOrgAndCheckout = async () => {
+    if (!orgName.trim()) return;
+
+    setLoading('team');
+    try {
+      const slug = orgName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const res = await fetch('/api/auth/organization/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: orgName.trim(), slug }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || t('checkoutError'));
+        setLoading(null);
+        return;
+      }
+
+      const org = await res.json();
+      setShowOrgDialog(false);
+      setOrgName('');
+      await proceedToCheckout('team', org.id);
+    } catch {
+      toast.error(t('checkoutError'));
       setLoading(null);
     }
   };
@@ -127,6 +169,38 @@ export function PricingTable({ isLoggedIn = false, currentPlan = 'free' }: Prici
 
   return (
     <div className="space-y-16">
+      {/* Inline Org Creation Dialog */}
+      {showOrgDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-card border rounded-2xl p-8 max-w-md w-full mx-4 shadow-xl">
+            <h3 className="text-xl font-bold mb-2">{t('team.name')}</h3>
+            <p className="text-sm text-muted-foreground mb-4">{tTeam('title')}</p>
+            <Input
+              placeholder={t('team.name')}
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateOrgAndCheckout()}
+              className="mb-4"
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => { setShowOrgDialog(false); setOrgName(''); }}
+              >
+Cancel
+              </Button>
+              <Button
+                onClick={handleCreateOrgAndCheckout}
+                disabled={!orgName.trim() || loading === 'team'}
+              >
+                {loading === 'team' ? t('processing') : t('team.cta')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Plan Cards */}
       <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {plans.map((plan) => {

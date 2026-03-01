@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { aiContexts, tasks, scanSnapshots } from '@/lib/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { requireProjectOwner } from '@/lib/auth-helpers';
+import type { ScanData } from '@/types';
 
 export async function getContextHistory(projectId: string, limit = 20) {
   await requireProjectOwner(projectId);
@@ -50,7 +51,7 @@ export async function getScanSnapshots(projectId: string, limit = 50) {
   return snapshots.map((s) => ({
     id: s.id,
     project_id: projectId,
-    scan_data: s.scanData,
+    scan_data: s.scanData as ScanData,
     created_at: s.createdAt?.toISOString() ?? '',
   }));
 }

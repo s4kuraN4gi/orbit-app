@@ -97,7 +97,7 @@ export async function bulkCreateTasks(
     revalidatePath('/dashboard');
 
     return { success: true, ai_context_id: aiContext.id };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Bulk create error:', error);
     return { success: false, error: 'Internal error' };
   }

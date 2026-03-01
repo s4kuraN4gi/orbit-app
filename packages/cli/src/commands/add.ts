@@ -18,7 +18,7 @@ export async function addCommand(title: string, options: AddOptions): Promise<vo
   const spinner = ora('Creating task...').start();
 
   try {
-    const data = await apiRequest('POST', `/api/cli/projects/${link.project_id}/tasks`, {
+    const data = await apiRequest<{ task: Task }>('POST', `/api/cli/projects/${link.project_id}/tasks`, {
       title,
       description: options.description || undefined,
       priority: options.priority || 'medium',

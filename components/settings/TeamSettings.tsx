@@ -8,6 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Users, Plus, Copy, Trash2, Crown, Shield, User, CreditCard } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
@@ -65,6 +73,9 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
   const [inviteRole, setInviteRole] = useState<OrgRole>('member');
   const [inviteLink, setInviteLink] = useState('');
 
+  // Remove member confirm dialog
+  const [removeMemberId, setRemoveMemberId] = useState<string | null>(null);
+
   useEffect(() => {
     loadOrganizations();
   }, []);
@@ -94,8 +105,8 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
       if (result.data) {
         setActiveOrg(result.data as unknown as OrganizationData);
       }
-    } catch (err) {
-      console.error('Failed to load org:', err);
+    } catch {
+      toast.error('Failed to load organization');
     }
   };
 
@@ -161,14 +172,18 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
     }
   };
 
-  const handleRemoveMember = async (memberId: string) => {
-    if (!activeOrg) return;
-    if (!confirm(t('removeMemberConfirm'))) return;
+  const handleRemoveMemberClick = (memberId: string) => {
+    setRemoveMemberId(memberId);
+  };
+
+  const handleConfirmRemoveMember = async () => {
+    if (!activeOrg || !removeMemberId) return;
+    setRemoveMemberId(null);
 
     startTransition(async () => {
       try {
         await authClient.organization.removeMember({
-          memberIdOrEmail: memberId,
+          memberIdOrEmail: removeMemberId,
           organizationId: activeOrg.id,
         });
         toast.success(t('memberRemoved'));
@@ -397,7 +412,7 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-red-500"
-                          onClick={() => handleRemoveMember(m.id)}
+                          onClick={() => handleRemoveMemberClick(m.id)}
                           disabled={isPending}
                         >
                           <Trash2 className="h-3 w-3" />
@@ -509,6 +524,25 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
             )}
           </>
         )}
+
+        <Dialog open={removeMemberId !== null} onOpenChange={(open) => { if (!open) setRemoveMemberId(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('removeMember')}</DialogTitle>
+              <DialogDescription>
+                {t('removeMemberConfirm')}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRemoveMemberId(null)}>
+                {t('cancel')}
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmRemoveMember}>
+                {t('removeMember')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

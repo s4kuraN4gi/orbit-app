@@ -44,10 +44,8 @@ const colorKeys: (keyof ThemeColors)[] = [
 export function SettingsView({ initialSettings, userEmail, userId, currentPlan = 'free', subscription }: SettingsViewProps) {
   const t = useTranslations('settings');
   const tCommon = useTranslations('common');
-  const tDashboard = useTranslations('dashboard');
   const [isPending, startTransition] = useTransition();
   const { theme, setTheme: setThemeContext, setCustomColors: setContextColors } = useTheme();
-  const [defaultView, setDefaultView] = useState<'list' | 'board' | 'gantt'>(initialSettings?.default_view || 'list');
   const [language, setLanguage] = useState<'ja' | 'en'>(initialSettings?.language || 'ja');
   
   // Custom colors state
@@ -93,18 +91,6 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
       try {
         await updateUserSettings({ theme: value });
         toast.success(t('themeUpdated'));
-      } catch {
-        toast.error(t('updateError'));
-      }
-    });
-  };
-
-  const handleDefaultViewChange = (value: 'list' | 'board' | 'gantt') => {
-    setDefaultView(value);
-    startTransition(async () => {
-      try {
-        await updateUserSettings({ default_view: value });
-        toast.success(t('defaultViewUpdated'));
       } catch {
         toast.error(t('updateError'));
       }
@@ -227,26 +213,6 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
                       <Monitor className="h-4 w-4" /> {t('theme.system')}
                     </div>
                   </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Separator />
-
-            {/* Default View */}
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>{t('defaultView.title')}</Label>
-                <p className="text-sm text-muted-foreground">{t('defaultView.description')}</p>
-              </div>
-              <Select value={defaultView} onValueChange={handleDefaultViewChange} disabled={isPending}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="list">{tDashboard('views.list')}</SelectItem>
-                  <SelectItem value="board">{tDashboard('views.board')}</SelectItem>
-                  <SelectItem value="gantt">{tDashboard('views.gantt')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -407,14 +373,6 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
               <div className="flex items-center justify-between">
                 <span>{t('shortcuts.listView')}</span>
                 <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">1</kbd>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>{t('shortcuts.boardView')}</span>
-                <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">2</kbd>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>{t('shortcuts.ganttView')}</span>
-                <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">3</kbd>
               </div>
               <div className="flex items-center justify-between">
                 <span>{t('shortcuts.closeModal')}</span>

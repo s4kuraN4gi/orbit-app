@@ -152,8 +152,8 @@ export async function getUsageCount(userId: string, feature: string): Promise<nu
 /**
  * Plan guard -- throws if user doesn't have required plan.
  */
-export async function requirePlan(userId: string, requiredPlan: PlanTier): Promise<void> {
-  const plan = await getSubscriptionPlan(userId);
+export async function requirePlan(userId: string, requiredPlan: PlanTier, orgId?: string | null): Promise<void> {
+  const plan = await getEffectivePlan(userId, orgId);
   const planOrder: Record<PlanTier, number> = { free: 0, pro: 1, team: 2 };
 
   if (planOrder[plan] < planOrder[requiredPlan]) {
