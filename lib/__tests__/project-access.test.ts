@@ -2,18 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // --- Mock setup ---
 
-const mockSelectResult: any[] = [];
-let selectCallCount = 0;
+let mockQueryResult: any[] = [];
 
 vi.mock('@/lib/db', () => ({
   db: {
     select: vi.fn(() => ({
       from: vi.fn(() => ({
-        where: vi.fn(() => {
-          const result = mockSelectResult[selectCallCount] ?? [];
-          selectCallCount++;
-          return Promise.resolve(Array.isArray(result) ? result : [result]);
-        }),
+        leftJoin: vi.fn(() => ({
+          where: vi.fn(() => Promise.resolve(mockQueryResult)),
+        })),
       })),
     })),
   },
@@ -34,12 +31,11 @@ vi.mock('drizzle-orm', () => ({
 describe('verifyProjectAccess', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSelectResult.length = 0;
-    selectCallCount = 0;
+    mockQueryResult = [];
   });
 
   it('returns null when project does not exist', async () => {
-    mockSelectResult[0] = []; // No project found
+    mockQueryResult = []; // No row returned
 
     const { verifyProjectAccess } = await import('../project-access');
     const result = await verifyProjectAccess('user-1', 'project-nonexistent');
@@ -47,12 +43,16 @@ describe('verifyProjectAccess', () => {
   });
 
   it('allows owner to access their personal project', async () => {
-    mockSelectResult[0] = [{
-      id: 'project-1',
-      ownerId: 'user-1',
-      organizationId: null,
-      name: 'My Project',
-      key: 'MP',
+    mockQueryResult = [{
+      project: {
+        id: 'project-1',
+        ownerId: 'user-1',
+        organizationId: null,
+        name: 'My Project',
+        key: 'MP',
+      },
+      memberId: null,
+      memberRole: null,
     }];
 
     const { verifyProjectAccess } = await import('../project-access');
@@ -62,12 +62,16 @@ describe('verifyProjectAccess', () => {
   });
 
   it('denies access to another user\'s personal project', async () => {
-    mockSelectResult[0] = [{
-      id: 'project-1',
-      ownerId: 'user-1',
-      organizationId: null,
-      name: 'My Project',
-      key: 'MP',
+    mockQueryResult = [{
+      project: {
+        id: 'project-1',
+        ownerId: 'user-1',
+        organizationId: null,
+        name: 'My Project',
+        key: 'MP',
+      },
+      memberId: null,
+      memberRole: null,
     }];
 
     const { verifyProjectAccess } = await import('../project-access');
@@ -76,16 +80,16 @@ describe('verifyProjectAccess', () => {
   });
 
   it('allows org member to access org project', async () => {
-    mockSelectResult[0] = [{
-      id: 'project-org',
-      ownerId: 'user-1',
-      organizationId: 'org-1',
-      name: 'Team Project',
-      key: 'TP',
-    }];
-    mockSelectResult[1] = [{
-      id: 'member-1',
-      role: 'member',
+    mockQueryResult = [{
+      project: {
+        id: 'project-org',
+        ownerId: 'user-1',
+        organizationId: 'org-1',
+        name: 'Team Project',
+        key: 'TP',
+      },
+      memberId: 'member-1',
+      memberRole: 'member',
     }];
 
     const { verifyProjectAccess } = await import('../project-access');
@@ -95,14 +99,17 @@ describe('verifyProjectAccess', () => {
   });
 
   it('denies non-member access to org project', async () => {
-    mockSelectResult[0] = [{
-      id: 'project-org',
-      ownerId: 'user-1',
-      organizationId: 'org-1',
-      name: 'Team Project',
-      key: 'TP',
+    mockQueryResult = [{
+      project: {
+        id: 'project-org',
+        ownerId: 'user-1',
+        organizationId: 'org-1',
+        name: 'Team Project',
+        key: 'TP',
+      },
+      memberId: null,
+      memberRole: null,
     }];
-    mockSelectResult[1] = []; // Not a member
 
     const { verifyProjectAccess } = await import('../project-access');
     const result = await verifyProjectAccess('user-3', 'project-org');

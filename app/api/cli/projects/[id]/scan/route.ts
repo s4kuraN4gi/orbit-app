@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { projects, scanSnapshots } from '@/lib/schema';
-import { eq, asc } from 'drizzle-orm';
+import { eq, desc, and, notInArray } from 'drizzle-orm';
 import { authenticateRequest, checkProjectAccess } from '../../../auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { measureAsync, flushAfterRequest } from '@/lib/monitoring';
@@ -73,30 +73,38 @@ export async function PUT(
   }
 
   const result = await measureAsync('scan_upload', async () => {
-    const [updated] = await db
-      .update(projects)
-      .set({ scanData: scan_data })
-      .where(eq(projects.id, id))
-      .returning();
-
-    // Save scan snapshot for history
-    await db.insert(scanSnapshots).values({
-      projectId: id,
-      scanData: scan_data,
-    });
+    // Batch update project + insert snapshot (1 HTTP round-trip)
+    const [[updated]] = await db.batch([
+      db.update(projects)
+        .set({ scanData: scan_data })
+        .where(eq(projects.id, id))
+        .returning(),
+      db.insert(scanSnapshots).values({
+        projectId: id,
+        scanData: scan_data,
+      }),
+    ]);
 
     // Keep only latest 50 snapshots per project
-    const allSnapshots = await db
+    const keepIds = await db
       .select({ id: scanSnapshots.id })
       .from(scanSnapshots)
       .where(eq(scanSnapshots.projectId, id))
-      .orderBy(asc(scanSnapshots.createdAt));
+      .orderBy(desc(scanSnapshots.createdAt))
+      .limit(50);
 
-    if (allSnapshots.length > 50) {
-      const toDelete = allSnapshots.slice(0, allSnapshots.length - 50);
-      for (const s of toDelete) {
-        await db.delete(scanSnapshots).where(eq(scanSnapshots.id, s.id));
-      }
+    if (keepIds.length >= 50) {
+      await db
+        .delete(scanSnapshots)
+        .where(
+          and(
+            eq(scanSnapshots.projectId, id),
+            notInArray(
+              scanSnapshots.id,
+              keepIds.map((s) => s.id)
+            )
+          )
+        );
     }
 
     return updated;

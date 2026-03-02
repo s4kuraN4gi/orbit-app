@@ -89,7 +89,7 @@ export async function convertIdeaToTask(ideaId: string): Promise<string | null> 
   if (!idea) throw new Error('Idea not found');
   await requireProjectOwner(idea.projectId);
 
-  // Create a new task from the idea content
+  // Create task from idea — need returning() so can't fully batch
   const [task] = await db
     .insert(tasks)
     .values({
@@ -103,7 +103,7 @@ export async function convertIdeaToTask(ideaId: string): Promise<string | null> 
 
   if (!task) return null;
 
-  // Update the idea with the converted task ID
+  // Update idea with converted task ID
   await db
     .update(ideas)
     .set({ convertedTaskId: task.id })

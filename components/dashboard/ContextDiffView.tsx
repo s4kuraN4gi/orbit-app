@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { PricingGate } from './PricingGate';
 import { getScanSnapshots } from '@/app/actions/context';
-import type { PlanTier, ScanSnapshot } from '@/types';
+import type { PlanTier, ScanSnapshot, ScanData, ScanDependency, ScanApiRoute, ScanDbTable } from '@/types';
 
 interface ContextDiffViewProps {
   projectId: string;
@@ -54,42 +54,7 @@ function diffScalar(category: string, key: string, before: unknown, after: unkno
   return { category, key, type: 'changed', before: String(b), after: String(a) };
 }
 
-interface ScanDependency {
-  category: string;
-  packages: string[];
-}
-
-interface ScanApiRoute {
-  method: string;
-  path: string;
-}
-
-interface ScanDbTable {
-  name: string;
-  columns: number;
-}
-
-interface ScanDataFull {
-  techStack?: string[];
-  packageManager?: string;
-  nodeVersion?: string;
-  dependencies?: ScanDependency[];
-  depCount?: { total: number };
-  structure?: {
-    pages?: string[];
-    apiRoutes?: ScanApiRoute[];
-    dbTables?: ScanDbTable[];
-  };
-  codeMetrics?: { totalFiles?: number; totalLines?: number };
-  exports?: unknown[];
-  importGraph?: unknown[];
-  envVars?: string[];
-  git?: { branch?: string; totalCommits?: number };
-  deployment?: { platform?: string; ci?: string };
-  scripts?: Record<string, string>;
-}
-
-function computeScanDiff(before: ScanDataFull, after: ScanDataFull): DiffItem[] {
+function computeScanDiff(before: ScanData, after: ScanData): DiffItem[] {
   if (!before || !after) return [];
   const diffs: DiffItem[] = [];
 
@@ -234,6 +199,7 @@ function DiffSummary({ diffs }: { diffs: DiffItem[] }) {
 
 export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps) {
   const t = useTranslations('contextDiff');
+  const tCommon = useTranslations('common');
   const [snapshots, setSnapshots] = useState<ScanSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [beforeId, setBeforeId] = useState<string>('');
@@ -252,7 +218,7 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
           }
         }
       })
-      .catch(() => toast.error('Failed to load snapshots'))
+      .catch(() => toast.error(tCommon('errorLoadSnapshots')))
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [projectId]);
@@ -261,7 +227,7 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
     const before = snapshots.find((s) => s.id === beforeId);
     const after = snapshots.find((s) => s.id === afterId);
     if (!before || !after) return [];
-    return computeScanDiff(before.scan_data as ScanDataFull, after.scan_data as ScanDataFull);
+    return computeScanDiff(before.scan_data as ScanData, after.scan_data as ScanData);
   }, [snapshots, beforeId, afterId]);
 
   // Group diffs by category, preserving order of first appearance

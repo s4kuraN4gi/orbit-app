@@ -62,16 +62,16 @@ function flattenTasks(taskList: Task[]): Task[] {
   return result;
 }
 
-function daysAgo(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
-  if (diff === 0) return 'today';
-  if (diff === 1) return '1 day ago';
-  return `${diff} days ago`;
-}
-
 export function ProjectOverview({ scanData, tasks }: ProjectOverviewProps) {
   const t = useTranslations('dashboard.scan');
   const tStats = useTranslations('dashboard.stats');
+  const tCommon = useTranslations('common');
+
+  const daysAgo = (dateStr: string): string => {
+    const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+    if (diff === 0) return tCommon('today');
+    return tCommon('daysAgo', { count: diff });
+  };
 
   const allTasks = flattenTasks(tasks);
   const totalTasks = allTasks.length;

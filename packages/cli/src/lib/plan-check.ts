@@ -8,6 +8,8 @@ interface PlanInfo {
 }
 
 let cachedPlan: PlanInfo | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export async function checkFeatureAccess(feature: string): Promise<{ allowed: boolean; message?: string }> {
   // Unauthenticated users must log in to use gated features
@@ -19,8 +21,9 @@ export async function checkFeatureAccess(feature: string): Promise<{ allowed: bo
   }
 
   try {
-    if (!cachedPlan) {
+    if (!cachedPlan || Date.now() - cacheTimestamp > CACHE_TTL_MS) {
       cachedPlan = await apiRequest<PlanInfo>('GET', '/api/cli/plan');
+      cacheTimestamp = Date.now();
     }
 
     const plan = cachedPlan!;
@@ -49,7 +52,8 @@ export async function recordFeatureUsage(feature: string): Promise<void> {
   if (!(await isLoggedIn())) return;
   try {
     await apiRequest('POST', '/api/cli/usage', { feature });
-    cachedPlan = null; // Clear cache
+    cachedPlan = null;
+    cacheTimestamp = 0;
   } catch {
     // Recording failure is non-critical
   }

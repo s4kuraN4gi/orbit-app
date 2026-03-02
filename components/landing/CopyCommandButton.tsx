@@ -14,7 +14,7 @@ export function CopyCommandButton() {
   };
 
   return (
-    <Button size="lg" className="px-8 h-12 text-base font-mono" onClick={handleCopy}>
+    <Button size="lg" variant="outline" className="px-8 h-12 text-base font-mono" onClick={handleCopy}>
       <Terminal className="mr-2 h-4 w-4" />
       npx @orbit-cli/core scan -g
       {copied ? <Check className="ml-2 h-4 w-4" /> : <Copy className="ml-2 h-4 w-4" />}

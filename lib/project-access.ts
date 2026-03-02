@@ -8,27 +8,33 @@ import { eq, and } from 'drizzle-orm';
  *
  * Returns { project, role } if the user has access, null otherwise.
  * Does NOT throw — callers decide how to handle denial.
+ *
+ * Uses a single LEFT JOIN query for both personal and team projects.
  */
 export async function verifyProjectAccess(userId: string, projectId: string) {
-  const [project] = await db
-    .select()
+  const [row] = await db
+    .select({
+      project: projects,
+      memberId: member.id,
+      memberRole: member.role,
+    })
     .from(projects)
+    .leftJoin(
+      member,
+      and(
+        eq(member.organizationId, projects.organizationId),
+        eq(member.userId, userId)
+      )
+    )
     .where(eq(projects.id, projectId));
 
-  if (!project) return null;
+  if (!row) return null;
 
-  // Team project — check org membership
+  const project = row.project;
+
+  // Team project — check org membership via JOIN result
   if (project.organizationId) {
-    const [m] = await db
-      .select({ id: member.id, role: member.role })
-      .from(member)
-      .where(
-        and(
-          eq(member.organizationId, project.organizationId),
-          eq(member.userId, userId)
-        )
-      );
-    return m ? { project, role: m.role } : null;
+    return row.memberId ? { project, role: row.memberRole! } : null;
   }
 
   // Personal project — check ownership

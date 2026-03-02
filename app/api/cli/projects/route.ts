@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { projects, member } from '@/lib/schema';
-import { eq, desc, or, inArray } from 'drizzle-orm';
+import { eq, desc, or, sql } from 'drizzle-orm';
 import { authenticateRequest } from '../auth';
 import { rateLimit } from '@/lib/rate-limit';
 
@@ -20,25 +20,31 @@ export async function GET(request: Request) {
 
   const userId = session.user.id;
 
-  // Get org IDs user belongs to
-  const memberships = await db
-    .select({ organizationId: member.organizationId })
-    .from(member)
-    .where(eq(member.userId, userId));
-
-  const orgIds = memberships.map((m) => m.organizationId);
-
-  // Fetch personal + team projects
-  const conditions = [eq(projects.ownerId, userId)];
-  if (orgIds.length > 0) {
-    conditions.push(inArray(projects.organizationId, orgIds));
-  }
-
-  const data = await db
-    .select()
+  // Single query: LEFT JOIN member to find projects user owns OR is a member of the org
+  const rows = await db
+    .select({ project: projects })
     .from(projects)
-    .where(or(...conditions))
+    .leftJoin(
+      member,
+      sql`${member.organizationId} = ${projects.organizationId} AND ${member.userId} = ${userId}`
+    )
+    .where(
+      or(
+        eq(projects.ownerId, userId),
+        sql`${member.id} IS NOT NULL`
+      )
+    )
     .orderBy(desc(projects.createdAt));
+
+  // Deduplicate
+  const seen = new Set<string>();
+  const data = rows
+    .map((r) => r.project)
+    .filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
 
   return NextResponse.json({
     projects: data.map((p) => ({

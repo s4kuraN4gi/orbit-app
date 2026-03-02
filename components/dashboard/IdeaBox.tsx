@@ -144,7 +144,7 @@ export function IdeaBox({ projectId, onTaskCreated }: IdeaBoxProps) {
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {isLoading ? (
           <div className="text-center text-muted-foreground py-8">
-            {t('loading') || '読み込み中...'}
+            {t('loading')}
           </div>
         ) : ideas.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
@@ -181,7 +181,7 @@ export function IdeaBox({ projectId, onTaskCreated }: IdeaBoxProps) {
                     {new Date(idea.created_at).toLocaleDateString()}
                   </span>
                   {idea.notes && !expandedIdeaId && (
-                    <span className="text-xs text-blue-500">メモあり</span>
+                    <span className="text-xs text-blue-500">{t('hasNotes')}</span>
                   )}
                 </div>
               </div>
@@ -193,7 +193,7 @@ export function IdeaBox({ projectId, onTaskCreated }: IdeaBoxProps) {
                     value={editingNotes}
                     onChange={(e) => setEditingNotes(e.target.value)}
                     onBlur={() => handleSaveNotes(idea.id)}
-                    placeholder={t('notesPlaceholder') || 'メモを入力...'}
+                    placeholder={t('notesPlaceholder')}
                     className="mt-2 text-sm min-h-[80px] resize-none"
                     maxLength={5000}
                   />
@@ -208,7 +208,7 @@ export function IdeaBox({ projectId, onTaskCreated }: IdeaBoxProps) {
                 {idea.converted_task_id ? (
                   <span className="text-xs text-green-600 flex items-center gap-1">
                     <Check className="h-3 w-3" />
-                    {t('convertedLabel') || '変換済み'}
+                    {t('convertedLabel')}
                   </span>
                 ) : (
                   <>

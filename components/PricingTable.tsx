@@ -28,6 +28,7 @@ interface PlanCard {
 
 export function PricingTable({ isLoggedIn = false, currentPlan = 'free', userOrganization }: PricingTableProps) {
   const t = useTranslations('pricing');
+  const tCommon = useTranslations('common');
   const tTeam = useTranslations('pricing.teamDetails');
   const router = useRouter();
   const [loading, setLoading] = useState<PlanTier | null>(null);
@@ -188,7 +189,7 @@ export function PricingTable({ isLoggedIn = false, currentPlan = 'free', userOrg
                 variant="outline"
                 onClick={() => { setShowOrgDialog(false); setOrgName(''); }}
               >
-Cancel
+{tCommon('cancel')}
               </Button>
               <Button
                 onClick={handleCreateOrgAndCheckout}

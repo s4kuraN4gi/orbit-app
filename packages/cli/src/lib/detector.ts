@@ -203,50 +203,36 @@ export async function scanExports(dir: string): Promise<ScanResult['exports']> {
   const files = await globFiles(dir, /\.(ts|tsx)$/);
   const results: ScanResult['exports'] = [];
 
-  const exportPatterns = [
-    // export function foo(...) or export async function foo(...)
-    /export\s+(?:async\s+)?function\s+(\w+)/g,
-    // export const foo =
-    /export\s+const\s+(\w+)\s*[=:]/g,
-    // export type/interface foo
-    /export\s+(?:type|interface)\s+(\w+)/g,
-    // export default function foo(...)
-    /export\s+default\s+(?:async\s+)?function\s+(\w+)/g,
-  ];
+  // Single-pass regex: matches all export forms in one scan
+  const exportRegex = /export\s+(?:(default)\s+)?(?:(async)\s+)?(?:(function|const|type|interface)\s+)(\w+)/g;
 
   for (const file of files) {
     const content = await readText(file);
     if (!content) continue;
     const relPath = relative(dir, file).replace(/\\/g, '/');
+    const seen = new Set<string>();
 
-    // export function / export async function
-    for (const m of content.matchAll(/export\s+(?:async\s+)?function\s+([A-Z]\w*)/g)) {
-      results.push({ file: relPath, name: m[1], kind: 'component' });
-    }
-    for (const m of content.matchAll(/export\s+(?:async\s+)?function\s+([a-z]\w*)/g)) {
-      results.push({ file: relPath, name: m[1], kind: 'function' });
-    }
-    // export default function (PascalCase = component)
-    for (const m of content.matchAll(/export\s+default\s+(?:async\s+)?function\s+([A-Z]\w*)/g)) {
-      if (!results.some(r => r.file === relPath && r.name === m[1])) {
-        results.push({ file: relPath, name: m[1], kind: 'component' });
+    for (const m of content.matchAll(exportRegex)) {
+      const isDefault = !!m[1];
+      const keyword = m[3]; // function, const, type, interface
+      const name = m[4];
+
+      // Skip duplicates (e.g. export default function Foo after export function Foo)
+      const key = `${name}:${keyword}`;
+      if (isDefault && seen.has(key)) continue;
+      seen.add(key);
+
+      let kind: 'component' | 'function' | 'const' | 'type';
+      if (keyword === 'type' || keyword === 'interface') {
+        kind = 'type';
+      } else if (keyword === 'function') {
+        kind = /^[A-Z]/.test(name) ? 'component' : 'function';
+      } else {
+        // const
+        kind = /^[A-Z]/.test(name) ? 'component' : 'const';
       }
-    }
-    for (const m of content.matchAll(/export\s+default\s+(?:async\s+)?function\s+([a-z]\w*)/g)) {
-      if (!results.some(r => r.file === relPath && r.name === m[1])) {
-        results.push({ file: relPath, name: m[1], kind: 'function' });
-      }
-    }
-    // export const (PascalCase = component, otherwise const)
-    for (const m of content.matchAll(/export\s+const\s+([A-Z]\w*)\s*[=:]/g)) {
-      results.push({ file: relPath, name: m[1], kind: 'component' });
-    }
-    for (const m of content.matchAll(/export\s+const\s+([a-z]\w*)\s*[=:]/g)) {
-      results.push({ file: relPath, name: m[1], kind: 'const' });
-    }
-    // export type / export interface
-    for (const m of content.matchAll(/export\s+(?:type|interface)\s+(\w+)/g)) {
-      results.push({ file: relPath, name: m[1], kind: 'type' });
+
+      results.push({ file: relPath, name, kind });
     }
   }
 

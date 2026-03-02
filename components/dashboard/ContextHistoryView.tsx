@@ -98,6 +98,7 @@ function ContextTimelineItem({ item, index, currentPlan }: { item: ContextItem; 
 
 export function ContextHistoryView({ projectId, currentPlan }: ContextHistoryViewProps) {
   const t = useTranslations('contextHistory');
+  const tCommon = useTranslations('common');
   const [contexts, setContexts] = useState<ContextItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -108,7 +109,7 @@ export function ContextHistoryView({ projectId, currentPlan }: ContextHistoryVie
       .then((data) => {
         if (!cancelled) setContexts(data);
       })
-      .catch(() => toast.error('Failed to load context history'))
+      .catch(() => toast.error(tCommon('errorLoadHistory')))
       .finally(() => {
         if (!cancelled) setLoading(false);
       });

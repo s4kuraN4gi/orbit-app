@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTranslations } from 'next-intl';
-import { Command, LayoutList, KanbanSquare, GanttChart, Search, Plus } from "lucide-react";
+import { Command, LayoutList, Search, Plus } from "lucide-react";
 
 interface ShortcutsListModalProps {
   open: boolean;
@@ -16,8 +16,6 @@ export function ShortcutsListModal({ open, onOpenChange }: ShortcutsListModalPro
     { key: 'N', description: t('newTask'), icon: <Plus className="h-4 w-4" /> },
     { key: '/', description: t('search'), icon: <Search className="h-4 w-4" /> },
     { key: '1', description: t('viewList'), icon: <LayoutList className="h-4 w-4" /> },
-    { key: '2', description: t('viewBoard'), icon: <KanbanSquare className="h-4 w-4" /> },
-    { key: '3', description: t('viewGantt'), icon: <GanttChart className="h-4 w-4" /> },
     { key: '?', description: t('showShortcuts'), icon: <span className="font-bold text-xs">?</span> },
   ];
 

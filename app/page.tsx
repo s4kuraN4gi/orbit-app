@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { CopyCommandButton } from '@/components/landing/CopyCommandButton';
+import { MobileNav } from '@/components/landing/MobileNav';
 import { getTranslations } from 'next-intl/server';
 
 export default async function Home() {
@@ -19,24 +20,18 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       {/* Navigation */}
-      <nav className="container mx-auto px-6 py-4 flex items-center justify-between">
+      <nav className="container mx-auto px-6 py-4 flex items-center justify-between relative">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">O</span>
           </div>
           <span className="font-bold text-xl">Orbit</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/pricing">
-            <Button variant="ghost">{t('nav.pricing')}</Button>
-          </Link>
-          <Link href="/login">
-            <Button variant="ghost">{t('nav.signIn')}</Button>
-          </Link>
-          <Link href="/login">
-            <Button>{t('nav.getStarted')}</Button>
-          </Link>
-        </div>
+        <MobileNav
+          pricingLabel={t('nav.pricing')}
+          signInLabel={t('nav.signIn')}
+          getStartedLabel={t('nav.getStarted')}
+        />
       </nav>
 
       {/* Hero Section */}
@@ -61,10 +56,10 @@ export default async function Home() {
               <span className="text-slate-500">$</span> npx @orbit-cli/core scan -g
             </code>
             <code className="text-slate-400 text-sm block mt-2">
-              Scanning project...
+              {t('terminalScanning')}
             </code>
             <code className="text-slate-400 text-sm block">
-              <span className="text-green-400">Generated: CLAUDE.md</span>
+              <span className="text-green-400">{t('terminalGenerated')}</span>
             </code>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -80,9 +75,9 @@ export default async function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-6 py-20">
+      <section className="container mx-auto px-6 py-20" aria-labelledby="features-heading">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">{t('features.title')}</h2>
+          <h2 id="features-heading" className="text-3xl font-bold mb-4">{t('features.title')}</h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
             {t('features.subtitle')}
           </p>
@@ -123,26 +118,45 @@ export default async function Home() {
               <BenefitItem text={t('whatScans.item6')} />
             </ul>
           </div>
-          <div className="bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-8 aspect-square flex items-center justify-center">
-            <div className="text-center">
-              <Sparkles className="h-16 w-16 mx-auto mb-4 text-blue-500" />
-              <p className="text-lg font-medium">{t('whatScans.tagline')}</p>
+          <div className="bg-slate-900 dark:bg-slate-800 rounded-2xl p-6 text-sm font-mono overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+              </div>
+              <span className="text-slate-500 text-xs ml-2">CLAUDE.md</span>
             </div>
+            <div className="space-y-1 text-slate-400 text-xs leading-relaxed">
+              <p className="text-slate-500"># Project: my-app</p>
+              <p className="text-slate-500 mt-2">## Tech Stack</p>
+              <p>Next.js / React / TypeScript / Tailwind</p>
+              <p className="text-slate-500 mt-2">## Project Structure</p>
+              <p>- <span className="text-blue-400">Pages (12):</span> /dashboard /settings ...</p>
+              <p>- <span className="text-blue-400">API Routes (8):</span> GET, POST, PATCH</p>
+              <p>- <span className="text-blue-400">DB Tables (6):</span> users, posts, ...</p>
+              <p className="text-slate-500 mt-2">## Import Graph</p>
+              <p>45 files, 128 local imports</p>
+              <p className="text-slate-500 mt-2">## Active Tasks</p>
+              <p className="text-green-400">- [ORB-a3f2] Add auth middleware</p>
+              <p className="text-green-400">- [ORB-b7c1] Fix pagination bug</p>
+            </div>
+            <p className="text-slate-600 text-xs mt-4 italic">{t('whatScans.tagline')}</p>
           </div>
         </div>
       </section>
 
       {/* Comparison Section — Orbit vs Repomix */}
-      <section className="container mx-auto px-6 py-20">
+      <section className="container mx-auto px-6 py-20" aria-labelledby="comparison-heading">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{t('comparison.title')}</h2>
+            <h2 id="comparison-heading" className="text-3xl font-bold mb-4">{t('comparison.title')}</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
               {t('comparison.subtitle')}
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse" aria-label={t('comparison.title')}>
               <thead>
                 <tr>
                   <th className="text-left p-4 border-b-2 dark:border-slate-700 w-[40%]"></th>
@@ -160,22 +174,22 @@ export default async function Home() {
                 </tr>
               </thead>
               <tbody className="text-sm">
-                <ComparisonRow label="Approach" orbit="Structured context" other="Full code dump" />
-                <ComparisonRow label="Output size (100-file project)" orbit="~200 lines" other="~10,000+ lines" />
-                <ComparisonRow label="Route & API detection" orbit={true} other={false} />
-                <ComparisonRow label="DB schema extraction" orbit={true} other={false} />
-                <ComparisonRow label="Import graph analysis" orbit={true} other={false} />
-                <ComparisonRow label="Export signatures" orbit={true} other={false} />
-                <ComparisonRow label="Task-aware context" orbit={true} other={false} />
-                <ComparisonRow label="Smart Context scoring" orbit="Pro" other={false} />
-                <ComparisonRow label="Implementation Plans" orbit={true} other={false} />
-                <ComparisonRow label="Watch mode (auto-regen)" orbit={true} other={false} />
-                <ComparisonRow label="Web dashboard & history" orbit={true} other={false} />
-                <ComparisonRow label="MCP Server" orbit="4 tools" other="1 tool" />
-                <ComparisonRow label="Multi-format output" orbit="CLAUDE.md, .cursorrules, copilot, windsurf" other="XML, Markdown" />
-                <ComparisonRow label="Tree-sitter parsing" other={true} orbit="Regex (fast)" />
-                <ComparisonRow label="Full source inclusion" other={true} orbit={false} />
-                <ComparisonRow label="Free & open source" orbit="CLI is OSS" other={true} />
+                <ComparisonRow label={t('comparison.rows.approach')} orbit={t('comparison.values.structured')} other={t('comparison.values.codeDump')} />
+                <ComparisonRow label={t('comparison.rows.outputSize')} orbit={t('comparison.values.orbitOutput')} other={t('comparison.values.repomixOutput')} />
+                <ComparisonRow label={t('comparison.rows.routeDetection')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.dbSchema')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.importGraph')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.exportSignatures')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.taskAware')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.smartContext')} orbit={t('comparison.values.pro')} other={false} />
+                <ComparisonRow label={t('comparison.rows.implPlans')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.watchMode')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.webDashboard')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.mcpServer')} orbit={t('comparison.values.orbitTools')} other={t('comparison.values.repomixTools')} />
+                <ComparisonRow label={t('comparison.rows.multiFormat')} orbit={t('comparison.values.orbitFormats')} other={t('comparison.values.repomixFormats')} />
+                <ComparisonRow label={t('comparison.rows.treeSitter')} other={true} orbit={t('comparison.values.regexFast')} />
+                <ComparisonRow label={t('comparison.rows.fullSource')} other={true} orbit={false} />
+                <ComparisonRow label={t('comparison.rows.freeOss')} orbit={t('comparison.values.cliOss')} other={true} />
               </tbody>
             </table>
           </div>
@@ -184,6 +198,26 @@ export default async function Home() {
               <span className="font-semibold">{t('comparison.whenRepomix')}</span> {t('comparison.whenRepomixDesc')}{' '}
               <span className="font-semibold">{t('comparison.whenOrbit')}</span> {t('comparison.whenOrbitDesc')}
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof */}
+      <section className="container mx-auto px-6 py-12">
+        <div className="max-w-3xl mx-auto">
+          <div className="grid grid-cols-3 gap-8 text-center">
+            <div>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{t('social.cliInstalls')}</p>
+              <p className="text-sm text-slate-500 mt-1">{t('social.cliInstallsLabel')}</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{t('social.formats')}</p>
+              <p className="text-sm text-slate-500 mt-1">{t('social.formatsLabel')}</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{t('social.openSource')}</p>
+              <p className="text-sm text-slate-500 mt-1">{t('social.openSourceLabel')}</p>
+            </div>
           </div>
         </div>
       </section>
@@ -213,12 +247,20 @@ export default async function Home() {
 
       {/* Footer */}
       <footer className="container mx-auto px-6 py-8 border-t">
-        <div className="flex items-center justify-between text-sm text-slate-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
               <span className="text-white font-bold text-xs">O</span>
             </div>
             <span>Orbit</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="https://github.com/s4kuraN4gi/orbit-cli" target="_blank" rel="noopener noreferrer" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+              GitHub
+            </a>
+            <Link href="/pricing" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+              {t('nav.pricing')}
+            </Link>
           </div>
           <p>&copy; 2026 Orbit. All rights reserved.</p>
         </div>

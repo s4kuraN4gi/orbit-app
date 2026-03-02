@@ -387,7 +387,7 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
            await updateTaskPosition(activeTask.id, newPosition);
       }
     } catch {
-      toast.error('Failed to update task');
+      toast.error(t('common.errorUpdateTask'));
     }
   };
 
@@ -495,7 +495,7 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-        <div ref={containerRef} className="rounded-md border">
+        <div ref={containerRef} className="rounded-md border" role="region" aria-label={t('dashboard.taskList')}>
         <div className="px-3 py-2 bg-muted/50 border-b text-xs text-muted-foreground">
             <span className="font-medium">{t('dashboard.keyboard.title')}:</span>{' '}
             <kbd className="px-1 bg-background rounded">↑</kbd>/<kbd className="px-1 bg-background rounded">↓</kbd> {t('dashboard.keyboard.upDown')} • 
@@ -519,9 +519,12 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
 
                     return (
                         <React.Fragment key={groupKey}>
-                            <TableRow 
+                            <TableRow
                                 className="bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
                                 onClick={() => handleToggleGroup(groupKey)}
+                                role="button"
+                                aria-expanded={!isCollapsed}
+                                aria-label={`${tDateGroups(groupKey)} (${items.length})`}
                             >
                                 <TableCell colSpan={4} className="py-2 px-4">
                                     <div className="flex items-center gap-2 font-semibold text-xs text-muted-foreground uppercase tracking-wider">

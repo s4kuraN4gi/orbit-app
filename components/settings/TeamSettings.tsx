@@ -58,6 +58,7 @@ const roleIcons: Record<string, React.ReactNode> = {
 
 export function TeamSettings({ userId }: TeamSettingsProps) {
   const t = useTranslations('team');
+  const tCommon = useTranslations('common');
   const [orgs, setOrgs] = useState<OrganizationData[]>([]);
   const [activeOrg, setActiveOrg] = useState<OrganizationData | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -106,7 +107,7 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
         setActiveOrg(result.data as unknown as OrganizationData);
       }
     } catch {
-      toast.error('Failed to load organization');
+      toast.error(tCommon('errorLoadOrg'));
     }
   };
 

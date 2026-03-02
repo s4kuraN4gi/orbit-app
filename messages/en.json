@@ -12,15 +12,19 @@
     "reset": "Reset",
     "search": "Search",
     "required": "Required",
-    "settings": "Settings"
+    "settings": "Settings",
+    "today": "today",
+    "daysAgo": "{count, plural, one {1 day ago} other {# days ago}}",
+    "errorLoadOrg": "Failed to load organization",
+    "errorUpdateTask": "Failed to update task",
+    "errorLoadSnapshots": "Failed to load snapshots",
+    "errorLoadHistory": "Failed to load context history"
   },
   "shortcuts": {
     "title": "Keyboard Shortcuts",
     "newTask": "Create New Task",
     "search": "Focus Search",
     "viewList": "List View",
-    "viewBoard": "Board View",
-    "viewGantt": "Gantt Chart",
     "showShortcuts": "Show Shortcuts"
   },
   "project": {
@@ -52,14 +56,34 @@
     "loginButton": "Login",
     "signupButton": "Create Account",
     "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?"
+    "hasAccount": "Already have an account?",
+    "welcomeTitle": "Welcome to Orbit",
+    "welcomeDesc": "Enter your credentials to access the dashboard.",
+    "signingIn": "Signing in...",
+    "signIn": "Sign In",
+    "signingUp": "Signing up...",
+    "signUpAction": "Sign Up",
+    "signInFailed": "Sign in failed",
+    "signUpFailed": "Sign up failed",
+    "genericError": "An error occurred"
+  },
+  "dateGroups": {
+    "overdue": "Overdue",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "thisWeek": "This Week",
+    "nextWeek": "Next Week",
+    "later": "Later",
+    "noDate": "No Date"
   },
   "dashboard": {
     "title": "Dashboard",
     "noTasks": "No tasks. Create a new task to get started.",
+    "taskList": "Task list",
     "noProjectTitle": "No Project Found",
     "noProjectDesc": "Create a new project from the \"+\" button in the top right.",
     "newTask": "New Task",
+    "ideaBox": "Ideas",
     "newProject": "New Project",
     "projectDelete": "Delete Project",
     "projectDeleteConfirm": "Are you sure you want to delete this project?",
@@ -350,6 +374,8 @@
       "subtitle": "Orbit connects your tasks to your codebase — scan structure, focus on what matters, and generate implementation plans. Built for Claude, Cursor, and Copilot."
     },
     "terminal": "Terminal",
+    "terminalScanning": "Scanning project...",
+    "terminalGenerated": "Generated: CLAUDE.md",
     "cta": {
       "openDashboard": "Open Dashboard",
       "getStartedFree": "Get Started Free"
@@ -378,10 +404,49 @@
     "comparison": {
       "title": "Orbit vs. Repomix",
       "subtitle": "Repomix packs your entire codebase into one file for AI. Orbit gives AI structured context — architecture, dependencies, and what you're working on right now.",
+      "rows": {
+        "approach": "Approach",
+        "outputSize": "Output size (100-file project)",
+        "routeDetection": "Route & API detection",
+        "dbSchema": "DB schema extraction",
+        "importGraph": "Import graph analysis",
+        "exportSignatures": "Export signatures",
+        "taskAware": "Task-aware context",
+        "smartContext": "Smart Context scoring",
+        "implPlans": "Implementation Plans",
+        "watchMode": "Watch mode (auto-regen)",
+        "webDashboard": "Web dashboard & history",
+        "mcpServer": "MCP Server",
+        "multiFormat": "Multi-format output",
+        "treeSitter": "Tree-sitter parsing",
+        "fullSource": "Full source inclusion",
+        "freeOss": "Free & open source"
+      },
+      "values": {
+        "structured": "Structured context",
+        "codeDump": "Full code dump",
+        "orbitOutput": "~200 lines",
+        "repomixOutput": "~10,000+ lines",
+        "pro": "Pro",
+        "orbitTools": "4 tools",
+        "repomixTools": "1 tool",
+        "orbitFormats": "CLAUDE.md, .cursorrules, copilot, windsurf",
+        "repomixFormats": "XML, Markdown",
+        "regexFast": "Regex (fast)",
+        "cliOss": "CLI is OSS"
+      },
       "whenRepomix": "When to use Repomix:",
       "whenRepomixDesc": "You need AI to read specific source code.",
       "whenOrbit": "When to use Orbit:",
       "whenOrbitDesc": "You need AI to understand your project — its architecture, what's connected to what, and what you're building next."
+    },
+    "social": {
+      "cliInstalls": "npx",
+      "cliInstallsLabel": "Zero install — run anywhere",
+      "formats": "5",
+      "formatsLabel": "Output formats supported",
+      "openSource": "OSS",
+      "openSourceLabel": "CLI is open source"
     },
     "ctaSection": {
       "title": "Try it in 10 seconds",

@@ -22,7 +22,7 @@ export type UserSettings = {
   id: string;
   user_id: string;
   theme: 'light' | 'dark' | 'system';
-  default_view: 'list' | 'board' | 'gantt';
+  default_view: 'list' | 'overview';
   language: 'ja' | 'en';
   custom_colors: CustomColors | null;
   created_at: string;

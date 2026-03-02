@@ -36,16 +36,39 @@ export interface PlanLimits {
   contextDiff: boolean;
 }
 
+export interface ScanDependency {
+  category: string;
+  packages: string[];
+}
+
+export interface ScanApiRoute {
+  method: string;
+  path: string;
+}
+
+export interface ScanDbTable {
+  name: string;
+  columns: number;
+}
+
 export interface ScanData {
-  techStack?: Record<string, unknown>;
-  pages?: unknown[];
-  apiRoutes?: unknown[];
-  dbTables?: unknown[];
+  techStack?: string[];
+  packageManager?: string;
+  nodeVersion?: string;
+  dependencies?: ScanDependency[];
+  depCount?: { total: number };
+  structure?: {
+    pages?: string[];
+    apiRoutes?: ScanApiRoute[];
+    dbTables?: ScanDbTable[];
+  };
+  codeMetrics?: { totalFiles?: number; totalLines?: number };
   exports?: unknown[];
-  imports?: unknown[];
-  files?: unknown[];
-  git?: Record<string, unknown>;
+  importGraph?: unknown[];
   envVars?: string[];
+  git?: { branch?: string; totalCommits?: number; lastCommitDate?: string };
+  deployment?: { platform?: string; ci?: string };
+  scripts?: Record<string, string>;
   [key: string]: unknown;
 }
 

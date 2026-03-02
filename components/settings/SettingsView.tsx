@@ -148,19 +148,6 @@ export function SettingsView({ initialSettings, userEmail, userId, currentPlan =
     });
   };
 
-  // applyTheme is now handled by ThemeProvider context
-
-  const applyCustomColors = (colors: CustomColors, currentTheme: string) => {
-    const root = document.documentElement;
-    const isDark = currentTheme === 'dark' || 
-      (currentTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    const activeColors = isDark ? colors.dark : colors.light;
-    
-    Object.entries(activeColors).forEach(([key, value]) => {
-      root.style.setProperty(`--custom-${key}`, value);
-    });
-  };
-
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
       {/* Header */}

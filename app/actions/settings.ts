@@ -2,24 +2,19 @@
 
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { userSettings } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { UserSettings, CustomColors } from '@/lib/theme';
-
-async function requireUser() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new Error('Not authenticated');
-  return session.user;
-}
+import { auth } from '@/lib/auth';
+import { requireUser } from '@/lib/auth-helpers';
 
 function toUserSettings(row: typeof userSettings.$inferSelect): UserSettings {
   return {
     id: row.id,
     user_id: row.userId,
     theme: (row.theme as 'light' | 'dark' | 'system') ?? 'system',
-    default_view: (row.defaultView as 'list' | 'board' | 'gantt') ?? 'list',
+    default_view: (row.defaultView as 'list' | 'overview') ?? 'list',
     language: (row.language as 'ja' | 'en') ?? 'ja',
     custom_colors: row.customColors as CustomColors | null,
     created_at: row.createdAt?.toISOString() ?? '',
@@ -74,7 +69,6 @@ export async function updateUserSettings(
   if (!data) throw new Error('Failed to update settings');
 
   revalidatePath('/settings');
-  revalidatePath('/dashboard');
 
   return toUserSettings(data);
 }

@@ -8,6 +8,7 @@ import { DashboardView } from '@/components/dashboard/DashboardView';
 import { Task } from '@/types';
 import { getUserSettings } from '@/app/actions/settings';
 import { getUserPlan } from '@/lib/plan';
+import { getTranslations } from 'next-intl/server';
 
 // Utility to build tree from flat list
 function buildTaskTree(taskList: Task[]): Task[] {
@@ -34,7 +35,7 @@ function buildTaskTree(taskList: Task[]): Task[] {
   return roots;
 }
 
-export const dynamic = 'force-dynamic';
+// Page is inherently dynamic due to headers()/session — no need for force-dynamic
 
 interface DashboardPageProps {
   searchParams: Promise<{ projectId?: string; checkout?: string }>;
@@ -85,7 +86,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       id: projects.id,
       name: projects.name,
       key: projects.key,
-      scanData: projects.scanData,
       organizationId: projects.organizationId,
     })
     .from(projects)
@@ -105,11 +105,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   // No projects at all - show empty state
   if (!currentProject) {
+    const tDashboard = await getTranslations('dashboard');
     return (
       <main className="container mx-auto py-6">
         <DashboardView
           initialTasks={[]}
-          projectName="プロジェクトなし"
+          projectName={tDashboard('noProjectTitle')}
           projectId=""
           allProjects={[]}
           planTier={planLimits.tier}
@@ -118,6 +119,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       </main>
     );
   }
+
+  // Fetch scanData only for current project
+  const [currentScanData] = await db
+    .select({ scanData: projects.scanData })
+    .from(projects)
+    .where(eq(projects.id, currentProject.id));
 
   // Fetch Tasks for the current Project with ai_context join
   const tasksData = await db
@@ -166,7 +173,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         allProjects={allProjects}
         defaultView="overview"
         currentUserEmail={user.email || ''}
-        scanData={currentProject.scanData as Record<string, unknown> | null}
+        scanData={currentScanData?.scanData as Record<string, unknown> | null}
         planTier={planLimits.tier}
         currentProjectCount={allProjects.length}
         checkoutSuccess={params.checkout === 'success'}

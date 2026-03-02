@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from 'next-intl';
 
 function LoginForm() {
   const router = useRouter();
@@ -14,6 +15,8 @@ function LoginForm() {
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('auth');
+
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleAction(isSignUp: boolean) {
@@ -34,7 +37,7 @@ function LoginForm() {
           name: email.split('@')[0],
         });
         if (signUpError) {
-          setError(signUpError.message ?? 'Sign up failed');
+          setError(signUpError.message ?? t('signUpFailed'));
           setLoading(false);
           return;
         }
@@ -44,7 +47,7 @@ function LoginForm() {
           password,
         });
         if (signInError) {
-          setError(signInError.message ?? 'Sign in failed');
+          setError(signInError.message ?? t('signInFailed'));
           setLoading(false);
           return;
         }
@@ -52,7 +55,7 @@ function LoginForm() {
       router.push(redirectTo);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('genericError'));
     } finally {
       setLoading(false);
     }
@@ -62,8 +65,8 @@ function LoginForm() {
     <div className="flex items-center justify-center min-h-screen bg-muted">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Welcome to Orbit</CardTitle>
-          <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
+          <CardTitle>{t('welcomeTitle')}</CardTitle>
+          <CardDescription>{t('welcomeDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -73,19 +76,19 @@ function LoginForm() {
           )}
           <form ref={formRef} className="space-y-4" onSubmit={(e) => e.preventDefault()}>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input id="email" name="email" type="email" required placeholder="m@example.com" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input id="password" name="password" type="password" required />
             </div>
             <div className="flex flex-col gap-2 pt-4">
               <Button type="button" disabled={loading} onClick={() => handleAction(false)}>
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? t('signingIn') : t('signIn')}
               </Button>
               <Button type="button" variant="outline" disabled={loading} onClick={() => handleAction(true)}>
-                {loading ? 'Signing up...' : 'Sign Up'}
+                {loading ? t('signingUp') : t('signUpAction')}
               </Button>
             </div>
           </form>

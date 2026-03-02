@@ -1,42 +1,39 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { projects, tasks, member } from '@/lib/schema';
-import { eq, desc, and, or, inArray } from 'drizzle-orm';
-import { requireProjectAdmin } from '@/lib/auth-helpers';
-
-async function requireUser() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) throw new Error('Not authenticated');
-  return session.user;
-}
+import { eq, desc, and, or, sql } from 'drizzle-orm';
+import { requireProjectAdmin, requireUser } from '@/lib/auth-helpers';
 
 export async function getProjects() {
   const user = await requireUser();
 
-  // Get org IDs user belongs to
-  const memberships = await db
-    .select({ organizationId: member.organizationId })
-    .from(member)
-    .where(eq(member.userId, user.id));
-
-  const orgIds = memberships.map((m) => m.organizationId);
-
-  const conditions = [eq(projects.ownerId, user.id)];
-  if (orgIds.length > 0) {
-    conditions.push(inArray(projects.organizationId, orgIds));
-  }
-
-  const data = await db
-    .select()
+  // Single query: LEFT JOIN member to find projects user owns OR is a member of the org
+  const rows = await db
+    .select({ project: projects })
     .from(projects)
-    .where(or(...conditions))
+    .leftJoin(
+      member,
+      sql`${member.organizationId} = ${projects.organizationId} AND ${member.userId} = ${user.id}`
+    )
+    .where(
+      or(
+        eq(projects.ownerId, user.id),
+        sql`${member.id} IS NOT NULL`
+      )
+    )
     .orderBy(desc(projects.createdAt));
 
-  return data;
+  // Deduplicate (a project the user owns in their own org could appear twice)
+  const seen = new Set<string>();
+  return rows
+    .map((r) => r.project)
+    .filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
 }
 
 export async function createProject(
@@ -78,11 +75,11 @@ export async function deleteProject(projectId: string) {
   // Require admin/owner for deletion
   await requireProjectAdmin(projectId);
 
-  // First delete all tasks belonging to this project
-  await db.delete(tasks).where(eq(tasks.projectId, projectId));
-
-  // Then delete the project
-  await db.delete(projects).where(eq(projects.id, projectId));
+  // Delete tasks and project in a single batch (1 HTTP round-trip)
+  await db.batch([
+    db.delete(tasks).where(eq(tasks.projectId, projectId)),
+    db.delete(projects).where(eq(projects.id, projectId)),
+  ]);
 
   revalidatePath('/dashboard');
 }

@@ -70,36 +70,72 @@ export function analyzeWorkContext(ir: ContextIR, cwd: string = process.cwd()): 
   // 4. Get recently changed files from git log
   const recentFiles = getRecentlyChangedFiles(cwd);
 
-  // 5. Score files based on multiple signals
-  const allModulePaths = ir.codeMap.modules.map(m => m.path);
+  // 5. Build lookup structures for O(1) matching
+  const pathSet = new Set(ir.codeMap.modules.map(m => m.path));
+
+  // Build a suffix → path map for fuzzy file matching
+  const suffixMap = new Map<string, string>();
+  for (const p of pathSet) {
+    suffixMap.set(p, p);
+    // Also index by filename for partial matches
+    const parts = p.split('/');
+    const filename = parts[parts.length - 1];
+    if (!suffixMap.has(filename)) suffixMap.set(filename, p);
+  }
+
+  const resolveFile = (file: string): string | undefined => {
+    if (pathSet.has(file)) return file;
+    const parts = file.split('/');
+    const filename = parts[parts.length - 1];
+    return suffixMap.get(filename);
+  };
+
+  // Build adjacency lists for import graph (O(E) once instead of O(E) per lookup)
+  const importsFrom = new Map<string, string[]>(); // from → [to]
+  const importedBy = new Map<string, string[]>();   // to → [from]
+  for (const edge of ir.architecture.importGraph) {
+    if (!importsFrom.has(edge.from)) importsFrom.set(edge.from, []);
+    importsFrom.get(edge.from)!.push(edge.to);
+    if (!importedBy.has(edge.to)) importedBy.set(edge.to, []);
+    importedBy.get(edge.to)!.push(edge.from);
+  }
 
   // Score changed files (highest signal)
   for (const file of changedFiles) {
-    const matchedModule = allModulePaths.find(p => p === file || file.endsWith(p) || p.endsWith(file));
-    if (matchedModule) {
-      scores.set(matchedModule, (scores.get(matchedModule) || 0) + 40);
+    const matched = resolveFile(file);
+    if (matched) {
+      scores.set(matched, (scores.get(matched) || 0) + 40);
     }
   }
 
   // Score recently committed files
   for (const file of recentFiles) {
-    const matchedModule = allModulePaths.find(p => p === file || file.endsWith(p) || p.endsWith(file));
-    if (matchedModule) {
-      scores.set(matchedModule, (scores.get(matchedModule) || 0) + 20);
+    const matched = resolveFile(file);
+    if (matched) {
+      scores.set(matched, (scores.get(matched) || 0) + 20);
     }
   }
 
-  // Score modules matching keywords via import graph
+  // Score modules matching keywords — lowercase keywords once
+  const kwLower = allKeywords.map(k => k.toLowerCase());
+
   for (const mod of ir.codeMap.modules) {
-    for (const kw of allKeywords) {
-      if (mod.path.toLowerCase().includes(kw.toLowerCase())) {
-        scores.set(mod.path, (scores.get(mod.path) || 0) + 15);
+    const pathLower = mod.path.toLowerCase();
+    let pathScore = 0;
+
+    for (const kw of kwLower) {
+      if (pathLower.includes(kw)) pathScore += 15;
+    }
+
+    for (const exp of mod.exports) {
+      const expLower = exp.name.toLowerCase();
+      for (const kw of kwLower) {
+        if (expLower.includes(kw)) { pathScore += 10; break; }
       }
-      for (const exp of mod.exports) {
-        if (exp.name.toLowerCase().includes(kw.toLowerCase())) {
-          scores.set(mod.path, (scores.get(mod.path) || 0) + 10);
-        }
-      }
+    }
+
+    if (pathScore > 0) {
+      scores.set(mod.path, (scores.get(mod.path) || 0) + pathScore);
     }
   }
 
@@ -110,14 +146,14 @@ export function analyzeWorkContext(ir: ContextIR, cwd: string = process.cwd()): 
     }
   }
 
-  // Expand to import graph: direct dependencies of scored files
+  // Expand to import graph: direct dependencies of scored files (using adjacency lists)
   const scoredPaths = new Set(scores.keys());
-  for (const edge of ir.architecture.importGraph) {
-    if (scoredPaths.has(edge.from) && !scores.has(edge.to)) {
-      scores.set(edge.to, 15);
+  for (const path of scoredPaths) {
+    for (const dep of importsFrom.get(path) || []) {
+      if (!scores.has(dep)) scores.set(dep, 15);
     }
-    if (scoredPaths.has(edge.to) && !scores.has(edge.from)) {
-      scores.set(edge.from, 10);
+    for (const dep of importedBy.get(path) || []) {
+      if (!scores.has(dep)) scores.set(dep, 10);
     }
   }
 
@@ -128,17 +164,15 @@ export function analyzeWorkContext(ir: ContextIR, cwd: string = process.cwd()): 
 
   const activeFiles = sorted.map(([path]) => path);
 
-  // 7. Find related modules (imports of active files not already in the list)
+  // 7. Find related modules using adjacency lists
   const activeSet = new Set(activeFiles);
   const relatedSet = new Set<string>();
   for (const file of activeFiles) {
-    for (const edge of ir.architecture.importGraph) {
-      if (edge.from === file && !activeSet.has(edge.to)) {
-        relatedSet.add(edge.to);
-      }
-      if (edge.to === file && !activeSet.has(edge.from)) {
-        relatedSet.add(edge.from);
-      }
+    for (const dep of importsFrom.get(file) || []) {
+      if (!activeSet.has(dep)) relatedSet.add(dep);
+    }
+    for (const dep of importedBy.get(file) || []) {
+      if (!activeSet.has(dep)) relatedSet.add(dep);
     }
   }
   const relatedModules = [...relatedSet].slice(0, 10);

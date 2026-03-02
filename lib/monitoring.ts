@@ -9,7 +9,6 @@ interface Metric {
 
 const buffer: Metric[] = [];
 const MAX_BUFFER_SIZE = 100;
-let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function trackMetric(
   name: string,
@@ -25,8 +24,6 @@ export function trackMetric(
 
   if (buffer.length >= MAX_BUFFER_SIZE) {
     flush();
-  } else if (!flushTimer) {
-    flushTimer = setTimeout(flush, 30_000);
   }
 }
 
@@ -49,10 +46,6 @@ export async function measureAsync<T>(
 }
 
 function flush(): void {
-  if (flushTimer) {
-    clearTimeout(flushTimer);
-    flushTimer = null;
-  }
   if (buffer.length === 0) return;
 
   const events = buffer.splice(0, buffer.length);
@@ -86,7 +79,5 @@ function flush(): void {
 }
 
 export function flushAfterRequest(): void {
-  if (buffer.length > 0) {
-    after(() => flush());
-  }
+  after(() => flush());
 }

@@ -9,7 +9,14 @@ import { TaskList } from './TaskList';
 import { ProjectOverview } from './ProjectOverview';
 import { ContextHistoryView } from './ContextHistoryView';
 import { ContextDiffView } from './ContextDiffView';
-import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, Bot, Sparkles } from 'lucide-react';
+import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, Bot, Sparkles, MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { logout } from '@/app/actions/auth';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -170,8 +177,8 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-4 min-w-0">
           <ProjectSelector
             projects={allProjects}
             currentProjectId={projectId}
@@ -180,7 +187,8 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
             organizations={organizations}
           />
         </div>
-        <div className="flex items-center gap-2">
+        {/* Desktop: full button bar */}
+        <div className="hidden lg:flex items-center gap-2">
           <Button onClick={() => setIsCreateModalOpen(true)} size="sm" className="flex items-center gap-2" disabled={!projectId}>
             <Plus className="h-4 w-4" />
             {t('newTask')}
@@ -227,6 +235,51 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
               {tAuth('logout')}
             </Button>
           </form>
+        </div>
+        {/* Mobile/Tablet: primary action + dropdown */}
+        <div className="flex lg:hidden items-center gap-2">
+          <Button onClick={() => setIsCreateModalOpen(true)} size="sm" disabled={!projectId}>
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline ml-1">{t('newTask')}</span>
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => setIsImportModalOpen(true)} disabled={!projectId}>
+                <FileUp className="h-4 w-4 mr-2" />
+                {tImport('button')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsIdeaBoxOpen(!isIdeaBoxOpen)} disabled={!projectId}>
+                <Lightbulb className="h-4 w-4 mr-2" />
+                {t('ideaBox')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsExportContextOpen(true)} disabled={!projectId}>
+                <Bot className="h-4 w-4 mr-2" />
+                {tExport('contextButton')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/settings">
+                  <Settings className="h-4 w-4 mr-2" />
+                  {tCommon('settings')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                const form = document.createElement('form');
+                form.action = '/api/auth/sign-out';
+                form.method = 'POST';
+                document.body.appendChild(form);
+                form.submit();
+              }}>
+                <LogOut className="h-4 w-4 mr-2" />
+                {tAuth('logout')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
