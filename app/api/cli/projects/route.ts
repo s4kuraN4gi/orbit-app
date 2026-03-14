@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { projects, member } from '@/lib/schema';
-import { eq, desc, or, sql } from 'drizzle-orm';
 import { authenticateRequest } from '../auth';
 import { rateLimit } from '@/lib/rate-limit';
+import { getProjectsForUser } from '@/lib/queries';
 
 const limiter = rateLimit({ interval: 60_000, maxRequests: 10 });
 
@@ -18,25 +16,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
-  const userId = session.user.id;
-
-  // Single query with DISTINCT ON to avoid duplicates from LEFT JOIN
-  const rows = await db
-    .selectDistinctOn([projects.id], { project: projects })
-    .from(projects)
-    .leftJoin(
-      member,
-      sql`${member.organizationId} = ${projects.organizationId} AND ${member.userId} = ${userId}`
-    )
-    .where(
-      or(
-        eq(projects.ownerId, userId),
-        sql`${member.id} IS NOT NULL`
-      )
-    )
-    .orderBy(projects.id, desc(projects.createdAt));
-
-  const data = rows.map((r) => r.project);
+  const data = await getProjectsForUser(session.user.id);
 
   return NextResponse.json({
     projects: data.map((p) => ({

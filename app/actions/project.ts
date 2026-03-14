@@ -3,29 +3,13 @@
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { projects, tasks, member } from '@/lib/schema';
-import { eq, desc, and, or, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { requireProjectAdmin, requireUser } from '@/lib/auth-helpers';
+import { getProjectsForUser } from '@/lib/queries';
 
 export async function getProjects() {
   const user = await requireUser();
-
-  // Single query with DISTINCT ON to avoid duplicates from LEFT JOIN
-  const rows = await db
-    .selectDistinctOn([projects.id], { project: projects })
-    .from(projects)
-    .leftJoin(
-      member,
-      sql`${member.organizationId} = ${projects.organizationId} AND ${member.userId} = ${user.id}`
-    )
-    .where(
-      or(
-        eq(projects.ownerId, user.id),
-        sql`${member.id} IS NOT NULL`
-      )
-    )
-    .orderBy(projects.id, desc(projects.createdAt));
-
-  return rows.map((r) => r.project);
+  return getProjectsForUser(user.id);
 }
 
 export async function createProject(

@@ -1,5 +1,5 @@
 export type TaskStatus = "todo" | "in_progress" | "done";
-export type TaskPriority = "low" | "medium" | "high";
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
 export type PlanTier = 'free' | 'pro' | 'team';
 
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'incomplete';

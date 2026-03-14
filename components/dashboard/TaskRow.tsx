@@ -31,10 +31,11 @@ const statusIcons = {
   done: <CheckCircle2 className="h-4 w-4 text-green-500" />,
 };
 
-const priorityColors = {
+const priorityColors: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
   medium: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
   high: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
+  urgent: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
 };
 
 export const TaskRow = forwardRef<HTMLTableRowElement, TaskRowProps>(({ 

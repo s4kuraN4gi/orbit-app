@@ -204,6 +204,7 @@ export const scanSnapshots = pgTable('scan_snapshots', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 }, (t) => [
   index('scan_snapshots_project_id_idx').on(t.projectId),
+  index('scan_snapshots_scan_data_gin_idx').using('gin', t.scanData),
 ]);
 
 // --------------------------------------------------------

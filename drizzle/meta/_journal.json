@@ -15,6 +15,13 @@
       "when": 1772345802066,
       "tag": "0001_cheerful_marvel_zombies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773501774929,
+      "tag": "0002_faithful_randall",
+      "breakpoints": true
     }
   ]
 }
