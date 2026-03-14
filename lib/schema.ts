@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   integer,
+  doublePrecision,
   jsonb,
   unique,
   boolean,
@@ -159,7 +160,7 @@ export const tasks = pgTable('tasks', {
   startDate: timestamp('start_date', { withTimezone: true }),
   dueDate: timestamp('due_date', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
-  position: integer('position').default(0),
+  position: doublePrecision('position').default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 }, (t) => [
   index('tasks_project_id_idx').on(t.projectId),

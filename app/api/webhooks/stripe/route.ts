@@ -33,9 +33,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  // Record event for idempotency
-  await db.insert(webhookEvents).values({ id: event.id, type: event.type });
-
+  // NOTE: The idempotency record is inserted AFTER successful processing
+  // so that if processing fails, Stripe can retry the event.
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -225,9 +224,13 @@ export async function POST(request: NextRequest) {
       }
     }
   } catch (err) {
+    // Do NOT record the event as processed — allow Stripe to retry
     await alert('stripe', `Webhook handler error for ${event.type}`, { eventId: event.id, error: String(err) });
     return NextResponse.json({ error: 'Handler error' }, { status: 500 });
   }
+
+  // Record event for idempotency only after successful processing
+  await db.insert(webhookEvents).values({ id: event.id, type: event.type });
 
   trackMetric('webhook_processed', 1, { type: event.type });
   flushAfterRequest();

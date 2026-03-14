@@ -52,36 +52,32 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const user = session.user;
 
-  // Fetch user settings and plan
-  const [userSettings, planLimits] = await Promise.all([
+  // Fetch user settings, plan, and memberships in parallel
+  const [userSettings, planLimits, memberships] = await Promise.all([
     getUserSettings(),
     getUserPlan(),
+    db
+      .select({ organizationId: member.organizationId })
+      .from(member)
+      .where(eq(member.userId, user.id)),
   ]);
-
-  // Get org IDs user belongs to
-  const memberships = await db
-    .select({ organizationId: member.organizationId })
-    .from(member)
-    .where(eq(member.userId, user.id));
 
   const orgIds = memberships.map((m) => m.organizationId);
 
-  // Fetch org names for CreateProjectModal
-  let userOrgs: { id: string; name: string }[] = [];
-  if (orgIds.length > 0) {
-    userOrgs = await db
-      .select({ id: organization.id, name: organization.name })
-      .from(organization)
-      .where(inArray(organization.id, orgIds));
-  }
+  // Fetch org names and projects in parallel (both depend only on orgIds)
+  const orgQuery = orgIds.length > 0
+    ? db
+        .select({ id: organization.id, name: organization.name })
+        .from(organization)
+        .where(inArray(organization.id, orgIds))
+    : Promise.resolve([] as { id: string; name: string }[]);
 
-  // Fetch personal + team projects
   const projectConditions = [eq(projects.ownerId, user.id)];
   if (orgIds.length > 0) {
     projectConditions.push(inArray(projects.organizationId, orgIds));
   }
 
-  const allProjects = await db
+  const projectQuery = db
     .select({
       id: projects.id,
       name: projects.name,
@@ -91,6 +87,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     .from(projects)
     .where(or(...projectConditions))
     .orderBy(desc(projects.createdAt));
+
+  const [userOrgs, allProjects] = await Promise.all([orgQuery, projectQuery]);
 
   // Determine current project
   let currentProject = null;
@@ -120,22 +118,24 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
-  // Fetch scanData only for current project
-  const [currentScanData] = await db
-    .select({ scanData: projects.scanData })
-    .from(projects)
-    .where(eq(projects.id, currentProject.id));
+  // Fetch scanData and tasks in parallel (independent queries)
+  const [scanDataResult, tasksData] = await Promise.all([
+    db
+      .select({ scanData: projects.scanData })
+      .from(projects)
+      .where(eq(projects.id, currentProject.id)),
+    db
+      .select({
+        task: tasks,
+        aiContext: aiContexts,
+      })
+      .from(tasks)
+      .leftJoin(aiContexts, eq(tasks.aiContextId, aiContexts.id))
+      .where(eq(tasks.projectId, currentProject.id))
+      .orderBy(asc(tasks.createdAt)),
+  ]);
 
-  // Fetch Tasks for the current Project with ai_context join
-  const tasksData = await db
-    .select({
-      task: tasks,
-      aiContext: aiContexts,
-    })
-    .from(tasks)
-    .leftJoin(aiContexts, eq(tasks.aiContextId, aiContexts.id))
-    .where(eq(tasks.projectId, currentProject.id))
-    .orderBy(asc(tasks.createdAt));
+  const [currentScanData] = scanDataResult;
 
   // Transform to Task type
   const taskList: Task[] = tasksData.map((row) => ({

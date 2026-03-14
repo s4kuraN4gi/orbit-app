@@ -9,7 +9,7 @@ import { TaskList } from './TaskList';
 import { ProjectOverview } from './ProjectOverview';
 import { ContextHistoryView } from './ContextHistoryView';
 import { ContextDiffView } from './ContextDiffView';
-import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, Bot, Sparkles, MoreHorizontal } from 'lucide-react';
+import { LayoutList, LogOut, Plus, Settings, Lightbulb, FileUp, Monitor, Bot, Sparkles, MoreHorizontal, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -268,13 +268,7 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
                   {tCommon('settings')}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                const form = document.createElement('form');
-                form.action = '/api/auth/sign-out';
-                form.method = 'POST';
-                document.body.appendChild(form);
-                form.submit();
-              }}>
+              <DropdownMenuItem onClick={() => logout()}>
                 <LogOut className="h-4 w-4 mr-2" />
                 {tAuth('logout')}
               </DropdownMenuItem>
@@ -344,9 +338,24 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
               </TabsContent>
             </Tabs>
 
+            {/* Desktop sidebar */}
             {isIdeaBoxOpen && (
-              <div className="w-80 shrink-0">
+              <div className="hidden lg:block w-80 shrink-0">
                 <IdeaBox projectId={projectId} onTaskCreated={() => router.refresh()} />
+              </div>
+            )}
+            {/* Mobile slide-over */}
+            {isIdeaBoxOpen && (
+              <div className="lg:hidden fixed inset-0 z-50">
+                <div className="absolute inset-0 bg-black/50" onClick={() => setIsIdeaBoxOpen(false)} />
+                <div className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-background shadow-xl p-4 overflow-y-auto">
+                  <div className="flex justify-end mb-2">
+                    <Button variant="ghost" size="icon" onClick={() => setIsIdeaBoxOpen(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <IdeaBox projectId={projectId} onTaskCreated={() => router.refresh()} />
+                </div>
               </div>
             )}
           </div>

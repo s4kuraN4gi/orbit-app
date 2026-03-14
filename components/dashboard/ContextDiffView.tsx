@@ -180,17 +180,17 @@ function DiffCategory({ category, items, t }: { category: string; items: DiffIte
 
 // ─── Summary bar ───
 
-function DiffSummary({ diffs }: { diffs: DiffItem[] }) {
+function DiffSummary({ diffs, t }: { diffs: DiffItem[]; t: ReturnType<typeof useTranslations> }) {
   const added = diffs.filter(d => d.type === 'added').length;
   const removed = diffs.filter(d => d.type === 'removed').length;
   const changed = diffs.filter(d => d.type === 'changed').length;
 
   return (
     <div className="flex items-center gap-4 text-xs text-muted-foreground py-2 px-1">
-      <span className="font-medium">{diffs.length} changes</span>
-      {added > 0 && <span className="text-green-600 dark:text-green-400">+{added} added</span>}
-      {removed > 0 && <span className="text-red-600 dark:text-red-400">-{removed} removed</span>}
-      {changed > 0 && <span className="text-amber-600 dark:text-amber-400">~{changed} changed</span>}
+      <span className="font-medium">{t('summaryChanges', { count: diffs.length })}</span>
+      {added > 0 && <span className="text-green-600 dark:text-green-400">{t('summaryAdded', { count: added })}</span>}
+      {removed > 0 && <span className="text-red-600 dark:text-red-400">{t('summaryRemoved', { count: removed })}</span>}
+      {changed > 0 && <span className="text-amber-600 dark:text-amber-400">{t('summaryChanged', { count: changed })}</span>}
     </div>
   );
 }
@@ -221,7 +221,7 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
       .catch(() => toast.error(tCommon('errorLoadSnapshots')))
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [projectId]);
+  }, [projectId, tCommon]);
 
   const diffs = useMemo(() => {
     const before = snapshots.find((s) => s.id === beforeId);
@@ -297,7 +297,7 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
             </div>
           ) : (
             <>
-              <DiffSummary diffs={diffs} />
+              <DiffSummary diffs={diffs} t={t} />
               <div className="space-y-6">
                 {groupedDiffs.map(({ category, items }) => (
                   <DiffCategory key={category} category={category} items={items} t={t} />

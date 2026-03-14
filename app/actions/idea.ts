@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { ideas, tasks } from '@/lib/schema';
 import { eq, desc } from 'drizzle-orm';
-import { requireProjectOwner, requireUser } from '@/lib/auth-helpers';
+import { requireProjectOwner } from '@/lib/auth-helpers';
+import { projectIdSchema, idSchema, createIdeaSchema, updateIdeaSchema } from '@/lib/validations';
 
 export interface Idea {
   id: string;
@@ -27,6 +28,7 @@ function toIdea(row: typeof ideas.$inferSelect): Idea {
 }
 
 export async function getIdeas(projectId: string): Promise<Idea[]> {
+  projectIdSchema.parse(projectId);
   await requireProjectOwner(projectId);
 
   const data = await db
@@ -39,6 +41,8 @@ export async function getIdeas(projectId: string): Promise<Idea[]> {
 }
 
 export async function createIdea(projectId: string, content: string): Promise<Idea | null> {
+  projectIdSchema.parse(projectId);
+  createIdeaSchema.parse({ content });
   await requireProjectOwner(projectId);
 
   const [data] = await db
@@ -53,7 +57,7 @@ export async function createIdea(projectId: string, content: string): Promise<Id
 }
 
 export async function deleteIdea(ideaId: string): Promise<boolean> {
-  const user = await requireUser();
+  idSchema.parse(ideaId);
 
   // Verify ownership via the idea's project
   const [idea] = await db.select().from(ideas).where(eq(ideas.id, ideaId));
@@ -66,6 +70,8 @@ export async function deleteIdea(ideaId: string): Promise<boolean> {
 }
 
 export async function updateIdea(ideaId: string, updates: { content?: string; notes?: string | null }): Promise<Idea | null> {
+  idSchema.parse(ideaId);
+  updateIdeaSchema.parse(updates);
   // Verify ownership via the idea's project
   const [idea] = await db.select().from(ideas).where(eq(ideas.id, ideaId));
   if (!idea) throw new Error('Idea not found');
@@ -84,6 +90,7 @@ export async function updateIdea(ideaId: string, updates: { content?: string; no
 }
 
 export async function convertIdeaToTask(ideaId: string): Promise<string | null> {
+  idSchema.parse(ideaId);
   // Verify ownership via the idea's project
   const [idea] = await db.select().from(ideas).where(eq(ideas.id, ideaId));
   if (!idea) throw new Error('Idea not found');

@@ -16,6 +16,7 @@ const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_RE
 
 // フォールバック: インメモリ（開発環境用）
 const memoryStore = new Map<string, number[]>();
+let inMemoryWarningLogged = false;
 
 export function rateLimit(config: RateLimitConfig) {
   if (redis) {
@@ -33,6 +34,10 @@ export function rateLimit(config: RateLimitConfig) {
   }
 
   // Fallback: in-memory (dev only)
+  if (!inMemoryWarningLogged) {
+    console.warn('[rate-limit] Upstash Redis not configured. Using in-memory fallback which does NOT work correctly on serverless platforms (each instance has its own memory). Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for production use.');
+    inMemoryWarningLogged = true;
+  }
   return {
     async check(key: string): Promise<{ success: boolean; remaining: number }> {
       const now = Date.now();

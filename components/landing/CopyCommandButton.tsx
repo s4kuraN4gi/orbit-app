@@ -7,8 +7,12 @@ import { Terminal, Copy, Check } from 'lucide-react';
 export function CopyCommandButton() {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText('npx @orbit-cli/core scan -g');
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText('npx @orbit-cli/core scan -g');
+    } catch {
+      // Silently handle clipboard errors (e.g. insecure contexts)
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

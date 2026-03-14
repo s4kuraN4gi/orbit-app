@@ -149,7 +149,7 @@ export function ImportPlanModal({ isOpen, onClose, projectId, planTier = 'free' 
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
           {/* Left: Input */}
           <div className="flex flex-col gap-2 min-h-0">
             <div className="flex items-center justify-between shrink-0">

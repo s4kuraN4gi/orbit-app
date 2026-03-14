@@ -261,6 +261,12 @@ export default async function Home() {
             <Link href="/pricing" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
               {t('nav.pricing')}
             </Link>
+            <Link href="/terms" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+              {t('nav.terms')}
+            </Link>
+            <Link href="/privacy" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+              {t('nav.privacy')}
+            </Link>
           </div>
           <p>&copy; 2026 Orbit. All rights reserved.</p>
         </div>

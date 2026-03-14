@@ -49,11 +49,15 @@ export async function getOrgSubscriptionPlan(orgId: string): Promise<PlanTier> {
 export async function getEffectivePlan(userId: string, orgId?: string | null): Promise<PlanTier> {
   const planOrder: Record<PlanTier, number> = { free: 0, pro: 1, team: 2 };
 
-  const personalPlan = await getSubscriptionPlan(userId);
+  if (!orgId) {
+    return getSubscriptionPlan(userId);
+  }
 
-  if (!orgId) return personalPlan;
-
-  const orgPlan = await getOrgSubscriptionPlan(orgId);
+  // Fetch personal and org plans in parallel
+  const [personalPlan, orgPlan] = await Promise.all([
+    getSubscriptionPlan(userId),
+    getOrgSubscriptionPlan(orgId),
+  ]);
 
   return planOrder[orgPlan] >= planOrder[personalPlan] ? orgPlan : personalPlan;
 }

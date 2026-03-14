@@ -83,63 +83,60 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // 1. Create AI Context
-    const [aiContext] = await db
-      .insert(aiContexts)
-      .values({
-        projectId: body.project_id,
-        sourceTool: body.source_tool || 'Manual',
-        originalPrompt: body.original_prompt || '',
-        rawData: body,
-      })
-      .returning({ id: aiContexts.id });
-
-    if (!aiContext) {
-      return NextResponse.json(
-        { error: 'Failed to create AI context' },
-        { status: 500 }
-      );
-    }
-
-    // 2. Flatten task tree and batch insert
-    const flatTasks = flattenTasks(body.tasks);
-
-    // Insert all tasks in a single batch
-    const insertedTasks = await db
-      .insert(tasks)
-      .values(
-        flatTasks.map((t) => ({
+    // All 3 steps wrapped in a transaction for data integrity
+    const result = await db.transaction(async (tx) => {
+      // 1. Create AI Context
+      const [aiContext] = await tx
+        .insert(aiContexts)
+        .values({
           projectId: body.project_id,
-          aiContextId: aiContext.id,
-          parentId: null as string | null,
-          title: t.title,
-          description: t.description,
-          status: t.status,
-          priority: t.priority,
-          startDate: t.startDate,
-          dueDate: t.dueDate,
-        }))
-      )
-      .returning({ id: tasks.id });
+          sourceTool: body.source_tool || 'Manual',
+          originalPrompt: body.original_prompt || '',
+          rawData: body,
+        })
+        .returning({ id: aiContexts.id });
 
-    // 3. Update parent IDs for child tasks (single batch round-trip)
-    const parentUpdates = flatTasks
-      .map((t, i) => ({ task: t, index: i }))
-      .filter(({ task }) => task.tempParentIndex !== null && task.tempParentIndex >= 0 && task.tempParentIndex < insertedTasks.length)
-      .map(({ task, index }) =>
-        db.update(tasks)
+      if (!aiContext) {
+        throw new Error('Failed to create AI context');
+      }
+
+      // 2. Flatten task tree and batch insert
+      const flatTasks = flattenTasks(body.tasks);
+
+      const insertedTasks = await tx
+        .insert(tasks)
+        .values(
+          flatTasks.map((t) => ({
+            projectId: body.project_id,
+            aiContextId: aiContext.id,
+            parentId: null as string | null,
+            title: t.title,
+            description: t.description,
+            status: t.status,
+            priority: t.priority,
+            startDate: t.startDate,
+            dueDate: t.dueDate,
+          }))
+        )
+        .returning({ id: tasks.id });
+
+      // 3. Update parent IDs for child tasks
+      for (const { task, index } of flatTasks
+        .map((t, i) => ({ task: t, index: i }))
+        .filter(({ task }) => task.tempParentIndex !== null && task.tempParentIndex >= 0 && task.tempParentIndex < insertedTasks.length)
+      ) {
+        await tx.update(tasks)
           .set({ parentId: insertedTasks[task.tempParentIndex!].id })
-          .where(eq(tasks.id, insertedTasks[index].id))
-      );
+          .where(eq(tasks.id, insertedTasks[index].id));
+      }
 
-    if (parentUpdates.length > 0) {
-      await db.batch(parentUpdates as [typeof parentUpdates[0], ...typeof parentUpdates]);
-    }
+      return aiContext.id;
+    });
 
     return NextResponse.json({
       success: true,
       message: 'Tasks created successfully',
-      ai_context_id: aiContext.id,
+      ai_context_id: result,
     });
   } catch (error: unknown) {
     if (error instanceof ZodError) {

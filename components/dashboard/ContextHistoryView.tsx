@@ -114,7 +114,7 @@ export function ContextHistoryView({ projectId, currentPlan }: ContextHistoryVie
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [projectId]);
+  }, [projectId, tCommon]);
 
   if (loading) {
     return (

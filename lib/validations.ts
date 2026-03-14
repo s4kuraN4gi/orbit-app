@@ -69,3 +69,29 @@ export const createProjectSchema = z.object({
 export const createIdeaSchema = z.object({
   content: z.string().min(1).max(5000),
 });
+
+export const updateIdeaSchema = z.object({
+  content: z.string().min(1).max(5000).optional(),
+  notes: z.string().max(10000).nullable().optional(),
+});
+
+// Server Action validation schemas
+export const taskIdSchema = z.string().uuid();
+export const taskStatusSchema = z.enum(['todo', 'in_progress', 'done']);
+export const taskPrioritySchema = z.enum(['low', 'medium', 'high', 'urgent']);
+export const taskPositionSchema = z.number().finite();
+export const taskDatesSchema = z.object({
+  startDate: z.coerce.date(),
+  dueDate: z.coerce.date(),
+});
+
+export const updateTaskSchema = z.object({
+  title: z.string().min(1).max(500).optional(),
+  description: z.string().max(5000).optional(),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
+  status: z.enum(['todo', 'in_progress', 'done']).optional(),
+  start_date: z.string().nullable().optional(),
+  due_date: z.string().nullable().optional(),
+  position: z.number().finite().optional(),
+  completed_at: z.string().nullable().optional(),
+});

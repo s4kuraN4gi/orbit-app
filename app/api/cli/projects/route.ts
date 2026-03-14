@@ -20,9 +20,9 @@ export async function GET(request: Request) {
 
   const userId = session.user.id;
 
-  // Single query: LEFT JOIN member to find projects user owns OR is a member of the org
+  // Single query with DISTINCT ON to avoid duplicates from LEFT JOIN
   const rows = await db
-    .select({ project: projects })
+    .selectDistinctOn([projects.id], { project: projects })
     .from(projects)
     .leftJoin(
       member,
@@ -34,17 +34,9 @@ export async function GET(request: Request) {
         sql`${member.id} IS NOT NULL`
       )
     )
-    .orderBy(desc(projects.createdAt));
+    .orderBy(projects.id, desc(projects.createdAt));
 
-  // Deduplicate
-  const seen = new Set<string>();
-  const data = rows
-    .map((r) => r.project)
-    .filter((p) => {
-      if (seen.has(p.id)) return false;
-      seen.add(p.id);
-      return true;
-    });
+  const data = rows.map((r) => r.project);
 
   return NextResponse.json({
     projects: data.map((p) => ({

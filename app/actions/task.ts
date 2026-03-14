@@ -6,8 +6,11 @@ import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { eq, desc, asc } from 'drizzle-orm';
 import { requireProjectOwner, requireTaskOwner } from '@/lib/auth-helpers';
+import { taskIdSchema, taskStatusSchema, taskPrioritySchema, taskPositionSchema, taskDatesSchema, projectIdSchema, updateTaskSchema } from '@/lib/validations';
 
 export async function updateTaskStatus(taskId: string, newStatus: TaskStatus) {
+  taskIdSchema.parse(taskId);
+  taskStatusSchema.parse(newStatus);
   await requireTaskOwner(taskId);
 
   const updates: Partial<typeof tasks.$inferInsert> = { status: newStatus };
@@ -23,6 +26,8 @@ export async function updateTaskStatus(taskId: string, newStatus: TaskStatus) {
 }
 
 export async function updateTaskPriority(taskId: string, newPriority: string) {
+  taskIdSchema.parse(taskId);
+  taskPrioritySchema.parse(newPriority);
   await requireTaskOwner(taskId);
 
   await db
@@ -34,6 +39,8 @@ export async function updateTaskPriority(taskId: string, newPriority: string) {
 }
 
 export async function updateTaskDates(taskId: string, startDate: Date, dueDate: Date) {
+  taskIdSchema.parse(taskId);
+  taskDatesSchema.parse({ startDate, dueDate });
   await requireTaskOwner(taskId);
 
   await db
@@ -45,6 +52,8 @@ export async function updateTaskDates(taskId: string, startDate: Date, dueDate: 
 }
 
 export async function updateTaskPosition(taskId: string, newPosition: number) {
+  taskIdSchema.parse(taskId);
+  taskPositionSchema.parse(newPosition);
   await requireTaskOwner(taskId);
 
   await db
@@ -65,6 +74,9 @@ export async function createTask(
   startDate?: string,
   dueDate?: string,
 ) {
+  projectIdSchema.parse(projectId);
+  if (priority) taskPrioritySchema.parse(priority);
+  if (status) taskStatusSchema.parse(status);
   await requireProjectOwner(projectId);
 
   // Get current max position
@@ -108,6 +120,7 @@ export async function createTask(
 }
 
 export async function deleteTask(taskId: string) {
+  taskIdSchema.parse(taskId);
   await requireTaskOwner(taskId);
 
   await db.delete(tasks).where(eq(tasks.id, taskId));
@@ -127,6 +140,8 @@ export async function updateTask(
     completed_at?: string | null;
   }
 ) {
+  taskIdSchema.parse(taskId);
+  updateTaskSchema.parse(updates);
   await requireTaskOwner(taskId);
 
   // Handle completed_at automatic update if status is changing
@@ -155,6 +170,7 @@ export async function updateTask(
 }
 
 export async function getTasks(projectId: string) {
+  projectIdSchema.parse(projectId);
   await requireProjectOwner(projectId);
 
   const data = await db

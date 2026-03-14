@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { authenticateRequest, checkProjectAccess } from '../../../auth';
 import { rateLimit } from '@/lib/rate-limit';
-import { formatTask } from '../../utils';
+import { formatTask, findTasksByIdPrefix } from '../../utils';
 
 const limiter = rateLimit({ interval: 60_000, maxRequests: 30 });
 
@@ -31,10 +31,7 @@ export async function PATCH(
     );
   }
 
-  const matchingTasks = await db
-    .select()
-    .from(tasks)
-    .where(sql`${tasks.id}::text LIKE ${idPrefix + '%'}`);
+  const matchingTasks = await findTasksByIdPrefix(idPrefix);
 
   if (matchingTasks.length === 0) {
     return NextResponse.json({ error: 'Task not found' }, { status: 404 });

@@ -5,6 +5,7 @@ interface Metric {
   value: number;
   tags: Record<string, string>;
   timestamp: number;
+  distinctId?: string;
 }
 
 const buffer: Metric[] = [];
@@ -14,12 +15,14 @@ export function trackMetric(
   name: string,
   value: number = 1,
   tags: Record<string, string> = {},
+  distinctId?: string,
 ): void {
   buffer.push({
     name,
     value,
     tags,
     timestamp: Date.now(),
+    distinctId,
   });
 
   if (buffer.length >= MAX_BUFFER_SIZE) {
@@ -60,6 +63,7 @@ function flush(): void {
         api_key: posthogKey,
         batch: events.map(e => ({
           event: e.name,
+          distinct_id: e.distinctId || e.tags.userId || 'server-anonymous',
           properties: {
             ...e.tags,
             value: e.value,

@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm';
 import { UserSettings, CustomColors } from '@/lib/theme';
 import { auth } from '@/lib/auth';
 import { requireUser } from '@/lib/auth-helpers';
+import { userSettingsSchema } from '@/lib/validations';
 
 function toUserSettings(row: typeof userSettings.$inferSelect): UserSettings {
   return {
@@ -54,11 +55,13 @@ export async function updateUserSettings(
 ): Promise<UserSettings | null> {
   const user = await requireUser();
 
+  const validated = userSettingsSchema.parse(updates);
+
   const setValues: Partial<typeof userSettings.$inferInsert> = { updatedAt: new Date() };
-  if (updates.theme !== undefined) setValues.theme = updates.theme;
-  if (updates.default_view !== undefined) setValues.defaultView = updates.default_view;
-  if (updates.language !== undefined) setValues.language = updates.language;
-  if (updates.custom_colors !== undefined) setValues.customColors = updates.custom_colors;
+  if (validated.theme !== undefined) setValues.theme = validated.theme;
+  if (validated.default_view !== undefined) setValues.defaultView = validated.default_view;
+  if (validated.language !== undefined) setValues.language = validated.language;
+  if (validated.custom_colors !== undefined) setValues.customColors = validated.custom_colors;
 
   const [data] = await db
     .update(userSettings)
