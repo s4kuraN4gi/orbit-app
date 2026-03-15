@@ -1,0 +1,59 @@
+name: 'Orbit Context Update'
+description: 'Automatically update AI context files (CLAUDE.md, .cursorrules, etc.) from your codebase structure'
+author: 'Orbit'
+
+branding:
+  icon: 'cpu'
+  color: 'purple'
+
+inputs:
+  target:
+    description: 'Output format: claude, cursor, cursor-mdc, copilot, windsurf'
+    required: false
+    default: 'claude'
+  output:
+    description: 'Custom output file path (default: auto based on target)'
+    required: false
+  commit:
+    description: 'Auto-commit updated context file back to the PR branch'
+    required: false
+    default: 'true'
+  commit-message:
+    description: 'Commit message for auto-commit'
+    required: false
+    default: 'chore: update AI context [orbit]'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Generate context
+      shell: bash
+      run: |
+        CMD="npx @orbit-cli/core@latest scan -g --target ${{ inputs.target }}"
+        if [ -n "${{ inputs.output }}" ]; then
+          CMD="$CMD -o ${{ inputs.output }}"
+        fi
+        echo "::group::Running Orbit scan"
+        echo "Command: $CMD"
+        $CMD
+        echo "::endgroup::"
+
+    - name: Commit changes
+      if: inputs.commit == 'true'
+      shell: bash
+      run: |
+        git config user.name "orbit-bot"
+        git config user.email "orbit-bot@users.noreply.github.com"
+        git add -A
+        if git diff --staged --quiet; then
+          echo "No context changes detected — skipping commit."
+        else
+          git commit -m "${{ inputs.commit-message }}"
+          git push
+          echo "Context file updated and pushed."
+        fi

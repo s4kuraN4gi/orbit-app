@@ -17,6 +17,8 @@ import type { WatchOptions } from './commands/watch.js';
 import { planCommand } from './commands/plan.js';
 import type { PlanOptions } from './commands/plan.js';
 import { mcpServeCommand } from './commands/mcp-serve.js';
+import { impactCommand } from './commands/impact.js';
+import type { ImpactOptions } from './commands/impact.js';
 import { OrbitError } from './lib/errors.js';
 import type { TaskPriority, TaskStatus } from './types.js';
 
@@ -125,6 +127,15 @@ program
   .option('--debounce <ms>', 'Debounce interval in ms (default: 2000)')
   .option('--focus', 'Include task-linked focus areas in context')
   .action((options: WatchOptions) => watchCommand(options));
+
+// --- Impact ---
+
+program
+  .command('impact <file>')
+  .description('Analyze the blast radius of changes to a file')
+  .option('-d, --depth <n>', 'Max traversal depth', parseInt)
+  .option('--format <format>', 'Output format: text (default) or json')
+  .action((file: string, options: ImpactOptions) => impactCommand(file, options));
 
 // --- MCP ---
 

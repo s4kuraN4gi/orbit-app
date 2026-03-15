@@ -1,0 +1,29 @@
+# Example: Orbit Context Update workflow
+# Copy this file to .github/workflows/orbit-context.yml in your repository.
+#
+# This keeps CLAUDE.md up to date on every pull request.
+# No API key or Orbit account needed — scan -g is free.
+
+name: Update AI Context
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update-context:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: s4kuraN4gi/orbit-action@v1
+        with:
+          target: claude          # claude | cursor | cursor-mdc | copilot | windsurf
+          # output: 'CLAUDE.md'   # Custom output path (optional)
+          # commit: 'true'        # Set to 'false' to skip auto-commit
+          # commit-message: 'chore: update AI context [orbit]'
