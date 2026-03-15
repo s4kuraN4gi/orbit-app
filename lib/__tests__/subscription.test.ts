@@ -26,7 +26,7 @@ const mockDbChain = createChain();
 vi.mock('@/lib/db', () => ({
   db: new Proxy({}, {
     get(_, prop) {
-      if (prop in mockDbChain) return mockDbChain[prop];
+      if (typeof prop === 'string' && prop in mockDbChain) return mockDbChain[prop];
       return vi.fn(() => mockDbChain);
     },
   }),
