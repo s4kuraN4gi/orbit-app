@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Task } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -67,8 +67,9 @@ export function ProjectOverview({ scanData, tasks }: ProjectOverviewProps) {
   const tStats = useTranslations('dashboard.stats');
   const tCommon = useTranslations('common');
 
+  const [now] = useState(() => Date.now());
   const daysAgo = (dateStr: string): string => {
-    const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+    const diff = Math.floor((now - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
     if (diff === 0) return tCommon('today');
     return tCommon('daysAgo', { count: diff });
   };

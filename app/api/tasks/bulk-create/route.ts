@@ -35,7 +35,6 @@ function flattenTasks(
 
   const result: FlatTask[] = [];
   for (const task of taskList) {
-    const currentIndex = result.length + (parentIndex !== null ? parentIndex + 1 : 0);
     result.push({
       title: task.title,
       description: task.description || null,

@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ─── Mock DB with response queue ───
 // Each .where() call pops the next response from the queue.
-let responseQueue: any[][] = [];
+let responseQueue: Record<string, unknown>[][] = [];
 
 function createChain() {
-  const chain: any = {};
+  const chain: Record<string, unknown> = {};
   chain.select = vi.fn(() => chain);
   chain.from = vi.fn(() => chain);
   chain.where = vi.fn(() => {
@@ -40,8 +40,8 @@ vi.mock('@/lib/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: any[]) => args),
-  and: vi.fn((...args: any[]) => args),
+  eq: vi.fn((...args: unknown[]) => args),
+  and: vi.fn((...args: unknown[]) => args),
   sql: vi.fn(),
 }));
 

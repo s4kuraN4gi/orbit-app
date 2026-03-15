@@ -72,10 +72,8 @@ export async function scanExportsWithTreeSitter(
   relPath: string,
 ): Promise<ExportEntry[]> {
   // Dynamic import to avoid build-time dependency
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const ParserModule = await import(/* webpackIgnore: true */ 'tree-sitter' + '');
   const Parser = ParserModule.default as new () => TreeSitterParser;
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const TypeScriptModule = await import(/* webpackIgnore: true */ 'tree-sitter-typescript' + '');
   const TypeScript = TypeScriptModule.default as { tsx: unknown; typescript: unknown };
 

@@ -104,15 +104,17 @@ export function ContextHistoryView({ projectId, currentPlan }: ContextHistoryVie
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    getContextHistory(projectId, 20)
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        const data = await getContextHistory(projectId, 20);
         if (!cancelled) setContexts(data);
-      })
-      .catch(() => toast.error(tCommon('errorLoadHistory')))
-      .finally(() => {
+      } catch {
+        if (!cancelled) toast.error(tCommon('errorLoadHistory'));
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    };
+    fetchData();
     return () => { cancelled = true; };
   }, [projectId, tCommon]);
 

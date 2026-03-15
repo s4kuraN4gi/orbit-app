@@ -77,10 +77,6 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
   // Remove member confirm dialog
   const [removeMemberId, setRemoveMemberId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadOrganizations();
-  }, []);
-
   const loadOrganizations = async () => {
     setLoading(true);
     try {
@@ -96,6 +92,9 @@ export function TeamSettings({ userId }: TeamSettingsProps) {
       setLoading(false);
     }
   };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadOrganizations(); }, []);
 
   const selectOrg = async (orgId: string) => {
     try {

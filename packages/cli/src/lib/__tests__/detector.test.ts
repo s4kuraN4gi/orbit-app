@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { join } from 'node:path';
 
@@ -46,9 +47,8 @@ function setupFiles(fileMap: Record<string, string>) {
     const parts = filePath.split('/').filter(Boolean);
     // Build directory tree
     for (let i = 0; i < parts.length - 1; i++) {
-      const dirPath = '/' + parts.slice(0, i + 1).join('/');
-      const parentDir = i === 0 ? '/' + parts[0].split('/')[0] : '/' + parts.slice(0, i).join('/');
-      // This is simplified; we register each directory level
+      // Build directory tree (simplified; we register each directory level)
+      void i;
     }
   }
 
@@ -79,16 +79,16 @@ function setupFiles(fileMap: Record<string, string>) {
     }
   }
 
-  mockReaddir.mockImplementation(async (dirPath: any) => {
+  mockReaddir.mockImplementation(async (dirPath: unknown) => {
     const entries = dirs.get(String(dirPath)) || [];
     return entries.map(e => ({
       name: e.name,
       isDirectory: () => e.isDir,
       isFile: () => !e.isDir,
-    })) as any;
+    })) as unknown as Awaited<ReturnType<typeof readdir>>;
   });
 
-  mockReadFile.mockImplementation(async (filePath: any) => {
+  mockReadFile.mockImplementation(async (filePath: unknown) => {
     const content = fileMap[String(filePath)];
     if (content === undefined) throw new Error(`ENOENT: ${filePath}`);
     return content;
@@ -372,7 +372,7 @@ describe('scanGit', () => {
   });
 
   it('returns git info when .git exists', () => {
-    mockExistsSync.mockImplementation((p: any) => String(p) === join(ROOT, '.git'));
+    mockExistsSync.mockImplementation((p: unknown) => String(p) === join(ROOT, '.git'));
     mockExecSync.mockImplementation((cmd: any) => {
       const c = String(cmd);
       if (c.includes('branch --show-current')) return 'main' as any;
@@ -395,21 +395,21 @@ describe('scanGit', () => {
 // ─── globFiles ───
 describe('globFiles', () => {
   it('skips node_modules and other ignored dirs', async () => {
-    mockReaddir.mockImplementation(async (dirPath: any) => {
+    mockReaddir.mockImplementation(async (dirPath: unknown) => {
       const p = String(dirPath);
       if (p === ROOT) {
         return [
           { name: 'lib', isDirectory: () => true, isFile: () => false },
           { name: 'node_modules', isDirectory: () => true, isFile: () => false },
           { name: 'index.ts', isDirectory: () => false, isFile: () => true },
-        ] as any;
+        ] as unknown as Awaited<ReturnType<typeof readdir>>;
       }
       if (p === join(ROOT, 'lib')) {
         return [
           { name: 'utils.ts', isDirectory: () => false, isFile: () => true },
-        ] as any;
+        ] as unknown as Awaited<ReturnType<typeof readdir>>;
       }
-      return [];
+      return [] as unknown as Awaited<ReturnType<typeof readdir>>;
     });
 
     const result = await globFiles(ROOT, /\.ts$/);

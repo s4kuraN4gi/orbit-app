@@ -24,15 +24,17 @@ export function IdeaBox({ projectId, onTaskCreated }: IdeaBoxProps) {
   const [editingNotes, setEditingNotes] = useState<string>('');
 
   useEffect(() => {
-    loadIdeas();
+    let cancelled = false;
+    const fetchIdeas = async () => {
+      const data = await getIdeas(projectId);
+      if (!cancelled) {
+        setIdeas(data);
+        setIsLoading(false);
+      }
+    };
+    fetchIdeas();
+    return () => { cancelled = true; };
   }, [projectId]);
-
-  const loadIdeas = async () => {
-    setIsLoading(true);
-    const data = await getIdeas(projectId);
-    setIdeas(data);
-    setIsLoading(false);
-  };
 
   const handleAddIdea = () => {
     if (!newIdea.trim()) return;

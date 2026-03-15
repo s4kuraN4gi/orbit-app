@@ -1,7 +1,5 @@
 import type { ContextIR } from './context-ir.js';
 import type { Task } from '../types.js';
-import type { ExternalIssue } from './issue-providers/types.js';
-
 export interface FocusArea {
   taskId: string;
   taskTitle: string;

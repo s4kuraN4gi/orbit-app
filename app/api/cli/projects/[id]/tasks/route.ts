@@ -34,7 +34,7 @@ export async function GET(
   const url = new URL(request.url);
   const statusParam = url.searchParams.get('status');
 
-  let conditions = [eq(tasks.projectId, id)];
+  const conditions = [eq(tasks.projectId, id)];
   if (statusParam) {
     const statuses = statusParam.split(',').map((s) => s.trim());
     conditions.push(inArray(tasks.status, statuses));

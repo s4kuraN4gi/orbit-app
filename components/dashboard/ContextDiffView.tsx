@@ -204,12 +204,11 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
   const [loading, setLoading] = useState(true);
   const [beforeId, setBeforeId] = useState<string>('');
   const [afterId, setAfterId] = useState<string>('');
-
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    getScanSnapshots(projectId, 50)
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        const data = await getScanSnapshots(projectId, 50);
         if (!cancelled) {
           setSnapshots(data);
           if (data.length >= 2) {
@@ -217,9 +216,13 @@ export function ContextDiffView({ projectId, currentPlan }: ContextDiffViewProps
             setAfterId(data[0].id);
           }
         }
-      })
-      .catch(() => toast.error(tCommon('errorLoadSnapshots')))
-      .finally(() => { if (!cancelled) setLoading(false); });
+      } catch {
+        if (!cancelled) toast.error(tCommon('errorLoadSnapshots'));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchData();
     return () => { cancelled = true; };
   }, [projectId, tCommon]);
 

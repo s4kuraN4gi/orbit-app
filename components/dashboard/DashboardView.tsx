@@ -102,7 +102,7 @@ function filterTasks(
   }, []);
 }
 
-export function DashboardView({ initialTasks, projectName, projectId, allProjects, defaultView = 'overview', currentUserEmail, scanData, planTier = 'free', currentProjectCount, checkoutSuccess, organizations = [] }: DashboardViewProps) {
+export function DashboardView({ initialTasks, projectName, projectId, allProjects, defaultView = 'overview', scanData, planTier = 'free', checkoutSuccess, organizations = [] }: DashboardViewProps) {
   const router = useRouter();
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
@@ -150,7 +150,7 @@ export function DashboardView({ initialTasks, projectName, projectId, allProject
       url.searchParams.delete('checkout');
       window.history.replaceState({}, '', url.toString());
     }
-  }, [checkoutSuccess, planTier]);
+  }, [checkoutSuccess, planTier, tPricing]);
 
   const handleProjectChange = (newProjectId: string) => {
     router.push(`/dashboard?projectId=${newProjectId}`);

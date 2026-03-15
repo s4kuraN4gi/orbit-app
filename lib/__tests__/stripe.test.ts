@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // Stub env vars BEFORE importing the module
 const MOCK_PRO_PRICE = 'price_pro_123';

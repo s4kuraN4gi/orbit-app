@@ -60,7 +60,7 @@ export function ExportContextModal({ isOpen, onClose, tasks, projectName, planTi
       setCopied(true);
       toast.success(t('copied'));
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error(t('copyError'));
     }
   };

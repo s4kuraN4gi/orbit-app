@@ -1,5 +1,4 @@
 import ora from 'ora';
-import chalk from 'chalk';
 import { apiRequest } from '../lib/api.js';
 import { requireAuth } from '../lib/session.js';
 import { getProjectLink } from '../lib/project.js';

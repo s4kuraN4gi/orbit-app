@@ -22,16 +22,14 @@ import {
 import { updateTaskPosition, updateTask } from '@/app/actions/task';
 import { toast } from 'sonner';
 import { GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
-import { 
-  isToday, 
-  isTomorrow, 
-  isPast, 
-  isThisWeek, 
-  addWeeks, 
-  isAfter, 
-  startOfDay, 
+import {
+  isToday,
+  isTomorrow,
+  isPast,
+  addWeeks,
+  isAfter,
+  startOfDay,
   endOfDay,
-  startOfWeek,
   endOfWeek,
   addDays
 } from 'date-fns';
@@ -57,20 +55,6 @@ function flattenVisibleTasks(
   }
   return result;
 }
-
-// Helper to find parent
-const findParent = (taskId: string, nodes: Task[]): Task | null => {
-  for (const node of nodes) {
-    if (node.children?.some(child => child.id === taskId)) {
-      return node;
-    }
-    if (node.children) {
-      const found = findParent(taskId, node.children);
-      if (found) return found;
-    }
-  }
-  return null;
-};
 
 export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListProps) {
   const t = useTranslations();
@@ -111,7 +95,6 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
     };
 
     const now = new Date();
-    const todayEnd = endOfDay(now);
     const tomorrowEnd = endOfDay(addDays(now, 1));
     const thisWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
     const nextWeekEnd = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
@@ -470,19 +453,18 @@ export function TaskList({ tasks, onTaskClick, isModalOpen = false }: TaskListPr
     }
   }, [focusedIndex]);
 
-  // Reset focus when tasks change
-  useEffect(() => {
-    if (focusedIndex >= visibleTasks.length) {
-      setFocusedIndex(Math.max(0, visibleTasks.length - 1));
-    }
-  }, [visibleTasks.length, focusedIndex]);
+  // Clamp focusedIndex when tasks list shrinks
+  const clampedFocusedIndex = useMemo(() => {
+    if (visibleTasks.length === 0) return 0;
+    return Math.min(focusedIndex, visibleTasks.length - 1);
+  }, [focusedIndex, visibleTasks.length]);
 
   if (tasks.length === 0) {
      return <div className="p-8 text-center text-muted-foreground">{t('dashboard.noTasks')}</div>;
   }
 
-  const focusedTaskId = focusedIndex >= 0 && focusedIndex < visibleTasks.length 
-    ? visibleTasks[focusedIndex].task.id 
+  const focusedTaskId = clampedFocusedIndex >= 0 && clampedFocusedIndex < visibleTasks.length
+    ? visibleTasks[clampedFocusedIndex].task.id
     : null;
   
   const groupOrder = ['overdue', 'today', 'tomorrow', 'thisWeek', 'nextWeek', 'later', 'noDate'];

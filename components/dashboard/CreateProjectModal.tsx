@@ -71,7 +71,7 @@ export function CreateProjectModal({
       setSelectedOrgId('personal');
       onClose();
       onProjectCreated(project.id);
-    } catch (error) {
+    } catch {
       toast.error(t('createError'));
     } finally {
       setIsLoading(false);

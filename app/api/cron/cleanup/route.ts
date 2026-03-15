@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 90);
 
-  const result = await db
+  await db
     .delete(webhookEvents)
     .where(lt(webhookEvents.processedAt, cutoff));
 

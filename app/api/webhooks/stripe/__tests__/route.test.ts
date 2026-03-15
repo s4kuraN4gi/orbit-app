@@ -20,25 +20,25 @@ vi.mock('@/lib/db', () => ({
   db: {
     select: () => {
       mockDb.select();
-      return { from: (table: any) => { mockFrom(table); return { where: (cond: any) => { mockWhere(cond); return Promise.resolve([]); } }; } };
+      return { from: (table: unknown) => { mockFrom(table); return { where: (cond: unknown) => { mockWhere(cond); return Promise.resolve([]); } }; } };
     },
-    insert: (table: any) => {
+    insert: (table: unknown) => {
       mockDb.insert(table);
       return {
-        values: (vals: any) => {
+        values: (vals: unknown) => {
           mockValues(vals);
           return {
-            onConflictDoUpdate: (opts: any) => { mockOnConflictDoUpdate(opts); return Promise.resolve(); },
+            onConflictDoUpdate: (opts: unknown) => { mockOnConflictDoUpdate(opts); return Promise.resolve(); },
           };
         },
       };
     },
-    update: (table: any) => {
+    update: (table: unknown) => {
       mockDb.update(table);
       return {
-        set: (vals: any) => {
+        set: (vals: unknown) => {
           mockSet(vals);
-          return { where: (cond: any) => { mockWhere(cond); return Promise.resolve(); } };
+          return { where: (cond: unknown) => { mockWhere(cond); return Promise.resolve(); } };
         },
       };
     },
@@ -73,7 +73,7 @@ vi.mock('@/lib/monitoring', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: any[]) => args),
+  eq: vi.fn((...args: unknown[]) => args),
 }));
 
 // --- Tests ---

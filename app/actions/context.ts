@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { aiContexts, tasks, scanSnapshots } from '@/lib/schema';
+import { aiContexts, scanSnapshots } from '@/lib/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { requireProjectOwner } from '@/lib/auth-helpers';
 import type { ScanData } from '@/types';

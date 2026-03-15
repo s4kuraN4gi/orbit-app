@@ -1,5 +1,5 @@
 import { writeFile, mkdir } from 'node:fs/promises';
-import { join, basename, dirname, relative } from 'node:path';
+import { join, basename, dirname } from 'node:path';
 import chalk from 'chalk';
 import ora from 'ora';
 import { watch as chokidarWatch } from 'chokidar';

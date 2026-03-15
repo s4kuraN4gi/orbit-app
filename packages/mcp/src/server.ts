@@ -4,7 +4,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { registerOrbitTools } from '../../cli/src/lib/mcp-tools.js';
 
 // ── Redirect console.log to stderr (stdio transport protection) ──
-const originalLog = console.log;
+void console.log; // originalLog reference preserved for potential restoration
 console.log = console.error;
 
 // ── No-op TaskProvider (standalone mode, no auth) ──

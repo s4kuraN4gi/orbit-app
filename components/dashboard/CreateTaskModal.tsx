@@ -74,7 +74,7 @@ export function CreateTaskModal({ isOpen, onClose, projectId }: CreateTaskModalP
       setPriority('medium');
       setDueDate('');
       onClose();
-    } catch (error) {
+    } catch {
       toast.error(t('create.error'));
     } finally {
       setIsLoading(false);

@@ -1,5 +1,4 @@
 import type { ContextIR } from './context-ir.js';
-import type { FocusArea } from './task-focus.js';
 import { appendUserSection, type MarkerFormat } from './user-sections.js';
 
 export type RenderTarget = 'claude' | 'cursor' | 'cursor-mdc' | 'copilot' | 'windsurf';

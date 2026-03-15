@@ -1,6 +1,6 @@
 'use server';
 
-import { Task, TaskStatus, TaskPriority } from '@/types';
+import { TaskStatus, TaskPriority } from '@/types';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';

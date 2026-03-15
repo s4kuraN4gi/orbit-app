@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // --- Mock setup ---
 
-let mockQueryResult: any[] = [];
+let mockQueryResult: Record<string, unknown>[] = [];
 
 vi.mock('@/lib/db', () => ({
   db: {
@@ -22,8 +22,8 @@ vi.mock('@/lib/schema', () => ({
 }));
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: any[]) => args),
-  and: vi.fn((...args: any[]) => args),
+  eq: vi.fn((...args: unknown[]) => args),
+  and: vi.fn((...args: unknown[]) => args),
 }));
 
 // --- Tests ---

@@ -53,7 +53,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const user = session.user;
 
   // Fetch user settings, plan, and memberships in parallel
-  const [userSettings, planLimits, memberships] = await Promise.all([
+  const [, planLimits, memberships] = await Promise.all([
     getUserSettings(),
     getUserPlan(),
     db

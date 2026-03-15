@@ -13,7 +13,7 @@ const PRIORITY_LABEL: Record<TaskPriority, string> = {
   low: chalk.gray('LOW'),
 };
 
-export function formatTask(task: Task, index?: number): string {
+export function formatTask(task: Task): string {
   const id = chalk.dim(task.id.slice(0, 6));
   const icon = STATUS_ICON[task.status];
   const priority = PRIORITY_LABEL[task.priority];

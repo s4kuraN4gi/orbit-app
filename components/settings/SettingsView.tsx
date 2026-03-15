@@ -43,7 +43,6 @@ const colorKeys: (keyof ThemeColors)[] = [
 
 export function SettingsView({ initialSettings, userEmail, userId, currentPlan = 'free', subscription }: SettingsViewProps) {
   const t = useTranslations('settings');
-  const tCommon = useTranslations('common');
   const [isPending, startTransition] = useTransition();
   const { theme, setTheme: setThemeContext, setCustomColors: setContextColors } = useTheme();
   const [language, setLanguage] = useState<'ja' | 'en'>(initialSettings?.language || 'ja');

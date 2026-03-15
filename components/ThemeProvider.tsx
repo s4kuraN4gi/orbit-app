@@ -62,30 +62,26 @@ export function ThemeProvider({
   storageKey = 'orbit-theme',
   initialCustomColors = null,
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
-  const [mounted, setMounted] = useState(false);
-  const [customColors, setCustomColorsState] = useState<CustomColors | null>(initialCustomColors);
-
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(storageKey) as Theme | null;
-    if (stored) {
-      setThemeState(stored);
-    }
-    
-    // Load custom colors from localStorage
+  const getInitialTheme = (): Theme => {
+    if (typeof window === 'undefined') return defaultTheme;
+    return (localStorage.getItem(storageKey) as Theme | null) ?? defaultTheme;
+  };
+  const getInitialCustomColors = (): CustomColors | null => {
+    if (typeof window === 'undefined') return initialCustomColors;
     const storedColors = localStorage.getItem('orbit-custom-colors');
     if (storedColors) {
-      try {
-        setCustomColorsState(JSON.parse(storedColors));
-      } catch {
-        // ignore parse errors
-      }
+      try { return JSON.parse(storedColors); } catch { /* ignore */ }
     }
-    
-    setMounted(true);
-  }, [storageKey]);
+    return initialCustomColors;
+  };
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const [mounted, setMounted] = useState(false);
+  const [customColors, setCustomColorsState] = useState<CustomColors | null>(getInitialCustomColors);
+
+  // Mark as mounted — standard Next.js hydration pattern
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setMounted(true); }, []);
 
   // Apply theme to document
   useEffect(() => {

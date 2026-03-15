@@ -9,7 +9,7 @@ import type { Task, OrbitProjectLink } from '../types.js';
 import type { TaskProvider } from '../lib/mcp-tools.js';
 
 // ── Redirect console.log to stderr (stdio transport protection) ──
-const originalLog = console.log;
+void console.log; // originalLog reference preserved for potential restoration
 console.log = console.error;
 
 async function tryGetProjectLink(): Promise<OrbitProjectLink | null> {

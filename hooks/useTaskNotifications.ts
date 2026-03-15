@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Task } from '@/types';
 import { useTranslations } from 'next-intl';
 
@@ -49,16 +49,15 @@ function isOverdue(dateString: string | null): boolean {
 
 export function useTaskNotifications(): UseTaskNotificationsReturn {
   const t = useTranslations('notifications');
-  const [permission, setPermission] = useState<NotificationPermission>('default');
-  const [isSupported, setIsSupported] = useState(false);
-
-  useEffect(() => {
-    // Check if Notification API is supported
+  const [permission, setPermission] = useState<NotificationPermission>(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
-      setIsSupported(true);
-      setPermission(Notification.permission as NotificationPermission);
+      return Notification.permission as NotificationPermission;
     }
-  }, []);
+    return 'default';
+  });
+  const [isSupported] = useState(() => {
+    return typeof window !== 'undefined' && 'Notification' in window;
+  });
 
   const requestPermission = useCallback(async (): Promise<NotificationPermission> => {
     if (!isSupported) return 'denied';
