@@ -1,73 +1,127 @@
 # @orbit-cli/core
 
-AI context engine for your codebase. Generate structured context files for Claude, Cursor, Windsurf, and other AI assistants.
+**AI context engine for your codebase.** Generate structured context files for Claude, Cursor, Copilot, Windsurf, and other AI assistants.
 
-**Unlike code-dump tools**, Orbit understands your project's _structure_ — tech stack, routes, database schema, dependencies, git activity, and task status — and generates focused context that helps AI assistants write better code.
+Unlike code-dump tools (like Repomix), Orbit understands your project's *structure* — tech stack, routes, database schema, import graph, dependencies, and git activity — and generates focused context that helps AI assistants write better code.
+
+## Why Orbit?
+
+| | Orbit | Code-dump tools |
+|---|---|---|
+| **Output** | Structured context (tech, routes, DB, imports) | Raw file contents |
+| **Token usage** | Minimal (structure only) | High (full source code) |
+| **Multi-format** | CLAUDE.md, .cursorrules, Copilot, Windsurf | Usually one format |
+| **Import graph** | Hub modules ranked by dependency count | None |
+| **Custom rules** | Preserved across regeneration | N/A |
+| **Setup** | Zero config — just run `npx` | Often requires configuration |
 
 ## Quick Start
 
 ```bash
-# No sign-up required
-npx @orbit-cli/core scan
-
-# Generate a CLAUDE.md context file
+# Generate a CLAUDE.md (no sign-up, no config)
 npx @orbit-cli/core scan -g
 
-# Generate a .cursorrules file
-npx @orbit-cli/core scan -g -o .cursorrules
+# Preview what Orbit detects (without writing a file)
+npx @orbit-cli/core scan
 ```
 
-## What It Does
+That's it. Open the generated `CLAUDE.md` in Claude Code, and your AI assistant now understands your project.
 
-`orbit scan` analyzes your project and outputs:
+## Multi-Format Output (Pro)
 
-- **Tech Stack** — frameworks, languages, versions
+Generate context files for any AI assistant:
+
+```bash
+orbit scan -g                          # CLAUDE.md (free)
+orbit scan -g --target cursor          # .cursorrules
+orbit scan -g --target copilot         # .github/copilot-instructions.md
+orbit scan -g --target windsurf        # .windsurfrules
+orbit scan -g --target cursor-mdc      # .cursor/rules/*.mdc (modular)
+```
+
+## What It Detects
+
+- **Tech Stack** — frameworks, languages, package manager, Node version
 - **Project Structure** — pages, API routes, database tables
-- **Dependencies** — categorized by purpose (UI, state, testing, etc.)
-- **Git Status** — branch, recent activity, uncommitted changes
-- **Codebase Metrics** — file count, lines of code, largest files
+- **Import Graph** — module dependencies, hub modules ranked by import count
+- **Exports** — components, functions, types with file locations
+- **Dependencies** — categorized (UI, state, testing, database, auth, etc.)
+- **Git Status** — branch, recent commits, uncommitted changes
+- **Code Metrics** — file count, lines of code, largest files
 - **Deployment** — platform (Vercel, AWS, etc.) and CI configuration
-- **Environment Variables** — detected variable names (values are never read)
+- **Environment Variables** — variable names detected (values are never read)
+- **Scripts** — npm/pnpm scripts available
 
-## Context Generation
+## Custom Rules (Preserved on Regeneration)
 
-With `--generate-context` (or `-g`), Orbit writes a Markdown file that AI assistants can use as project context:
+When you re-run `orbit scan -g`, your hand-written notes are preserved:
 
-```bash
-orbit scan -g              # Outputs CLAUDE.md
-orbit scan -g -o context.md   # Custom output path
+```markdown
+<!-- ORBIT:USER-START -->
+## Our Coding Standards
+- Use `const` over `let` everywhere
+- All API routes must validate input with Zod
+- Components use named exports, not default
+<!-- ORBIT:USER-END -->
 ```
 
-The generated file includes all scan data in a clean, structured format that AI tools understand.
+Write anything between the markers — Orbit keeps it intact across regeneration.
 
-## With Orbit Account (Optional)
+## Task-Aware Context (Optional)
 
-Sign in to include task data in your context — so AI assistants know what you're working on right now:
+Connect to the Orbit dashboard to include task context — so AI knows *what you're building right now*:
 
 ```bash
-orbit login
-orbit init        # Link to an Orbit project
-orbit scan -g     # Now includes active tasks + completion status
+orbit login                 # Sign in
+orbit init                  # Link to a project
+orbit add "Add user auth"   # Create a task
+orbit start ORB-a1b2        # Start working
+orbit scan -g               # Context now includes active tasks
 ```
 
-Task context gives AI assistants the "what" and "why" behind your current work, not just the code.
+## MCP Server
 
-## Commands
+Use Orbit as an MCP server for real-time context in Claude Desktop or other MCP clients:
+
+```bash
+orbit mcp-serve
+```
+
+Provides tools: `orbit_getProjectContext`, `orbit_getModuleContext`, `orbit_getActiveTasks`, `orbit_getFileRelations`, `orbit_getTaskFocus`.
+
+## All Commands
 
 | Command | Description |
 |---------|-------------|
 | `orbit scan` | Scan project and display overview |
-| `orbit scan -g` | Scan + generate AI context file |
+| `orbit scan -g` | Generate AI context file |
+| `orbit scan -g --target <format>` | Generate for specific AI tool |
+| `orbit watch` | Watch for changes and auto-regenerate |
+| `orbit focus <task-id>` | Generate task-focused context |
 | `orbit login` | Sign in to Orbit |
-| `orbit init` | Link directory to an Orbit project |
+| `orbit init` | Link directory to a project |
 | `orbit list` | List tasks |
 | `orbit add <title>` | Create a task |
 | `orbit start <id>` | Start a task |
 | `orbit done <id>` | Complete a task |
+| `orbit mcp-serve` | Start MCP server |
+| `orbit issues` | Import GitHub issues as tasks |
 
 ## Requirements
 
-- Node.js >= 18
+- Node.js >= 20
+
+## Free vs Pro
+
+| Feature | Free | Pro ($12/mo) |
+|---------|------|-------------|
+| `scan -g` (CLAUDE.md) | Unlimited | Unlimited |
+| Multi-format output | - | All formats |
+| Custom rules preservation | 1 project | Unlimited |
+| `orbit watch` | - | Unlimited |
+| MCP Server | - | Authenticated |
+| Context history | 3 snapshots | Unlimited |
+| Smart Context | - | AI-powered |
 
 ## License
 

@@ -492,8 +492,8 @@
       "period": "/ forever",
       "feature1": "1 project",
       "feature2": "20 tasks per project",
-      "feature3": "3 context history entries",
-      "feature4": "Markdown export",
+      "feature3": "CLAUDE.md format only",
+      "feature4": "3 context history entries",
       "cta": "Get Started"
     },
     "pro": {
@@ -501,11 +501,11 @@
       "period": "/ month",
       "feature1": "Unlimited projects",
       "feature2": "Unlimited tasks",
-      "feature3": "Unlimited context history",
-      "feature4": "JSON & custom export",
-      "feature5": "Context Diff view",
-      "feature6": "Smart Context (Git-aware)",
-      "feature7": "Implementation Plans",
+      "feature3": "All AI formats (Claude, Cursor, Copilot, Windsurf)",
+      "feature4": "Custom rules & JSON export",
+      "feature5": "MCP Server (authenticated)",
+      "feature6": "Context Diff view",
+      "feature7": "Smart Context & Implementation Plans",
       "cta": "Upgrade to Pro"
     },
     "currentPlan": "Current Plan",

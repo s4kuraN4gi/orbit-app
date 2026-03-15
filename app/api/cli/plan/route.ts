@@ -40,6 +40,7 @@ export async function GET(request: Request) {
       cliWatch: plan === 'free' ? 0 : null,
       cliSmart: plan === 'free' ? 0 : null,
       cliPlan: plan === 'free' ? 0 : null,
+      cliFormat: plan === 'free' ? 0 : null,
     },
     usage: usageMap,
   });

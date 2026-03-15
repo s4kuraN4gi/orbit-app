@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, readFile, mkdir } from 'node:fs/promises';
 import { join, basename, dirname } from 'node:path';
 import ora from 'ora';
 import chalk from 'chalk';
@@ -13,6 +13,7 @@ import { formatScanResult } from '../lib/formatters.js';
 import type { OutputFormat } from '../lib/formatters.js';
 import { error, dim, heading } from '../lib/display.js';
 import { checkFeatureAccess, recordFeatureUsage } from '../lib/plan-check.js';
+import { extractUserSections, getMarkerFormat } from '../lib/user-sections.js';
 import type { Task, OrbitProjectLink } from '../types.js';
 
 export interface ScanOptions {
@@ -38,6 +39,17 @@ function daysAgo(dateStr: string): string {
   if (diff === 0) return 'today';
   if (diff === 1) return '1 day ago';
   return `${diff} days ago`;
+}
+
+/**
+ * Read a file's content, returning null if it doesn't exist.
+ */
+async function readFileIfExists(path: string): Promise<string | null> {
+  try {
+    return await readFile(path, 'utf-8');
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -249,7 +261,18 @@ export async function scanCommand(options: ScanOptions = {}): Promise<void> {
 
     // Generate context file
     if (options.generateContext) {
-      const target: RenderTarget = options.target ?? 'claude';
+      let target: RenderTarget = options.target ?? 'claude';
+      // Free plan: only CLAUDE.md format is allowed
+      if (target !== 'claude') {
+        const access = await checkFeatureAccess('cliFormat');
+        if (!access.allowed) {
+          console.log(chalk.yellow(`  Multi-format output (${target}) requires Pro plan.`));
+          console.log(chalk.yellow('  Generating CLAUDE.md instead. Upgrade for all formats:'));
+          console.log(chalk.yellow('  https://orbit.dev/pricing'));
+          console.log('');
+          target = 'claude';
+        }
+      }
       const outputFile = options.output ?? RENDER_TARGETS[target];
       const ir = buildContextIR(scan, tasks, projectName);
       if (options.issues) {
@@ -283,19 +306,41 @@ export async function scanCommand(options: ScanOptions = {}): Promise<void> {
         await recordFeatureUsage('cliSmart');
       }
       if (target === 'cursor-mdc') {
-        const mdcFiles = renderCursorMdc(ir);
         const mdcDir = join(process.cwd(), '.cursor', 'rules');
         await mkdir(mdcDir, { recursive: true });
+
+        // Extract preserved user sections from existing MDC files
+        const preservedUserSections = new Map<string, string | null>();
+        const existingFiles = ['project.mdc', 'tasks.mdc', 'focus.mdc', 'smart.mdc'];
+        for (const filename of existingFiles) {
+          const existing = await readFileIfExists(join(mdcDir, filename));
+          if (existing) {
+            preservedUserSections.set(filename, extractUserSections(existing, 'markdown'));
+          }
+        }
+
+        const mdcFiles = renderCursorMdc(ir, preservedUserSections);
         for (const [filename, content] of mdcFiles) {
           await writeFile(join(mdcDir, filename), content, 'utf-8');
         }
         console.log(chalk.green(`  Generated: .cursor/rules/ (${mdcFiles.size} files)`));
       } else {
-        const content = renderContext(ir, target);
         const outputPath = join(process.cwd(), outputFile);
+        const format = getMarkerFormat(outputFile);
+
+        // Extract preserved user sections from existing file
+        const existing = await readFileIfExists(outputPath);
+        const preservedUserContent = existing ? extractUserSections(existing, format) : null;
+
+        const content = renderContext(ir, target, preservedUserContent);
         await mkdir(dirname(outputPath), { recursive: true });
         await writeFile(outputPath, content, 'utf-8');
-        console.log(chalk.green(`  Generated: ${outputFile}`));
+
+        if (preservedUserContent) {
+          console.log(chalk.green(`  Generated: ${outputFile} (custom rules preserved)`));
+        } else {
+          console.log(chalk.green(`  Generated: ${outputFile}`));
+        }
       }
 
       // "What's next?" guide for first-time users

@@ -492,8 +492,8 @@
       "period": "/ 永久無料",
       "feature1": "1プロジェクト",
       "feature2": "プロジェクトあたり20タスク",
-      "feature3": "コンテキスト履歴3件",
-      "feature4": "Markdownエクスポート",
+      "feature3": "CLAUDE.md フォーマットのみ",
+      "feature4": "コンテキスト履歴3件",
       "cta": "無料で始める"
     },
     "pro": {
@@ -501,11 +501,11 @@
       "period": "/ 月",
       "feature1": "プロジェクト無制限",
       "feature2": "タスク無制限",
-      "feature3": "コンテキスト履歴無制限",
-      "feature4": "JSON・カスタムエクスポート",
-      "feature5": "Context Diff ビュー",
-      "feature6": "スマートコンテキスト（Git連携）",
-      "feature7": "実装計画生成",
+      "feature3": "全AIフォーマット（Claude, Cursor, Copilot, Windsurf）",
+      "feature4": "カスタムルール & JSONエクスポート",
+      "feature5": "MCPサーバー（認証付き）",
+      "feature6": "Context Diff ビュー",
+      "feature7": "スマートコンテキスト & 実装計画",
       "cta": "Proにアップグレード"
     },
     "currentPlan": "現在のプラン",

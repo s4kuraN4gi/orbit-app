@@ -1,5 +1,6 @@
 import type { ContextIR } from './context-ir.js';
 import type { FocusArea } from './task-focus.js';
+import { appendUserSection, type MarkerFormat } from './user-sections.js';
 
 export type RenderTarget = 'claude' | 'cursor' | 'cursor-mdc' | 'copilot' | 'windsurf';
 
@@ -11,28 +12,44 @@ export const RENDER_TARGETS: Record<RenderTarget, string> = {
   windsurf: '.windsurfrules',
 };
 
-export function renderContext(ir: ContextIR, target: RenderTarget): string {
+export function renderContext(ir: ContextIR, target: RenderTarget, preservedUserContent?: string | null): string {
+  let content: string;
+  let format: MarkerFormat;
+
   switch (target) {
     case 'claude':
-      return renderClaude(ir);
+      content = renderClaude(ir);
+      format = 'markdown';
+      break;
     case 'cursor':
-      return renderCursor(ir);
+      content = renderCursor(ir);
+      format = 'comment';
+      break;
     case 'cursor-mdc':
       // For MDC, renderContext returns the project overview as default.
       // Use renderCursorMdc() for multi-file output.
-      return renderCursor(ir);
+      content = renderCursor(ir);
+      format = 'markdown';
+      break;
     case 'copilot':
-      return renderCopilot(ir);
+      content = renderCopilot(ir);
+      format = 'markdown';
+      break;
     case 'windsurf':
-      return renderWindsurf(ir);
+      content = renderWindsurf(ir);
+      format = 'comment';
+      break;
   }
+
+  return appendUserSection(content, preservedUserContent ?? null, format);
 }
 
 /**
  * Render Cursor MDC format: returns a Map of filename → content
  * for writing to .cursor/rules/ directory.
+ * @param preservedUserSections - Map of filename → preserved user content from existing files
  */
-export function renderCursorMdc(ir: ContextIR): Map<string, string> {
+export function renderCursorMdc(ir: ContextIR, preservedUserSections?: Map<string, string | null>): Map<string, string> {
   const files = new Map<string, string>();
 
   // project.mdc — Project overview + tech stack
@@ -75,7 +92,14 @@ export function renderCursorMdc(ir: ContextIR): Map<string, string> {
     files.set('smart.mdc', renderMdcFile('AI-powered context recommendations', smartLines.join('\n')));
   }
 
-  return files;
+  // Append user sections to each MDC file
+  const result = new Map<string, string>();
+  for (const [filename, content] of files) {
+    const preserved = preservedUserSections?.get(filename) ?? null;
+    result.set(filename, appendUserSection(content, preserved, 'markdown'));
+  }
+
+  return result;
 }
 
 function renderMdcFile(description: string, content: string): string {

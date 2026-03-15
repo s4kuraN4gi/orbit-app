@@ -206,11 +206,16 @@ export async function scanExports(dir: string): Promise<ScanResult['exports']> {
   // Single-pass regex: matches all export forms in one scan
   const exportRegex = /export\s+(?:(default)\s+)?(?:(async)\s+)?(?:(function|const|type|interface)\s+)(\w+)/g;
 
+  // HTTP method exports in API route files should be classified as 'function', not 'component'
+  const HTTP_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']);
+
   for (const file of files) {
     const content = await readText(file);
     if (!content) continue;
     const relPath = relative(dir, file).replace(/\\/g, '/');
     const seen = new Set<string>();
+    const isApiRoute = /route\.(ts|js)$/.test(basename(file)) ||
+      relPath.includes('api/') || relPath.includes('pages/api/');
 
     for (const m of content.matchAll(exportRegex)) {
       const isDefault = !!m[1];
@@ -225,6 +230,9 @@ export async function scanExports(dir: string): Promise<ScanResult['exports']> {
       let kind: 'component' | 'function' | 'const' | 'type';
       if (keyword === 'type' || keyword === 'interface') {
         kind = 'type';
+      } else if (isApiRoute && HTTP_METHODS.has(name)) {
+        // API route handler exports (GET, POST, etc.) are functions, not components
+        kind = 'function';
       } else if (keyword === 'function') {
         kind = /^[A-Z]/.test(name) ? 'component' : 'function';
       } else {
