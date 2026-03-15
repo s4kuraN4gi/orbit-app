@@ -359,42 +359,47 @@
     "permissionDenied": "Notifications denied"
   },
   "landing": {
-    "badge": "Task-Driven AI Workflow Engine",
+    "badge": "AI Context Engine for Developers",
     "hero": {
-      "title": "From task to code, with the right context",
-      "subtitle": "Orbit connects your tasks to your codebase — scan structure, focus on what matters, and generate implementation plans. Built for Claude, Cursor, and Copilot."
+      "title": "One command. AI understands your project.",
+      "subtitle": "Generates structured context for Claude, Cursor, Copilot from your codebase — zero config, 30 seconds."
     },
     "terminal": "Terminal",
-    "terminalScanning": "Scanning project...",
-    "terminalGenerated": "Generated: CLAUDE.md",
+    "terminalScanning": "Scanning project structure...",
+    "terminalGenerated": "Generated: CLAUDE.md (200 lines)",
     "cta": {
       "openDashboard": "Open Dashboard",
       "getStartedFree": "Get Started Free"
     },
     "features": {
-      "title": "Tasks drive everything",
-      "subtitle": "Unlike code-dump tools, Orbit understands what you're building right now and gives AI exactly the context it needs.",
+      "title": "Context, not code dumps",
+      "subtitle": "Unlike tools that dump your entire codebase, Orbit extracts only the structural context AI needs to be effective.",
       "scan": "Zero-config Scan",
-      "scanDesc": "Auto-detect tech stack, routes, DB schema, imports, and exports in seconds.",
-      "context": "Smart Context",
-      "contextDesc": "Git-aware context relevance scoring. Focus on what matters for your current task.",
-      "taskAware": "Implementation Plans",
-      "taskAwareDesc": "Generate step-by-step implementation plans from your tasks with orbit plan."
+      "scanDesc": "Auto-detect tech stack, routes, DB schema, import graph, and export signatures in seconds.",
+      "multiFormat": "Multi-format Output",
+      "multiFormatDesc": "CLAUDE.md, .cursorrules, Copilot, and Windsurf — one command generates context for any AI tool.",
+      "impact": "Impact Analysis",
+      "impactDesc": "Run orbit impact <file> to see the blast radius of any change — what depends on it, what breaks."
     },
     "whatScans": {
       "title": "What Orbit scans",
       "subtitle": "One command gives your AI assistant everything it needs to write better code for your specific project.",
       "item1": "Tech stack, frameworks, and package manager",
       "item2": "Pages, API routes, and database tables",
-      "item3": "Git branch, recent activity, uncommitted changes",
+      "item3": "Import graph and export signatures",
       "item4": "File count, largest files, and code metrics",
-      "item5": "Active tasks and completion progress",
+      "item5": "Git branch, recent activity, uncommitted changes",
       "item6": "Environment variable names (never values)",
-      "tagline": "Tasks + Structure = Better AI"
+      "tagline": "Structure = Better AI"
+    },
+    "githubAction": {
+      "title": "Automate with GitHub Actions",
+      "subtitle": "Keep your AI context file updated automatically on every pull request.",
+      "description": "Every PR triggers a fresh scan. Your CLAUDE.md stays in sync with your code — no manual steps."
     },
     "comparison": {
       "title": "Orbit vs. Repomix",
-      "subtitle": "Repomix packs your entire codebase into one file for AI. Orbit gives AI structured context — architecture, dependencies, and what you're working on right now.",
+      "subtitle": "Repomix packs your entire codebase into one file for AI. Orbit gives AI structured context — architecture, dependencies, and project structure.",
       "rows": {
         "approach": "Approach",
         "outputSize": "Output size (100-file project)",
@@ -402,9 +407,9 @@
         "dbSchema": "DB schema extraction",
         "importGraph": "Import graph analysis",
         "exportSignatures": "Export signatures",
+        "impactAnalysis": "Impact analysis",
+        "githubAction": "GitHub Action",
         "taskAware": "Task-aware context",
-        "smartContext": "Smart Context scoring",
-        "implPlans": "Implementation Plans",
         "watchMode": "Watch mode (auto-regen)",
         "webDashboard": "Web dashboard & history",
         "mcpServer": "MCP Server",
@@ -429,7 +434,7 @@
       "whenRepomix": "When to use Repomix:",
       "whenRepomixDesc": "You need AI to read specific source code.",
       "whenOrbit": "When to use Orbit:",
-      "whenOrbitDesc": "You need AI to understand your project — its architecture, what's connected to what, and what you're building next."
+      "whenOrbitDesc": "You need AI to understand your project — its architecture, what's connected to what, and how files relate."
     },
     "social": {
       "cliInstalls": "npx",
@@ -440,8 +445,8 @@
       "openSourceLabel": "CLI is open source"
     },
     "ctaSection": {
-      "title": "Try it in 10 seconds",
-      "subtitle": "Free plan available. Start managing your AI workflow today."
+      "title": "Try it in 30 seconds",
+      "subtitle": "No signup required. Just run the command and see your project context."
     },
     "nav": {
       "pricing": "Pricing",

@@ -359,42 +359,47 @@
     "permissionDenied": "通知が拒否されました"
   },
   "landing": {
-    "badge": "タスク駆動AIワークフローエンジン",
+    "badge": "開発者向けAIコンテキストエンジン",
     "hero": {
-      "title": "タスクからコードへ、適切なコンテキストと共に",
-      "subtitle": "Orbitはタスクとコードベースを接続 — 構造をスキャンし、重要なものにフォーカスし、実装計画を生成します。Claude、Cursor、Copilot対応。"
+      "title": "1コマンド。AIがプロジェクトを理解する。",
+      "subtitle": "コードベースからClaude、Cursor、Copilot向けの構造化コンテキストを生成 — 設定不要、30秒で完了。"
     },
     "terminal": "ターミナル",
-    "terminalScanning": "プロジェクトをスキャン中...",
-    "terminalGenerated": "生成完了: CLAUDE.md",
+    "terminalScanning": "プロジェクト構造をスキャン中...",
+    "terminalGenerated": "生成完了: CLAUDE.md（200行）",
     "cta": {
       "openDashboard": "ダッシュボードを開く",
       "getStartedFree": "無料で始める"
     },
     "features": {
-      "title": "タスクがすべてを駆動する",
-      "subtitle": "コードダンプツールとは違い、Orbitは今何を作っているかを理解し、AIに必要なコンテキストだけを提供します。",
+      "title": "コードダンプではなく、コンテキスト",
+      "subtitle": "コードベース全体をダンプするツールとは違い、OrbitはAIが効果的に動くために必要な構造コンテキストだけを抽出します。",
       "scan": "ゼロコンフィグスキャン",
-      "scanDesc": "1コマンドで実行。技術スタック、ルート、DBスキーマ、依存関係を自動検出。",
-      "context": "スマートコンテキスト",
-      "contextDesc": "Git連携のコンテキスト関連性スコアリング。現在のタスクに重要なものにフォーカス。",
-      "taskAware": "実装計画",
-      "taskAwareDesc": "orbit plan でタスクからステップバイステップの実装計画を生成。"
+      "scanDesc": "技術スタック、ルート、DBスキーマ、インポートグラフ、エクスポートシグネチャを数秒で自動検出。",
+      "multiFormat": "マルチフォーマット出力",
+      "multiFormatDesc": "CLAUDE.md、.cursorrules、Copilot、Windsurf — 1コマンドであらゆるAIツール向けのコンテキストを生成。",
+      "impact": "影響範囲分析",
+      "impactDesc": "orbit impact <file> で変更の影響範囲を可視化 — 何が依存し、何が壊れるかを把握。"
     },
     "whatScans": {
       "title": "Orbitがスキャンするもの",
       "subtitle": "1コマンドで、AIアシスタントがより良いコードを書くために必要なすべてを提供します。",
       "item1": "技術スタック、フレームワーク、パッケージマネージャー",
       "item2": "ページ、APIルート、データベーステーブル",
-      "item3": "Gitブランチ、最近のアクティビティ、未コミットの変更",
+      "item3": "インポートグラフとエクスポートシグネチャ",
       "item4": "ファイル数、最大ファイル、コードメトリクス",
-      "item5": "アクティブなタスクと進捗状況",
+      "item5": "Gitブランチ、最近のアクティビティ、未コミットの変更",
       "item6": "環境変数名（値は含まない）",
-      "tagline": "タスク + 構造 = より良いAI"
+      "tagline": "構造 = より良いAI"
+    },
+    "githubAction": {
+      "title": "GitHub Actionsで自動化",
+      "subtitle": "プルリクエストごとにAIコンテキストファイルを自動更新。",
+      "description": "PR作成のたびに最新のスキャンを実行。CLAUDE.mdがコードと常に同期 — 手動作業は不要。"
     },
     "comparison": {
       "title": "Orbit vs. Repomix",
-      "subtitle": "Repomixはコードベース全体を1ファイルにまとめてAIに渡します。Orbitは構造化されたコンテキスト — アーキテクチャ、依存関係、今取り組んでいることをAIに提供します。",
+      "subtitle": "Repomixはコードベース全体を1ファイルにまとめてAIに渡します。Orbitは構造化されたコンテキスト — アーキテクチャ、依存関係、プロジェクト構造をAIに提供します。",
       "rows": {
         "approach": "アプローチ",
         "outputSize": "出力サイズ（100ファイルプロジェクト）",
@@ -402,9 +407,9 @@
         "dbSchema": "DB スキーマ抽出",
         "importGraph": "インポートグラフ分析",
         "exportSignatures": "エクスポートシグネチャ",
+        "impactAnalysis": "影響範囲分析",
+        "githubAction": "GitHub Action",
         "taskAware": "タスク連動コンテキスト",
-        "smartContext": "スマートコンテキストスコアリング",
-        "implPlans": "実装計画",
         "watchMode": "ウォッチモード（自動再生成）",
         "webDashboard": "Web ダッシュボード & 履歴",
         "mcpServer": "MCP サーバー",
@@ -429,7 +434,7 @@
       "whenRepomix": "Repomixが適している場合:",
       "whenRepomixDesc": "AIに特定のソースコードを読ませたいとき。",
       "whenOrbit": "Orbitが適している場合:",
-      "whenOrbitDesc": "AIにプロジェクトを理解させたいとき — アーキテクチャ、何がどう繋がっているか、次に何を作るか。"
+      "whenOrbitDesc": "AIにプロジェクトを理解させたいとき — アーキテクチャ、何がどう繋がっているか、ファイル間の関係。"
     },
     "social": {
       "cliInstalls": "npx",
@@ -440,8 +445,8 @@
       "openSourceLabel": "CLI はオープンソース"
     },
     "ctaSection": {
-      "title": "10秒で試せます",
-      "subtitle": "Freeプランあり。今すぐAIワークフローを始めましょう。"
+      "title": "30秒で試せます",
+      "subtitle": "サインアップ不要。コマンドを実行するだけでプロジェクトコンテキストを確認できます。"
     },
     "nav": {
       "pricing": "料金",

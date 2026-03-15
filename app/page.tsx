@@ -6,9 +6,10 @@ import {
   CheckCircle2,
   Terminal,
   FileText,
-  Zap,
   Check,
   X,
+  GitBranch,
+  Search,
 } from 'lucide-react';
 import { CopyCommandButton } from '@/components/landing/CopyCommandButton';
 import { MobileNav } from '@/components/landing/MobileNav';
@@ -47,7 +48,14 @@ export default async function Home() {
           <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto">
             {t('hero.subtitle')}
           </p>
-          <div className="max-w-lg mx-auto bg-slate-900 dark:bg-slate-800 rounded-xl p-6 mb-8 text-left">
+
+          {/* Primary CTA: npx command */}
+          <div className="flex justify-center mb-6">
+            <CopyCommandButton />
+          </div>
+
+          {/* Terminal mockup */}
+          <div className="max-w-lg mx-auto bg-slate-900 dark:bg-slate-800 rounded-xl p-6 mb-6 text-left">
             <div className="flex items-center gap-2 mb-3 text-sm text-slate-400">
               <Terminal className="h-4 w-4" />
               <span>{t('terminal')}</span>
@@ -62,14 +70,24 @@ export default async function Home() {
               <span className="text-green-400">{t('terminalGenerated')}</span>
             </code>
           </div>
+
+          {/* Demo GIF placeholder */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/demo.gif"
+            alt="Orbit demo"
+            className="max-w-2xl mx-auto rounded-xl shadow-lg mb-8 hidden"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+
+          {/* Secondary CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/login">
-              <Button size="lg" className="px-8 h-12 text-base">
+              <Button size="lg" variant="outline" className="px-8 h-12 text-base">
                 {t('cta.openDashboard')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <CopyCommandButton />
           </div>
         </div>
       </section>
@@ -90,13 +108,13 @@ export default async function Home() {
           />
           <FeatureCard
             icon={<FileText className="h-8 w-8" />}
-            title={t('features.context')}
-            description={t('features.contextDesc')}
+            title={t('features.multiFormat')}
+            description={t('features.multiFormatDesc')}
           />
           <FeatureCard
-            icon={<Zap className="h-8 w-8" />}
-            title={t('features.taskAware')}
-            description={t('features.taskAwareDesc')}
+            icon={<Search className="h-8 w-8" />}
+            title={t('features.impact')}
+            description={t('features.impactDesc')}
           />
         </div>
       </section>
@@ -137,12 +155,44 @@ export default async function Home() {
               <p>- <span className="text-blue-400">DB Tables (6):</span> users, posts, ...</p>
               <p className="text-slate-500 mt-2">## Import Graph</p>
               <p>45 files, 128 local imports</p>
-              <p className="text-slate-500 mt-2">## Active Tasks</p>
-              <p className="text-green-400">- [ORB-a3f2] Add auth middleware</p>
-              <p className="text-green-400">- [ORB-b7c1] Fix pagination bug</p>
+              <p className="text-slate-500 mt-2">## Environment Variables</p>
+              <p>DATABASE_URL, AUTH_SECRET</p>
             </div>
             <p className="text-slate-600 text-xs mt-4 italic">{t('whatScans.tagline')}</p>
           </div>
+        </div>
+      </section>
+
+      {/* GitHub Action Section */}
+      <section className="container mx-auto px-6 py-20 bg-slate-50 dark:bg-slate-900/50" aria-labelledby="github-action-heading">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 id="github-action-heading" className="text-3xl font-bold mb-4">{t('githubAction.title')}</h2>
+            <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+              {t('githubAction.subtitle')}
+            </p>
+          </div>
+          <div className="max-w-2xl mx-auto bg-slate-900 dark:bg-slate-800 rounded-xl p-6 text-left">
+            <div className="flex items-center gap-2 mb-3 text-sm text-slate-400">
+              <GitBranch className="h-4 w-4" />
+              <span>.github/workflows/orbit.yml</span>
+            </div>
+            <pre className="text-sm text-slate-300 leading-relaxed overflow-x-auto">
+              <code>{`name: Update AI Context
+on:
+  pull_request:
+
+jobs:
+  orbit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: s4kuraN4gi/orbit-action@v1`}</code>
+            </pre>
+          </div>
+          <p className="text-center text-slate-500 mt-6 text-sm">
+            {t('githubAction.description')}
+          </p>
         </div>
       </section>
 
@@ -180,9 +230,9 @@ export default async function Home() {
                 <ComparisonRow label={t('comparison.rows.dbSchema')} orbit={true} other={false} />
                 <ComparisonRow label={t('comparison.rows.importGraph')} orbit={true} other={false} />
                 <ComparisonRow label={t('comparison.rows.exportSignatures')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.impactAnalysis')} orbit={true} other={false} />
+                <ComparisonRow label={t('comparison.rows.githubAction')} orbit={true} other={false} />
                 <ComparisonRow label={t('comparison.rows.taskAware')} orbit={true} other={false} />
-                <ComparisonRow label={t('comparison.rows.smartContext')} orbit={t('comparison.values.pro')} other={false} />
-                <ComparisonRow label={t('comparison.rows.implPlans')} orbit={true} other={false} />
                 <ComparisonRow label={t('comparison.rows.watchMode')} orbit={true} other={false} />
                 <ComparisonRow label={t('comparison.rows.webDashboard')} orbit={true} other={false} />
                 <ComparisonRow label={t('comparison.rows.mcpServer')} orbit={t('comparison.values.orbitTools')} other={t('comparison.values.repomixTools')} />
@@ -232,15 +282,15 @@ export default async function Home() {
             {t('ctaSection.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="bg-white/10 rounded-lg px-6 py-3 text-base">
+              <code className="text-white font-mono">npx @orbit-cli/core scan -g</code>
+            </div>
             <Link href="/login">
               <Button size="lg" variant="secondary" className="px-8 h-12 text-base">
-                {t('cta.getStartedFree')}
+                {t('cta.openDashboard')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <div className="bg-white/10 rounded-lg px-4 py-2 text-sm">
-              <code className="text-white">npx @orbit-cli/core scan -g</code>
-            </div>
           </div>
         </div>
       </section>
@@ -255,7 +305,7 @@ export default async function Home() {
             <span>Orbit</span>
           </div>
           <div className="flex items-center gap-4">
-            <a href="https://github.com/s4kuraN4gi/orbit-cli" target="_blank" rel="noopener noreferrer" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+            <a href="https://github.com/s4kuraN4gi/orbit-app" target="_blank" rel="noopener noreferrer" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
               GitHub
             </a>
             <Link href="/pricing" className="hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
