@@ -2,6 +2,8 @@
 
 **AI context engine for your codebase.** Generate structured context files for Claude, Cursor, Copilot, Windsurf, and other AI assistants.
 
+![Orbit demo](./demo.gif)
+
 Unlike code-dump tools (like Repomix), Orbit understands your project's *structure* — tech stack, routes, database schema, import graph, dependencies, and git activity — and generates focused context that helps AI assistants write better code.
 
 ## Why Orbit?

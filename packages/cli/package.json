@@ -1,6 +1,6 @@
 {
   "name": "@orbit-cli/core",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "AI context engine for your codebase — generate structured context files for Claude, Cursor, and other AI assistants",
   "type": "module",
   "license": "MIT",
