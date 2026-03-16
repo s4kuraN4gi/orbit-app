@@ -379,7 +379,7 @@
       "multiFormat": "Multi-format Output",
       "multiFormatDesc": "CLAUDE.md, .cursorrules, Copilot, and Windsurf — one command generates context for any AI tool.",
       "impact": "Impact Analysis",
-      "impactDesc": "Run orbit impact <file> to see the blast radius of any change — what depends on it, what breaks."
+      "impactDesc": "Run orbit impact [file] to see the blast radius of any change — what depends on it, what breaks."
     },
     "whatScans": {
       "title": "What Orbit scans",

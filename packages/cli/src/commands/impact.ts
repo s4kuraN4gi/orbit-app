@@ -27,12 +27,9 @@ export async function impactCommand(filePath: string, options: ImpactOptions = {
     const result = analyzeImpact(relPath, scan.importGraph, totalFiles);
 
     // Check if file was found in the graph
-    if (
-      result.directDependents.length === 0 &&
-      result.directDependencies.length === 0 &&
-      result.transitiveDependents.length === 0 &&
-      result.targetFile === filePath
-    ) {
+    // When the file is not found, analyzeImpact returns the original input as targetFile
+    // and all arrays are empty with impactScore 0
+    if (result.impactScore === 0 && result.hubScore === 0 && result.targetFile === filePath) {
       console.log('');
       console.log(chalk.yellow(`  File "${relPath}" was not found in the import graph.`));
       console.log(chalk.dim('  Make sure the file exists and is a .ts/.tsx/.js/.jsx source file.'));

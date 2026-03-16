@@ -379,7 +379,7 @@
       "multiFormat": "マルチフォーマット出力",
       "multiFormatDesc": "CLAUDE.md、.cursorrules、Copilot、Windsurf — 1コマンドであらゆるAIツール向けのコンテキストを生成。",
       "impact": "影響範囲分析",
-      "impactDesc": "orbit impact <file> で変更の影響範囲を可視化 — 何が依存し、何が壊れるかを把握。"
+      "impactDesc": "orbit impact [file] で変更の影響範囲を可視化 — 何が依存し、何が壊れるかを把握。"
     },
     "whatScans": {
       "title": "Orbitがスキャンするもの",

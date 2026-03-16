@@ -21,13 +21,20 @@ import { impactCommand } from './commands/impact.js';
 import type { ImpactOptions } from './commands/impact.js';
 import { OrbitError } from './lib/errors.js';
 import type { TaskPriority, TaskStatus } from './types.js';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
 
 const program = new Command();
 
 program
   .name('orbit')
   .description('Orbit — AI context engine for your codebase')
-  .version('0.1.0');
+  .version(pkg.version);
 
 // --- Auth ---
 

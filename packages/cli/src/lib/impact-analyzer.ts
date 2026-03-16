@@ -71,6 +71,30 @@ export function analyzeImpact(
     return id; // unresolved (external or relative specifier)
   }
 
+  // ── 1b. Also register import specifiers as canonical entries ──
+  // Files that have no local imports themselves won't appear in realFiles,
+  // but they can still be import *targets* (e.g. `@/lib/utils`).
+  // We collect all @/ import specifiers and register them so they can be matched.
+  for (const entry of importGraph) {
+    for (const imp of entry.imports) {
+      if (imp.startsWith('@/')) {
+        const specAsFile = imp.slice(2); // remove @/
+        // Try common extensions to find a plausible file path
+        const extensions = ['.ts', '.tsx', '.js', '.jsx'];
+        for (const ext of extensions) {
+          const candidate = specAsFile + ext;
+          if (!canonicalOf.has(candidate)) {
+            canonicalOf.set(candidate, imp);
+          }
+        }
+        if (!canonicalOf.has(imp)) {
+          canonicalOf.set(imp, imp);
+        }
+        allCanonicals.add(imp);
+      }
+    }
+  }
+
   // ── 2. Build adjacency lists using canonical keys ──
   const forward = new Map<string, Set<string>>();
   const reverse = new Map<string, Set<string>>();

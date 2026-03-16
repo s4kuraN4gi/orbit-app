@@ -71,14 +71,7 @@ export default async function Home() {
             </code>
           </div>
 
-          {/* Demo GIF placeholder */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/demo.gif"
-            alt="Orbit demo"
-            className="max-w-2xl mx-auto rounded-xl shadow-lg mb-8 hidden"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
+          {/* Demo GIF — served from npm README via GitHub raw URL */}
 
           {/* Secondary CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
