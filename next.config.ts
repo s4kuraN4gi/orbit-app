@@ -6,12 +6,9 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const isDev = process.env.NODE_ENV === 'development';
 
 // In development, unsafe-eval is needed for Next.js Fast Refresh / React DevTools.
-// In production, we use strict-dynamic to only allow scripts loaded by trusted scripts.
 const scriptSrc = isDev
   ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-  : "script-src 'self' 'strict-dynamic' 'unsafe-inline'";
-// Note: 'unsafe-inline' is ignored by browsers when 'strict-dynamic' is present,
-// but kept as a fallback for older browsers that don't support strict-dynamic.
+  : "script-src 'self' 'unsafe-inline'";
 
 const csp = [
   "default-src 'self'",
