@@ -34,13 +34,14 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     plan,
+    // [Sponsorware] All CLI features unlimited during adoption phase
     limits: {
-      cliFocus: plan === 'free' ? 1 : null,
-      cliIssues: plan === 'free' ? 1 : null,
-      cliWatch: plan === 'free' ? 0 : null,
-      cliSmart: plan === 'free' ? 0 : null,
-      cliPlan: plan === 'free' ? 0 : null,
-      cliFormat: plan === 'free' ? 0 : null,
+      cliFocus: null,
+      cliIssues: null,
+      cliWatch: null,
+      cliSmart: null,
+      cliPlan: null,
+      cliFormat: null,
     },
     usage: usageMap,
   });

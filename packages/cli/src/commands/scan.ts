@@ -262,48 +262,51 @@ export async function scanCommand(options: ScanOptions = {}): Promise<void> {
     // Generate context file
     if (options.generateContext) {
       let target: RenderTarget = options.target ?? 'claude';
-      // Free plan: only CLAUDE.md format is allowed
-      if (target !== 'claude') {
-        const access = await checkFeatureAccess('cliFormat');
-        if (!access.allowed) {
-          console.log(chalk.yellow(`  Multi-format output (${target}) requires Pro plan.`));
-          console.log(chalk.yellow('  Generating CLAUDE.md instead. Upgrade for all formats:'));
-          console.log(chalk.yellow('  https://orbit.dev/pricing'));
-          console.log('');
-          target = 'claude';
-        }
-      }
+      // [Sponsorware] Gate removed — all features free during adoption phase
+      // if (target !== 'claude') {
+      //   const access = await checkFeatureAccess('cliFormat');
+      //   if (!access.allowed) {
+      //     console.log(chalk.yellow(`  Multi-format output (${target}) requires Pro plan.`));
+      //     console.log(chalk.yellow('  Generating CLAUDE.md instead. Upgrade for all formats:'));
+      //     console.log(chalk.yellow('  https://orbit.dev/pricing'));
+      //     console.log('');
+      //     target = 'claude';
+      //   }
+      // }
       const outputFile = options.output ?? RENDER_TARGETS[target];
       const ir = buildContextIR(scan, tasks, projectName);
       if (options.issues) {
-        const access = await checkFeatureAccess('cliIssues');
-        if (!access.allowed) {
-          console.error(access.message);
-          process.exit(1);
-        }
+        // [Sponsorware] Gate removed — all features free during adoption phase
+        // const access = await checkFeatureAccess('cliIssues');
+        // if (!access.allowed) {
+        //   console.error(access.message);
+        //   process.exit(1);
+        // }
         const { fetchExternalIssues } = await import('../lib/issue-providers/index.js');
         ir.activeWork.externalIssues = await fetchExternalIssues(process.cwd());
-        await recordFeatureUsage('cliIssues');
+        // await recordFeatureUsage('cliIssues');
       }
       if (options.focus) {
-        const access = await checkFeatureAccess('cliFocus');
-        if (!access.allowed) {
-          console.error(access.message);
-          process.exit(1);
-        }
+        // [Sponsorware] Gate removed — all features free during adoption phase
+        // const access = await checkFeatureAccess('cliFocus');
+        // if (!access.allowed) {
+        //   console.error(access.message);
+        //   process.exit(1);
+        // }
         const { resolveTaskFocus } = await import('../lib/task-focus.js');
         ir.focusAreas = resolveTaskFocus(tasks, ir);
-        await recordFeatureUsage('cliFocus');
+        // await recordFeatureUsage('cliFocus');
       }
       if (options.smart) {
-        const access = await checkFeatureAccess('cliSmart');
-        if (!access.allowed) {
-          console.error(access.message);
-          process.exit(1);
-        }
+        // [Sponsorware] Gate removed — all features free during adoption phase
+        // const access = await checkFeatureAccess('cliSmart');
+        // if (!access.allowed) {
+        //   console.error(access.message);
+        //   process.exit(1);
+        // }
         const { analyzeWorkContext } = await import('../lib/smart-context.js');
         ir.smartRecommendation = analyzeWorkContext(ir, process.cwd());
-        await recordFeatureUsage('cliSmart');
+        // await recordFeatureUsage('cliSmart');
       }
       if (target === 'cursor-mdc') {
         const mdcDir = join(process.cwd(), '.cursor', 'rules');

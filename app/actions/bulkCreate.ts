@@ -4,8 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { tasks, aiContexts } from '@/lib/schema';
 import { requireProjectOwner } from '@/lib/auth-helpers';
-import { getSubscriptionPlan, getUsageCount, incrementUsage } from '@/lib/subscription';
-import { getPlanLimits } from '@/lib/plan-client';
+import { incrementUsage } from '@/lib/subscription';
+// [Sponsorware] Unused during adoption phase — restore when re-enabling limits
+// import { getSubscriptionPlan, getUsageCount } from '@/lib/subscription';
+// import { getPlanLimits } from '@/lib/plan-client';
 
 interface TaskInput {
   title: string;
@@ -62,15 +64,15 @@ export async function bulkCreateTasks(
   // Auth + Authorization: verify project ownership
   const { user } = await requireProjectOwner(input.project_id);
 
-  // Usage limit check for Free plan
-  const plan = await getSubscriptionPlan(user.id);
-  const limits = getPlanLimits(plan);
-  if (limits.maxImportsPerMonth !== Infinity) {
-    const currentUsage = await getUsageCount(user.id, 'import_plan');
-    if (currentUsage >= limits.maxImportsPerMonth) {
-      return { success: false, error: `Free plan limit: ${limits.maxImportsPerMonth} imports per month` };
-    }
-  }
+  // [Sponsorware] Import limit removed during adoption phase
+  // const plan = await getSubscriptionPlan(user.id);
+  // const limits = getPlanLimits(plan);
+  // if (limits.maxImportsPerMonth !== Infinity) {
+  //   const currentUsage = await getUsageCount(user.id, 'import_plan');
+  //   if (currentUsage >= limits.maxImportsPerMonth) {
+  //     return { success: false, error: `Free plan limit: ${limits.maxImportsPerMonth} imports per month` };
+  //   }
+  // }
 
   try {
     // 1. Create AI Context

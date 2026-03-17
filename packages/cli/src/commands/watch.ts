@@ -44,12 +44,13 @@ async function fetchTasks(link: OrbitProjectLink | null): Promise<Task[]> {
 }
 
 export async function watchCommand(options: WatchOptions = {}): Promise<void> {
-  const access = await checkFeatureAccess('cliWatch');
-  if (!access.allowed) {
-    console.error(access.message);
-    process.exit(1);
-  }
-  await recordFeatureUsage('cliWatch');
+  // [Sponsorware] Gate removed — all features free during adoption phase
+  // const access = await checkFeatureAccess('cliWatch');
+  // if (!access.allowed) {
+  //   console.error(access.message);
+  //   process.exit(1);
+  // }
+  // await recordFeatureUsage('cliWatch');
 
   const dir = process.cwd();
   const target: RenderTarget = options.target ?? 'claude';

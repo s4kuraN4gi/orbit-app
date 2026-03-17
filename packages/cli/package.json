@@ -22,6 +22,14 @@
     "directory": "packages/cli"
   },
   "homepage": "https://github.com/s4kuraN4gi/orbit-app/tree/main/packages/cli#readme",
+  "author": "s4kuraN4gi",
+  "bugs": {
+    "url": "https://github.com/s4kuraN4gi/orbit-app/issues"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/s4kuraN4gi"
+  },
   "keywords": [
     "ai",
     "context",
@@ -30,7 +38,18 @@
     "codebase",
     "scan",
     "developer-tools",
-    "cli"
+    "cli",
+    "copilot",
+    "windsurf",
+    "claude-code",
+    "cursorrules",
+    "ai-context",
+    "llm",
+    "mcp",
+    "model-context-protocol",
+    "ai-coding",
+    "repomix-alternative",
+    "context-generator"
   ],
   "scripts": {
     "dev": "tsx src/index.ts",

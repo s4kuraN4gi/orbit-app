@@ -22,21 +22,24 @@ interface PricingGateProps {
   itemIndex?: number;
 }
 
-function isLocked(feature: GatedFeature, limits: PlanLimits, itemIndex?: number): boolean {
-  switch (feature) {
-    case 'context_history':
-      return itemIndex !== undefined && itemIndex >= limits.maxContextHistory;
-    case 'context_diff':
-      return !limits.contextDiff;
-    case 'export_json':
-      return !limits.exportFormats.includes('json');
-    case 'project_limit':
-      return itemIndex !== undefined && itemIndex >= limits.maxProjects;
-    case 'task_limit':
-      return itemIndex !== undefined && itemIndex >= limits.maxTasksPerProject;
-    default:
-      return false;
-  }
+// [Sponsorware] All features unlocked during adoption phase — original gating logic preserved below
+function isLocked(_feature: GatedFeature, _limits: PlanLimits, _itemIndex?: number): boolean {
+  return false;
+  // Original gating logic:
+  // switch (feature) {
+  //   case 'context_history':
+  //     return itemIndex !== undefined && itemIndex >= limits.maxContextHistory;
+  //   case 'context_diff':
+  //     return !limits.contextDiff;
+  //   case 'export_json':
+  //     return !limits.exportFormats.includes('json');
+  //   case 'project_limit':
+  //     return itemIndex !== undefined && itemIndex >= limits.maxProjects;
+  //   case 'task_limit':
+  //     return itemIndex !== undefined && itemIndex >= limits.maxTasksPerProject;
+  //   default:
+  //     return false;
+  // }
 }
 
 export function PricingGate({ feature, currentPlan, children, itemIndex }: PricingGateProps) {

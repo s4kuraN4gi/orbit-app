@@ -36,12 +36,12 @@ export async function planCommand(taskIdPrefix: string, options: PlanOptions = {
     process.exit(1);
   }
 
-  // 3. Pro gate check
-  const access = await checkFeatureAccess('cliPlan');
-  if (!access.allowed) {
-    console.error(access.message);
-    process.exit(1);
-  }
+  // [Sponsorware] Gate removed — all features free during adoption phase
+  // const access = await checkFeatureAccess('cliPlan');
+  // if (!access.allowed) {
+  //   console.error(access.message);
+  //   process.exit(1);
+  // }
 
   const spinner = ora('Generating implementation plan...').start();
 
@@ -91,7 +91,8 @@ export async function planCommand(taskIdPrefix: string, options: PlanOptions = {
       }
     }
 
-    await recordFeatureUsage('cliPlan');
+    // [Sponsorware] Gate removed — all features free during adoption phase
+    // await recordFeatureUsage('cliPlan');
   } catch (err: unknown) {
     spinner.stop();
     const message = err instanceof Error ? err.message : String(err);

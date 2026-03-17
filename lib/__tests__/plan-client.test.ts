@@ -2,15 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { getPlanLimits } from '../plan-client';
 
 describe('getPlanLimits', () => {
+  // [Sponsorware] Free tier now has same limits as pro during adoption phase
   it('returns free tier limits', () => {
     const limits = getPlanLimits('free');
     expect(limits.tier).toBe('free');
-    expect(limits.maxProjects).toBe(1);
-    expect(limits.maxTasksPerProject).toBe(20);
-    expect(limits.maxContextHistory).toBe(3);
-    expect(limits.maxImportsPerMonth).toBe(1);
-    expect(limits.exportFormats).toEqual(['markdown']);
-    expect(limits.contextDiff).toBe(false);
+    expect(limits.maxProjects).toBe(Infinity);
+    expect(limits.maxTasksPerProject).toBe(Infinity);
+    expect(limits.maxContextHistory).toBe(Infinity);
+    expect(limits.maxImportsPerMonth).toBe(Infinity);
+    expect(limits.exportFormats).toEqual(['markdown', 'json', 'custom']);
+    expect(limits.contextDiff).toBe(true);
   });
 
   it('returns pro tier limits', () => {
@@ -39,11 +40,12 @@ describe('getPlanLimits', () => {
     expect(pro.exportFormats).toEqual(team.exportFormats);
   });
 
-  it('free tier is more restrictive than pro', () => {
+  // [Sponsorware] Free tier now matches pro during adoption phase
+  it('free tier has same limits as pro during sponsorware phase', () => {
     const free = getPlanLimits('free');
     const pro = getPlanLimits('pro');
-    expect(free.maxProjects).toBeLessThan(pro.maxProjects);
-    expect(free.maxTasksPerProject).toBeLessThan(pro.maxTasksPerProject);
-    expect(free.exportFormats.length).toBeLessThan(pro.exportFormats.length);
+    expect(free.maxProjects).toBe(pro.maxProjects);
+    expect(free.maxTasksPerProject).toBe(pro.maxTasksPerProject);
+    expect(free.exportFormats).toEqual(pro.exportFormats);
   });
 });

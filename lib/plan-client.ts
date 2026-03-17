@@ -1,14 +1,15 @@
 import type { PlanTier, PlanLimits } from '@/types';
 
+// [Sponsorware] Free tier limits relaxed — all features free during adoption phase
 const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
   free: {
     tier: 'free',
-    maxProjects: 1,
-    maxTasksPerProject: 20,
-    maxContextHistory: 3,
-    maxImportsPerMonth: 1,
-    exportFormats: ['markdown'],
-    contextDiff: false,
+    maxProjects: Infinity,
+    maxTasksPerProject: Infinity,
+    maxContextHistory: Infinity,
+    maxImportsPerMonth: Infinity,
+    exportFormats: ['markdown', 'json', 'custom'],
+    contextDiff: true,
   },
   pro: {
     tier: 'pro',
