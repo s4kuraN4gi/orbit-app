@@ -186,7 +186,7 @@
       "copied": "コピーしました",
       "copyError": "コピーに失敗しました",
       "close": "閉じる",
-      "jsonProOnly": "JSONエクスポートにはProプランが必要です",
+      "jsonProOnly": "JSONエクスポート",
       "markdownFormat": "Markdown",
       "jsonFormat": "JSON",
       "proBadge": "Pro"
@@ -320,10 +320,10 @@
       "showShortcuts": "ショートカット一覧"
     },
     "subscription": {
-      "title": "サブスクリプション",
-      "desc": "プランと請求を管理",
+      "title": "プラン",
+      "desc": "現在のプラン",
       "currentPlan": "現在のプラン",
-      "upgrade": "アップグレード",
+      "upgrade": "プランを見る",
       "manage": "サブスクリプション管理",
       "renewsOn": "更新日",
       "canceling": "期間終了時にキャンセル",
@@ -429,7 +429,7 @@
         "orbitFormats": "CLAUDE.md, .cursorrules, copilot, windsurf",
         "repomixFormats": "XML, Markdown",
         "regexFast": "Regex（高速）",
-        "cliOss": "CLI は OSS"
+        "cliOss": "完全無料"
       },
       "whenRepomix": "Repomixが適している場合:",
       "whenRepomixDesc": "AIに特定のソースコードを読ませたいとき。",
@@ -487,72 +487,41 @@
     "importing": "インポート中...",
     "sourceManual": "手動",
     "button": "インポート",
-    "freeLimit": "Freeプラン: 月1回まで",
+    "freeLimit": "インポート無制限",
     "freeBadge": "Free"
   },
   "pricing": {
-    "mostPopular": "人気No.1",
-    "free": {
-      "name": "Free",
-      "period": "/ 永久無料",
-      "feature1": "1プロジェクト",
-      "feature2": "プロジェクトあたり20タスク",
-      "feature3": "CLAUDE.md フォーマットのみ",
-      "feature4": "コンテキスト履歴3件",
-      "cta": "無料で始める"
+    "title": "すべて無料",
+    "period": "/ 永久無料",
+    "subtitle": "全機能を無制限で利用可能。クレジットカード不要。Sponsorwareモデルを採用 — GitHubでスターして開発を応援してください。",
+    "cta": "無料で始める",
+    "features": {
+      "f1": "プロジェクト無制限",
+      "f2": "タスク無制限",
+      "f3": "全AIフォーマット（Claude, Cursor, Copilot, Windsurf）",
+      "f4": "カスタムルール & JSONエクスポート",
+      "f5": "MCPサーバー",
+      "f6": "Context Diff ビュー",
+      "f7": "スマートコンテキスト & 実装計画",
+      "f8": "チームコラボレーション（ロールベースアクセス）",
+      "f9": "コンテキスト履歴（無制限）",
+      "f10": "影響範囲分析 & ウォッチモード"
     },
-    "pro": {
-      "name": "Pro",
-      "period": "/ 月",
-      "feature1": "プロジェクト無制限",
-      "feature2": "タスク無制限",
-      "feature3": "全AIフォーマット（Claude, Cursor, Copilot, Windsurf）",
-      "feature4": "カスタムルール & JSONエクスポート",
-      "feature5": "MCPサーバー（認証付き）",
-      "feature6": "Context Diff ビュー",
-      "feature7": "スマートコンテキスト & 実装計画",
-      "cta": "Proにアップグレード"
+    "sponsor": {
+      "title": "Orbitを応援する",
+      "desc": "Orbitは無料でオープンソースです。もし役に立ったら、プロジェクトのサポートをご検討ください。",
+      "starCta": "GitHubでスター",
+      "sponsorCta": "GitHub Sponsors"
     },
     "currentPlan": "現在のプラン",
     "processing": "処理中...",
-    "team": {
-      "name": "Team",
-      "period": "/ ユーザー / 月",
-      "feature1": "Proの全機能",
-      "feature2": "チームメンバー無制限",
-      "feature3": "ロールベースのプロジェクト共有",
-      "feature4": "シート課金（自動調整）",
-      "feature5": "リンクでメンバー招待",
-      "feature6": "Owner / Admin / Member ロール",
-      "cta": "Teamにアップグレード"
-    },
-    "teamDetails": {
-      "title": "AIで開発するチームのために",
-      "subtitle": "Team プランならメンバー全員が共有 AI コンテキストにアクセス — チーム全体の認識を揃えます。",
-      "roles": {
-        "title": "ロールベースのアクセス制御",
-        "desc": "Owner・Admin・Member の3ロール。プロジェクト管理、メンバー招待、設定変更の権限を制御できます。"
-      },
-      "shared": {
-        "title": "プロジェクトコンテキスト共有",
-        "desc": "チーム全員が同じスキャン結果・コンテキスト履歴・Context Diff を確認 — CLAUDE.md の不整合がなくなります。"
-      },
-      "billing": {
-        "title": "シンプルなシート課金",
-        "desc": "メンバー単位の課金。追加・削除に合わせて Stripe が自動調整 — 手動のインボイス管理は不要です。"
-      },
-      "invite": {
-        "title": "ワンクリック招待",
-        "desc": "共有リンクでチームメイトを招待。承認するだけですぐにコラボレーション開始。"
-      }
-    },
-    "checkoutSuccess": "サブスクリプションが有効になりました！{plan}プランへようこそ。",
-    "checkoutError": "チェックアウトセッションの作成に失敗しました"
+    "checkoutSuccess": "Orbitへようこそ！",
+    "checkoutError": "エラーが発生しました"
   },
   "gate": {
-    "title": "Pro機能",
-    "description": "この機能を使うにはProプランへのアップグレードが必要です",
-    "upgrade": "プランを見る"
+    "title": "機能",
+    "description": "この機能を使うにはログインが必要です",
+    "upgrade": "ログイン"
   },
   "contextHistory": {
     "title": "コンテキスト履歴",

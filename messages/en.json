@@ -186,7 +186,7 @@
       "copied": "Copied",
       "copyError": "Copy failed",
       "close": "Close",
-      "jsonProOnly": "JSON export requires Pro plan",
+      "jsonProOnly": "JSON export",
       "markdownFormat": "Markdown",
       "jsonFormat": "JSON",
       "proBadge": "Pro"
@@ -320,10 +320,10 @@
       "showShortcuts": "Show Shortcuts"
     },
     "subscription": {
-      "title": "Subscription",
-      "desc": "Manage your plan and billing",
+      "title": "Plan",
+      "desc": "Your current plan",
       "currentPlan": "Current Plan",
-      "upgrade": "Upgrade",
+      "upgrade": "View Plans",
       "manage": "Manage Subscription",
       "renewsOn": "Renews on",
       "canceling": "Canceling at period end",
@@ -429,7 +429,7 @@
         "orbitFormats": "CLAUDE.md, .cursorrules, copilot, windsurf",
         "repomixFormats": "XML, Markdown",
         "regexFast": "Regex (fast)",
-        "cliOss": "CLI is OSS"
+        "cliOss": "100% free"
       },
       "whenRepomix": "When to use Repomix:",
       "whenRepomixDesc": "You need AI to read specific source code.",
@@ -487,72 +487,41 @@
     "importing": "Importing...",
     "sourceManual": "Manual",
     "button": "Import",
-    "freeLimit": "Free plan: up to 1 import per month",
+    "freeLimit": "Unlimited imports",
     "freeBadge": "Free"
   },
   "pricing": {
-    "mostPopular": "Most Popular",
-    "free": {
-      "name": "Free",
-      "period": "/ forever",
-      "feature1": "1 project",
-      "feature2": "20 tasks per project",
-      "feature3": "CLAUDE.md format only",
-      "feature4": "3 context history entries",
-      "cta": "Get Started"
+    "title": "Free for everyone",
+    "period": "/ forever",
+    "subtitle": "All features unlocked. No limits. No credit card. We follow a Sponsorware model — star us on GitHub to support development.",
+    "cta": "Get Started",
+    "features": {
+      "f1": "Unlimited projects",
+      "f2": "Unlimited tasks",
+      "f3": "All AI formats (Claude, Cursor, Copilot, Windsurf)",
+      "f4": "Custom rules & JSON export",
+      "f5": "MCP Server",
+      "f6": "Context Diff view",
+      "f7": "Smart Context & Implementation Plans",
+      "f8": "Team collaboration with role-based access",
+      "f9": "Context history (unlimited)",
+      "f10": "Impact analysis & watch mode"
     },
-    "pro": {
-      "name": "Pro",
-      "period": "/ month",
-      "feature1": "Unlimited projects",
-      "feature2": "Unlimited tasks",
-      "feature3": "All AI formats (Claude, Cursor, Copilot, Windsurf)",
-      "feature4": "Custom rules & JSON export",
-      "feature5": "MCP Server (authenticated)",
-      "feature6": "Context Diff view",
-      "feature7": "Smart Context & Implementation Plans",
-      "cta": "Upgrade to Pro"
+    "sponsor": {
+      "title": "Support Orbit",
+      "desc": "Orbit is free and open source. If it saves you time, consider supporting the project.",
+      "starCta": "Star on GitHub",
+      "sponsorCta": "GitHub Sponsors"
     },
     "currentPlan": "Current Plan",
     "processing": "Processing...",
-    "team": {
-      "name": "Team",
-      "period": "/ user / month",
-      "feature1": "Everything in Pro",
-      "feature2": "Unlimited team members",
-      "feature3": "Shared projects with role-based access",
-      "feature4": "Per-seat billing (auto-adjusts)",
-      "feature5": "Member invite via link",
-      "feature6": "Owner / Admin / Member roles",
-      "cta": "Upgrade to Team"
-    },
-    "teamDetails": {
-      "title": "Built for teams that ship with AI",
-      "subtitle": "Team plan gives every member access to shared AI context — so everyone is on the same page.",
-      "roles": {
-        "title": "Role-based access control",
-        "desc": "Owner, Admin, and Member roles. Control who can manage projects, invite members, and modify settings."
-      },
-      "shared": {
-        "title": "Shared project contexts",
-        "desc": "Team members see the same scan results, context history, and Context Diff — no more out-of-sync CLAUDE.md files."
-      },
-      "billing": {
-        "title": "Simple per-seat billing",
-        "desc": "Pay per team member. Stripe automatically adjusts when you add or remove members — no manual invoicing."
-      },
-      "invite": {
-        "title": "One-click invitations",
-        "desc": "Invite teammates with a shareable link. They accept, pick their role, and start collaborating immediately."
-      }
-    },
-    "checkoutSuccess": "Subscription activated! Welcome to {plan}.",
-    "checkoutError": "Failed to create checkout session"
+    "checkoutSuccess": "Welcome to Orbit!",
+    "checkoutError": "An error occurred"
   },
   "gate": {
-    "title": "Pro Feature",
-    "description": "Upgrade to Pro to unlock this feature",
-    "upgrade": "View Plans"
+    "title": "Feature",
+    "description": "Sign in to access this feature",
+    "upgrade": "Sign In"
   },
   "contextHistory": {
     "title": "Context History",

@@ -232,7 +232,7 @@ jobs:
                 <ComparisonRow label={t('comparison.rows.multiFormat')} orbit={t('comparison.values.orbitFormats')} other={t('comparison.values.repomixFormats')} />
                 <ComparisonRow label={t('comparison.rows.treeSitter')} other={true} orbit={t('comparison.values.regexFast')} />
                 <ComparisonRow label={t('comparison.rows.fullSource')} other={true} orbit={false} />
-                <ComparisonRow label={t('comparison.rows.freeOss')} orbit={t('comparison.values.cliOss')} other={true} />
+                <ComparisonRow label={t('comparison.rows.freeOss')} orbit={true} other={true} />
               </tbody>
             </table>
           </div>

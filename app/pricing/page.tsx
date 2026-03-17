@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -8,13 +7,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { PricingTable } from '@/components/PricingTable';
-import { auth } from '@/lib/auth';
-import { getUserPlan } from '@/lib/plan';
 
 export default async function PricingPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  const planLimits = session ? await getUserPlan() : null;
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       {/* Navigation */}
@@ -29,20 +23,9 @@ export default async function PricingPage() {
           <Link href="/pricing">
             <Button variant="ghost">Pricing</Button>
           </Link>
-          {session ? (
-            <Link href="/dashboard">
-              <Button>Dashboard</Button>
-            </Link>
-          ) : (
-            <>
-              <Link href="/login">
-                <Button variant="ghost">Sign in</Button>
-              </Link>
-              <Link href="/login">
-                <Button>Get Started</Button>
-              </Link>
-            </>
-          )}
+          <Link href="/dashboard">
+            <Button>Dashboard</Button>
+          </Link>
         </div>
       </nav>
 
@@ -50,17 +33,14 @@ export default async function PricingPage() {
       <section className="container mx-auto px-6 pt-20 pb-16">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Simple, transparent pricing
+            Everything is free
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Start free. Upgrade when you need more projects, history, and export formats.
+            All features. No limits. No credit card required. Star us on GitHub to support development.
           </p>
         </div>
 
-        <PricingTable
-          isLoggedIn={!!session}
-          currentPlan={planLimits?.tier ?? 'free'}
-        />
+        <PricingTable />
       </section>
 
       {/* FAQ Section */}
@@ -70,19 +50,11 @@ export default async function PricingPage() {
         </h2>
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="free">
-            <AccordionTrigger>What&apos;s included in the Free plan?</AccordionTrigger>
+            <AccordionTrigger>Is Orbit really free?</AccordionTrigger>
             <AccordionContent>
-              The Free plan includes up to 3 projects, 50 tasks per project,
-              5 context history entries, and Markdown export. The CLI tool is
-              always free and open source.
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="pro">
-            <AccordionTrigger>What does the Pro plan include?</AccordionTrigger>
-            <AccordionContent>
-              Pro unlocks unlimited projects, tasks, and context history.
-              You also get JSON &amp; custom export formats and the Context Diff view
-              to track how your project evolves over time.
+              Yes! All features are completely free — unlimited projects, tasks,
+              export formats, and team collaboration. We believe in building a
+              great tool first and earning community support through value.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="cli">
@@ -94,11 +66,26 @@ export default async function PricingPage() {
               like history and visual diffs.
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="cancel">
-            <AccordionTrigger>Can I cancel anytime?</AccordionTrigger>
+          <AccordionItem value="support">
+            <AccordionTrigger>How can I support Orbit?</AccordionTrigger>
             <AccordionContent>
-              Yes. You can cancel anytime from your Settings page and your account
-              will revert to the Free plan at the end of the billing cycle.
+              The best way to support us is to star the{' '}
+              <a href="https://github.com/s4kuraN4gi/orbit-app" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline">
+                GitHub repository
+              </a>{' '}
+              and spread the word. You can also support development directly via{' '}
+              <a href="https://github.com/sponsors/s4kuraN4gi" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline">
+                GitHub Sponsors
+              </a>.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="future">
+            <AccordionTrigger>Will there be paid plans in the future?</AccordionTrigger>
+            <AccordionContent>
+              We follow a Sponsorware model — features are built in the open and
+              released free to everyone. Premium plans may be introduced in the
+              future for advanced enterprise needs, but the core product will
+              always remain free.
             </AccordionContent>
           </AccordionItem>
         </Accordion>
