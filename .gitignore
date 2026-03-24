@@ -43,3 +43,25 @@ next-env.d.ts
 # orbit cli
 .orbit.json
 packages/cli/dist/
+
+# internal strategy & marketing docs (keep local only)
+docs/*strategy*.md
+docs/*marketing*.md
+docs/*elevator*.md
+docs/*pitch*.md
+docs/*launch*.md
+docs/*revenue*.md
+docs/*monetization*.md
+docs/*acquisition*.md
+docs/*pmf*.md
+docs/*review*.md
+docs/*simulation*.md
+docs/*draft*.md
+docs/08_*.md
+docs/09_*.md
+docs/15_*.md
+docs/16_*.md
+docs/17_*.md
+docs/18_*.md
+docs/19_*.md
+docs/20_*.md
