@@ -261,7 +261,7 @@ export async function scanCommand(options: ScanOptions = {}): Promise<void> {
 
     // Generate context file
     if (options.generateContext) {
-      let target: RenderTarget = options.target ?? 'claude';
+      const target: RenderTarget = options.target ?? 'claude';
       // [Sponsorware] Gate removed — all features free during adoption phase
       // if (target !== 'claude') {
       //   const access = await checkFeatureAccess('cliFormat');
@@ -354,7 +354,7 @@ export async function scanCommand(options: ScanOptions = {}): Promise<void> {
         console.log(dim('  2. Connect to dashboard:  orbit login'));
         console.log(dim('  3. Add tasks:             orbit add "My first task"'));
         console.log(dim('  4. Watch for changes:     orbit watch'));
-        console.log(dim('  5. Smart context (Pro):   orbit scan -g --smart'));
+        console.log(dim('  5. Smart context:         orbit scan -g --smart'));
         console.log('');
       }
 
